@@ -341,11 +341,11 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
         sb.from('customers').select('id,name,phone,loyalty_points').eq('barbershop_id',shopId).order('name'),
         sb.from('appointments').select('id,customer_id,barber_id,service_id,starts_at,ends_at,status,price').eq('barbershop_id',shopId).order('starts_at')
       ]);
-      if(st.error)throw st.error;if(sv.error)throw sv.error;if(cu.error)throw cu.error;if(ap.error)throw ap.error;
+      if(st.error)throw new Error('Equipe: '+st.error.message);if(sv.error)throw new Error('Serviços: '+sv.error.message);if(cu.error)throw new Error('Clientes: '+cu.error.message);if(ap.error)throw new Error('Agenda: '+ap.error.message);
       dbStaff=st.data||[];dbServices=sv.data||[];dbCustomers=cu.data||[];dbAppointments=ap.data||[];
       renderStaff();renderServices();renderCustomers();renderAppointments();updateDashboardFromDB();
-      await loadCash();
-    }catch(e){console.error(e);setLoginError('Não foi possível carregar os dados do BarberID.');$('loginScreen').style.display='flex'}
+      try{await loadCash()}catch(e){console.error('Caixa:',e);}
+    }catch(e){console.error(e);setLoginError('Login realizado, mas houve um erro ao carregar os dados: '+(e?.message||e));$('loginScreen').style.display='none';}
   }
   function renderStaff(){
     const tabs=$('barberTabs'); if(tabs){tabs.innerHTML='<button class="barber-tab active" data-barber="all" type="button">Todos</button>' + dbStaff.filter(x=>x.role==='barber').map(x=>`<button class="barber-tab" data-barber-id="${x.id}" data-barber="${x.name}" type="button">${x.name}</button>`).join(''); bindBarberTabs();}
