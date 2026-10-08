@@ -22,7 +22,7 @@ main{padding:16px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9p
 </style>
 </head><body><div id="loginScreen" class="login-screen"><div class="login-box"><h1>BarberID</h1><p>Entre para acessar os dados reais da sua barbearia.</p><input id="loginEmail" type="email" placeholder="E-mail"><input id="loginPassword" type="password" placeholder="Senha"><button id="loginBtn" type="button">Entrar</button><div id="loginError" class="login-error"></div><div class="db-note">Dados sincronizados com Supabase</div></div></div>
 <div class="app">
-<section id="home" class="page active"><header><div class="top"><div class="brand">BarberID</div><div>🔔</div></div><div class="greet"><small>Quarta-feira, 7 de outubro</small><h1>Bom dia, Administrador 👋</h1></div></header><main>
+<section id="home" class="page active"><header><div class="top"><div class="brand">BarberID</div><div>🔔</div></div><div class="greet"><small>Quarta-feira, 7 de outubro</small><h1>Bom dia, Carlos 👋</h1></div></header><main>
 <div class="barber-tabs" id="barberTabs"><button class="barber-tab active" data-barber="all" type="button">Todos</button><button class="barber-tab" data-barber="Barbeiro 1" type="button">Barbeiro 1</button><button class="barber-tab" data-barber="Barbeiro 2" type="button">Barbeiro 2</button><button class="barber-tab" data-barber="Barbeiro 3" type="button">Barbeiro 3</button></div><div class="stats">
 <div class="stat"><b id="apptCount">8</b><span>Atendimentos</span></div>
 <div class="stat fat-card"><b id="fatValue">R$ 320</b><span>Faturamento</span><div class="fat-tabs">
@@ -118,10 +118,6 @@ main{padding:16px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9p
 <div class="finish-actions"><button class="no" type="button" id="finishNo">Voltar</button><button class="yes" type="button" id="finishYes">Confirmar pagamento</button></div>
 </div></div>
 
-<div id="cashOpenModal" class="cash-modal"><div class="cash-sheet"><h2>Abrir caixa</h2><div style="color:#667085;font-size:13px;margin-bottom:8px">Informe o valor inicial disponível no caixa.</div><input id="openingAmount" type="number" min="0" step="0.01" placeholder="Valor inicial (R$)"><button id="confirmOpenCash" type="button">Abrir caixa</button><button class="close" id="cancelOpenCash" type="button">Cancelar</button></div></div>
-<div id="cashExpenseModal" class="cash-modal"><div class="cash-sheet"><h2>Registrar saída</h2><input id="expenseDesc" placeholder="Descrição (ex.: Compra de material)"><input id="expenseAmount" type="number" min="0.01" step="0.01" placeholder="Valor (R$)"><select id="expenseMethod"><option>Dinheiro</option><option>Pix</option><option>Crédito</option><option>Débito</option></select><button id="confirmExpense" type="button">Registrar saída</button><button class="close" id="cancelExpense" type="button">Cancelar</button></div></div>
-<div id="cashCloseModal" class="cash-modal"><div class="cash-sheet"><h2>Fechar caixa</h2><div style="color:#667085;font-size:13px;margin-bottom:12px">Confira o saldo antes de fechar.</div><div class="cash-card"><span>Saldo calculado</span><b id="closeBalance">R$ 0,00</b></div><button id="confirmCloseCash" type="button" style="margin-top:12px">Confirmar fechamento</button><button class="close" id="cancelCloseCash" type="button">Cancelar</button></div></div>
-
 <script>function show(id,b){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.bottom button').forEach(x=>x.classList.remove('active'));if(b)b.classList.add('active');scrollTo(0,0)}function modal(){document.getElementById('m').style.display='flex'}function closeM(){document.getElementById('m').style.display='none'}
 const barberTabs=document.querySelectorAll('.barber-tab');
 const appts=document.querySelectorAll('#todayAgenda .appt');
@@ -172,6 +168,9 @@ document.querySelectorAll('.fat-tab').forEach(function(btn){
 updateBarberDashboard();
 
 
+<div id="cashOpenModal" class="cash-modal"><div class="cash-sheet"><h2>Abrir caixa</h2><div style="color:#667085;font-size:13px;margin-bottom:8px">Informe o valor inicial disponível no caixa.</div><input id="openingAmount" type="number" min="0" step="0.01" placeholder="Valor inicial (R$)"><button id="confirmOpenCash" type="button">Abrir caixa</button><button class="close" id="cancelOpenCash" type="button">Cancelar</button></div></div>
+<div id="cashExpenseModal" class="cash-modal"><div class="cash-sheet"><h2>Registrar saída</h2><input id="expenseDesc" placeholder="Descrição (ex.: Compra de material)"><input id="expenseAmount" type="number" min="0.01" step="0.01" placeholder="Valor (R$)"><select id="expenseMethod"><option>Dinheiro</option><option>Pix</option><option>Crédito</option><option>Débito</option></select><button id="confirmExpense" type="button">Registrar saída</button><button class="close" id="cancelExpense" type="button">Cancelar</button></div></div>
+<div id="cashCloseModal" class="cash-modal"><div class="cash-sheet"><h2>Fechar caixa</h2><div style="color:#667085;font-size:13px;margin-bottom:12px">Confira o saldo antes de fechar.</div><div class="cash-card"><span>Saldo calculado</span><b id="closeBalance">R$ 0,00</b></div><button id="confirmCloseCash" type="button" style="margin-top:12px">Confirmar fechamento</button><button class="close" id="cancelCloseCash" type="button">Cancelar</button></div></div>
 <script>
 // Navegação e funções dos módulos do BarberID.
 function openTeamForm(){var e=document.getElementById('teamForm');e.style.display=e.style.display==='none'?'grid':'none'}
@@ -601,135 +600,8 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
     cashSession=data||null;
 
     if($('cashStatus'))$('cashStatus').textContent=cashSession?'Caixa aberto':'Caixa fechado';
-    if($('openCashBtn'))$('openCashBtn').textContent=cashSession?'Caixa aberto':'Abrir caixa';
-
-    let movements=[];
-    if(cashSession){
-      const {data:m,error:me}=await sb.from('cash_movements')
-        .select('id,type,description,amount,method,created_at,payment_id')
-        .eq('cash_session_id',cashSession.id)
-        .order('created_at',{ascending:false});
-      if(me){console.error('Movimentações do caixa:',me);return;}
-      movements=m||[];
-    }
-
-    const entries=movements.filter(x=>x.type==='entry').reduce((sum,x)=>sum+Number(x.amount||0),0);
-    const exits=movements.filter(x=>x.type!=='entry').reduce((sum,x)=>sum+Number(x.amount||0),0);
-    const balance=Number(cashSession?.opening_amount||0)+entries-exits;
-
-    if($('cashIn'))$('cashIn').textContent=money(entries);
-    if($('cashOut'))$('cashOut').textContent=money(exits);
-    if($('cashBalance'))$('cashBalance').textContent=money(balance);
-    if($('closeBalance'))$('closeBalance').textContent=money(balance);
-    if($('cashCount'))$('cashCount').textContent=movements.length+' movimentaç'+(movements.length===1?'ão':'ões');
-
-    renderCashMovements(movements);
+    if($('cashOpenBtn'))$('cashOpenBtn').textContent=cashSession?'Caixa aberto':'Abrir caixa';
   }
-
-  function renderCashMovements(movements){
-    const list=$('cashList');
-    if(!list)return;
-    const filter=document.querySelector('.cash-filter button.active')?.dataset.cashFilter||'all';
-    const filtered=filter==='all'?movements:movements.filter(x=>({pix:'Pix',cash:'Dinheiro',credit:'Crédito',debit:'Débito'}[x.method]||'')===filter);
-    if(!filtered.length){
-      list.innerHTML='<div class="row"><div class="cash-tx"><div><b>Sem movimentações</b><small>'+(cashSession?'Nenhum lançamento neste caixa ainda.':'Abra o caixa para começar.')+'</small></div></div></div>';
-      return;
-    }
-    list.innerHTML=filtered.map(x=>{
-      const plus=x.type==='entry';
-      const label=x.method?({pix:'Pix',cash:'Dinheiro',credit:'Crédito',debit:'Débito'}[x.method]||x.method):'';
-      const time=new Intl.DateTimeFormat('pt-BR',{hour:'2-digit',minute:'2-digit',timeZone:tz}).format(new Date(x.created_at));
-      return `<div class="row"><div class="cash-tx"><div><b>${escapeHtml(x.description||'Movimentação')}</b><small>${label}${label?' · ':''}${time}</small></div><strong class="${plus?'cash-plus':'cash-minus'}">${plus?'+':'−'} ${money(x.amount)}</strong></div></div>`;
-    }).join('');
-  }
-
-  $('openCashBtn').onclick=()=>{
-    if(cashSession){alert('O caixa já está aberto.');return;}
-    $('openingAmount').value='';
-    $('cashOpenModal').style.display='flex';
-    setTimeout(()=>$('openingAmount').focus(),50);
-  };
-  $('cancelOpenCash').onclick=()=>$('cashOpenModal').style.display='none';
-
-  $('confirmOpenCash').onclick=async()=>{
-    const amount=Number($('openingAmount').value||0);
-    if(amount<0){alert('Informe um valor inicial válido.');return;}
-    const btn=$('confirmOpenCash');
-    btn.disabled=true;btn.textContent='Abrindo...';
-    try{
-      const {data:existing}=await sb.from('cash_sessions').select('id').eq('barbershop_id',shopId).eq('status','open').limit(1);
-      if(existing?.length){cashSession=existing[0];throw new Error('Já existe um caixa aberto.');}
-      const {error}=await sb.from('cash_sessions').insert({
-        barbershop_id:shopId,opened_by:currentUser.id,opening_amount:amount,status:'open'
-      });
-      if(error)throw new Error(error.message);
-      $('cashOpenModal').style.display='none';
-      await loadCash();
-      alert('Caixa aberto com sucesso.');
-    }catch(e){alert('Não foi possível abrir o caixa: '+e.message)}
-    finally{btn.disabled=false;btn.textContent='Abrir caixa';}
-  };
-
-  $('cashExpenseBtn').onclick=()=>{
-    if(!cashSession){alert('Abra o caixa primeiro.');return;}
-    $('expenseDesc').value='';$('expenseAmount').value='';$('expenseMethod').value='Dinheiro';
-    $('cashExpenseModal').style.display='flex';
-    setTimeout(()=>$('expenseDesc').focus(),50);
-  };
-  $('cancelExpense').onclick=()=>$('cashExpenseModal').style.display='none';
-
-  $('confirmExpense').onclick=async()=>{
-    if(!cashSession){alert('Abra o caixa primeiro.');return;}
-    const description=$('expenseDesc').value.trim();
-    const amount=Number($('expenseAmount').value||0);
-    const methodMap={Pix:'pix',Dinheiro:'cash',Crédito:'credit',Débito:'debit'};
-    if(!description){alert('Informe a descrição da saída.');return;}
-    if(amount<=0){alert('Informe um valor válido.');return;}
-    const btn=$('confirmExpense');btn.disabled=true;btn.textContent='Registrando...';
-    try{
-      const {error}=await sb.from('cash_movements').insert({
-        barbershop_id:shopId,cash_session_id:cashSession.id,type:'expense',
-        description,amount,method:methodMap[$('expenseMethod').value],created_by:currentUser.id
-      });
-      if(error)throw new Error(error.message);
-      $('cashExpenseModal').style.display='none';
-      await loadCash();
-    }catch(e){alert('Não foi possível registrar a saída: '+e.message)}
-    finally{btn.disabled=false;btn.textContent='Registrar saída';}
-  };
-
-  $('closeCashBtn').onclick=()=>{
-    if(!cashSession){alert('Não há caixa aberto.');return;}
-    $('cashCloseModal').style.display='flex';
-  };
-  $('cancelCloseCash').onclick=()=>$('cashCloseModal').style.display='none';
-
-  $('confirmCloseCash').onclick=async()=>{
-    if(!cashSession)return;
-    const btn=$('confirmCloseCash');btn.disabled=true;btn.textContent='Fechando...';
-    try{
-      const {data:movs,error:me}=await sb.from('cash_movements').select('type,amount').eq('cash_session_id',cashSession.id);
-      if(me)throw new Error(me.message);
-      const entries=(movs||[]).filter(x=>x.type==='entry').reduce((s,x)=>s+Number(x.amount||0),0);
-      const exits=(movs||[]).filter(x=>x.type!=='entry').reduce((s,x)=>s+Number(x.amount||0),0);
-      const closing=Number(cashSession.opening_amount||0)+entries-exits;
-      const {error}=await sb.from('cash_sessions').update({closing_amount:closing,closed_at:new Date().toISOString(),status:'closed'}).eq('id',cashSession.id).eq('barbershop_id',shopId);
-      if(error)throw new Error(error.message);
-      $('cashCloseModal').style.display='none';
-      cashSession=null;
-      await loadCash();
-      alert('Caixa fechado com sucesso.');
-    }catch(e){alert('Não foi possível fechar o caixa: '+e.message)}
-    finally{btn.disabled=false;btn.textContent='Confirmar fechamento';}
-  };
-
-  document.querySelectorAll('[data-cash-filter]').forEach(btn=>{
-    btn.onclick=()=>{
-      document.querySelectorAll('[data-cash-filter]').forEach(b=>b.classList.remove('active'));
-      btn.classList.add('active');
-      loadCash();
-    };
-  });
 
   // Exibe data e saudação reais
   function updateHeader(){
@@ -740,11 +612,7 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
     const small=document.querySelector('#home header .greet small');
     const h=document.querySelector('#home header .greet h1');
     if(small)small.textContent=day.charAt(0).toUpperCase()+day.slice(1);
-    const meta=currentUser?.user_metadata||{};
-    const rawName=meta.full_name||meta.name||meta.display_name||meta.first_name||'';
-    const emailName=(currentUser?.email||'').split('@')[0];
-    const ownerName=rawName.trim()|| (emailName.toLowerCase().startsWith('oziel') ? 'Oziel' : 'Administrador');
-    if(h)h.textContent=greeting+', '+ownerName+' 👋';
+    if(h)h.textContent=greeting+', Carlos 👋';
   }
 
   function updateRealReports(){
