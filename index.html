@@ -600,8 +600,135 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
     cashSession=data||null;
 
     if($('cashStatus'))$('cashStatus').textContent=cashSession?'Caixa aberto':'Caixa fechado';
-    if($('cashOpenBtn'))$('cashOpenBtn').textContent=cashSession?'Caixa aberto':'Abrir caixa';
+    if($('openCashBtn'))$('openCashBtn').textContent=cashSession?'Caixa aberto':'Abrir caixa';
+
+    let movements=[];
+    if(cashSession){
+      const {data:m,error:me}=await sb.from('cash_movements')
+        .select('id,type,description,amount,method,created_at,payment_id')
+        .eq('cash_session_id',cashSession.id)
+        .order('created_at',{ascending:false});
+      if(me){console.error('Movimentações do caixa:',me);return;}
+      movements=m||[];
+    }
+
+    const entries=movements.filter(x=>x.type==='entry').reduce((sum,x)=>sum+Number(x.amount||0),0);
+    const exits=movements.filter(x=>x.type!=='entry').reduce((sum,x)=>sum+Number(x.amount||0),0);
+    const balance=Number(cashSession?.opening_amount||0)+entries-exits;
+
+    if($('cashIn'))$('cashIn').textContent=money(entries);
+    if($('cashOut'))$('cashOut').textContent=money(exits);
+    if($('cashBalance'))$('cashBalance').textContent=money(balance);
+    if($('closeBalance'))$('closeBalance').textContent=money(balance);
+    if($('cashCount'))$('cashCount').textContent=movements.length+' movimentaç'+(movements.length===1?'ão':'ões');
+
+    renderCashMovements(movements);
   }
+
+  function renderCashMovements(movements){
+    const list=$('cashList');
+    if(!list)return;
+    const filter=document.querySelector('.cash-filter button.active')?.dataset.cashFilter||'all';
+    const filtered=filter==='all'?movements:movements.filter(x=>({pix:'Pix',cash:'Dinheiro',credit:'Crédito',debit:'Débito'}[x.method]||'')===filter);
+    if(!filtered.length){
+      list.innerHTML='<div class="row"><div class="cash-tx"><div><b>Sem movimentações</b><small>'+(cashSession?'Nenhum lançamento neste caixa ainda.':'Abra o caixa para começar.')+'</small></div></div></div>';
+      return;
+    }
+    list.innerHTML=filtered.map(x=>{
+      const plus=x.type==='entry';
+      const label=x.method?({pix:'Pix',cash:'Dinheiro',credit:'Crédito',debit:'Débito'}[x.method]||x.method):'';
+      const time=new Intl.DateTimeFormat('pt-BR',{hour:'2-digit',minute:'2-digit',timeZone:tz}).format(new Date(x.created_at));
+      return `<div class="row"><div class="cash-tx"><div><b>${escapeHtml(x.description||'Movimentação')}</b><small>${label}${label?' · ':''}${time}</small></div><strong class="${plus?'cash-plus':'cash-minus'}">${plus?'+':'−'} ${money(x.amount)}</strong></div></div>`;
+    }).join('');
+  }
+
+  $('openCashBtn').onclick=()=>{
+    if(cashSession){alert('O caixa já está aberto.');return;}
+    $('openingAmount').value='';
+    $('cashOpenModal').style.display='flex';
+    setTimeout(()=>$('openingAmount').focus(),50);
+  };
+  $('cancelOpenCash').onclick=()=>$('cashOpenModal').style.display='none';
+
+  $('confirmOpenCash').onclick=async()=>{
+    const amount=Number($('openingAmount').value||0);
+    if(amount<0){alert('Informe um valor inicial válido.');return;}
+    const btn=$('confirmOpenCash');
+    btn.disabled=true;btn.textContent='Abrindo...';
+    try{
+      const {data:existing}=await sb.from('cash_sessions').select('id').eq('barbershop_id',shopId).eq('status','open').limit(1);
+      if(existing?.length){cashSession=existing[0];throw new Error('Já existe um caixa aberto.');}
+      const {error}=await sb.from('cash_sessions').insert({
+        barbershop_id:shopId,opened_by:currentUser.id,opening_amount:amount,status:'open'
+      });
+      if(error)throw new Error(error.message);
+      $('cashOpenModal').style.display='none';
+      await loadCash();
+      alert('Caixa aberto com sucesso.');
+    }catch(e){alert('Não foi possível abrir o caixa: '+e.message)}
+    finally{btn.disabled=false;btn.textContent='Abrir caixa';}
+  };
+
+  $('cashExpenseBtn').onclick=()=>{
+    if(!cashSession){alert('Abra o caixa primeiro.');return;}
+    $('expenseDesc').value='';$('expenseAmount').value='';$('expenseMethod').value='Dinheiro';
+    $('cashExpenseModal').style.display='flex';
+    setTimeout(()=>$('expenseDesc').focus(),50);
+  };
+  $('cancelExpense').onclick=()=>$('cashExpenseModal').style.display='none';
+
+  $('confirmExpense').onclick=async()=>{
+    if(!cashSession){alert('Abra o caixa primeiro.');return;}
+    const description=$('expenseDesc').value.trim();
+    const amount=Number($('expenseAmount').value||0);
+    const methodMap={Pix:'pix',Dinheiro:'cash',Crédito:'credit',Débito:'debit'};
+    if(!description){alert('Informe a descrição da saída.');return;}
+    if(amount<=0){alert('Informe um valor válido.');return;}
+    const btn=$('confirmExpense');btn.disabled=true;btn.textContent='Registrando...';
+    try{
+      const {error}=await sb.from('cash_movements').insert({
+        barbershop_id:shopId,cash_session_id:cashSession.id,type:'expense',
+        description,amount,method:methodMap[$('expenseMethod').value],created_by:currentUser.id
+      });
+      if(error)throw new Error(error.message);
+      $('cashExpenseModal').style.display='none';
+      await loadCash();
+    }catch(e){alert('Não foi possível registrar a saída: '+e.message)}
+    finally{btn.disabled=false;btn.textContent='Registrar saída';}
+  };
+
+  $('closeCashBtn').onclick=()=>{
+    if(!cashSession){alert('Não há caixa aberto.');return;}
+    $('cashCloseModal').style.display='flex';
+  };
+  $('cancelCloseCash').onclick=()=>$('cashCloseModal').style.display='none';
+
+  $('confirmCloseCash').onclick=async()=>{
+    if(!cashSession)return;
+    const btn=$('confirmCloseCash');btn.disabled=true;btn.textContent='Fechando...';
+    try{
+      const {data:movs,error:me}=await sb.from('cash_movements').select('type,amount').eq('cash_session_id',cashSession.id);
+      if(me)throw new Error(me.message);
+      const entries=(movs||[]).filter(x=>x.type==='entry').reduce((s,x)=>s+Number(x.amount||0),0);
+      const exits=(movs||[]).filter(x=>x.type!=='entry').reduce((s,x)=>s+Number(x.amount||0),0);
+      const closing=Number(cashSession.opening_amount||0)+entries-exits;
+      const {error}=await sb.from('cash_sessions').update({closing_amount:closing,closed_at:new Date().toISOString(),status:'closed'}).eq('id',cashSession.id).eq('barbershop_id',shopId);
+      if(error)throw new Error(error.message);
+      $('cashCloseModal').style.display='none';
+      cashSession=null;
+      await loadCash();
+      alert('Caixa fechado com sucesso.');
+    }catch(e){alert('Não foi possível fechar o caixa: '+e.message)}
+    finally{btn.disabled=false;btn.textContent='Confirmar fechamento';}
+  };
+
+  document.querySelectorAll('[data-cash-filter]').forEach(btn=>{
+    btn.onclick=()=>{
+      document.querySelectorAll('[data-cash-filter]').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      loadCash();
+    };
+  });
 
   // Exibe data e saudação reais
   function updateHeader(){
