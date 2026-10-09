@@ -53,6 +53,8 @@ main{padding:16px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9p
 .day-event .statusBtn,.week-event .statusBtn{display:block;margin-top:6px;font-size:10px;padding:5px 7px;background:#fff;border:1px solid currentColor;color:inherit}
 .day-event .statusBtn[hidden],.week-event .statusBtn[hidden]{display:none!important}
 
+
+.staff-avatar{width:30px;height:30px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:7px;border:1px solid #dbe2ea;background:#eef2f7}.staff-avatar.large{width:92px;height:92px;display:block;margin:0 auto 10px}.team-edit{border:0;border-radius:9px;background:#e8efff;color:#1d4ed8;padding:10px 12px;font-weight:700}.team-buttons{display:flex;gap:7px;align-items:center}.team-member-main{display:flex;align-items:center;gap:8px}.avatar-placeholder{width:30px;height:30px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:#e8efff;color:#1d4ed8;font-size:12px;font-weight:800;margin-right:7px}
 </style>
 <style>
 .module-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}.module-card{background:#fff;border:1px solid #e7eaf0;border-radius:15px;padding:15px}.module-card span{display:block;font-size:11px;color:#667085}.module-card b{display:block;font-size:22px;margin-top:4px}.module-actions{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.module-actions button,.mini-btn{border:0;border-radius:11px;padding:11px 13px;font-weight:700;background:#eef3ff;color:#1d4ed8}.mini-btn.danger{background:#fff0f0;color:#b42318}.module-list .row{cursor:pointer}.tag{display:inline-block;padding:5px 8px;border-radius:999px;background:#eef3ff;color:#1d4ed8;font-size:11px;font-weight:700}.muted{color:#667085}.empty-state{text-align:center;padding:30px 15px;color:#667085}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.form-grid input,.form-grid select,.module-form input,.module-form select{width:100%;box-sizing:border-box;padding:12px;border:1px solid #dfe3ea;border-radius:10px;background:#fff}.module-form{display:grid;gap:9px;background:#fff;border:1px solid #e7eaf0;border-radius:15px;padding:14px;margin:12px 0}.module-form button{padding:12px;border:0;border-radius:11px;background:#1d4ed8;color:#fff;font-weight:800}.table-row{display:grid;grid-template-columns:1.3fr .8fr .8fr;gap:8px;align-items:center;padding:12px 0;border-bottom:1px solid #edf0f4}.table-row:last-child{border-bottom:0}.report-bar{height:10px;border-radius:99px;background:#e9edf3;overflow:hidden}.report-bar i{display:block;height:100%;background:#2563eb;border-radius:99px}.switch-row{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid #edf0f4}.switch{width:44px;height:24px;border-radius:20px;background:#d0d5dd;position:relative}.switch.on{background:#2563eb}.switch:after{content:'';position:absolute;width:20px;height:20px;background:#fff;border-radius:50%;top:2px;left:2px}.switch.on:after{left:22px}
@@ -167,6 +169,7 @@ main{padding:16px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9p
 
 </script>
 
+<div id="staffProfileModal" class="modal"><div class="sheet"><h2 id="staffProfileTitle">Perfil do barbeiro</h2><div id="staffPhotoPreview"></div><label for="staffPhotoInput">Foto do profissional</label><input id="staffPhotoInput" type="file" accept="image/*" capture="user"><input id="staffProfileName" placeholder="Nome do barbeiro"><button id="saveStaffProfile" type="button">Salvar perfil</button><button class="close" type="button" onclick="closeStaffProfile()">Cancelar</button><p style="font-size:11px;color:#667085">A foto será enviada ao armazenamento do Supabase.</p></div></div>
 <div id="cashOpenModal" class="cash-modal"><div class="cash-sheet"><h2>Abrir caixa</h2><div style="color:#667085;font-size:13px;margin-bottom:8px">Informe o valor inicial disponível no caixa.</div><input id="openingAmount" type="number" min="0" step="0.01" placeholder="Valor inicial (R$)"><button id="confirmOpenCash" type="button">Abrir caixa</button><button class="close" id="cancelOpenCash" type="button">Cancelar</button></div></div>
 <div id="cashExpenseModal" class="cash-modal"><div class="cash-sheet"><h2>Registrar saída</h2><input id="expenseDesc" placeholder="Descrição (ex.: Compra de material)"><input id="expenseAmount" type="number" min="0.01" step="0.01" placeholder="Valor (R$)"><select id="expenseMethod"><option>Dinheiro</option><option>Pix</option><option>Crédito</option><option>Débito</option></select><button id="confirmExpense" type="button">Registrar saída</button><button class="close" id="cancelExpense" type="button">Cancelar</button></div></div>
 <div id="cashCloseModal" class="cash-modal"><div class="cash-sheet"><h2>Fechar caixa</h2><div style="color:#667085;font-size:13px;margin-bottom:12px">Confira o saldo antes de fechar.</div><div class="cash-card"><span>Saldo calculado</span><b id="closeBalance">R$ 0,00</b></div><button id="confirmCloseCash" type="button" style="margin-top:12px">Confirmar fechamento</button><button class="close" id="cancelCloseCash" type="button">Cancelar</button></div></div>
@@ -341,7 +344,7 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
       await getShop();
 
       const [st,sv,cu,ap,pa]=await Promise.all([
-        sb.from('staff').select('id,name,role,active').eq('barbershop_id',shopId).eq('active',true).order('name'),
+        sb.from('staff').select('id,name,role,active,avatar_url').eq('barbershop_id',shopId).eq('active',true).order('name'),
         sb.from('services').select('id,name,price,duration_minutes').eq('barbershop_id',shopId).eq('active',true).order('name'),
         sb.from('customers').select('id,name,phone,loyalty_points').eq('barbershop_id',shopId).order('name'),
         sb.from('appointments').select('id,customer_id,barber_id,service_id,starts_at,ends_at,status,price').eq('barbershop_id',shopId).order('starts_at'),
@@ -388,9 +391,10 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
     const list=$('teamList');
     if(list){
       list.innerHTML=dbStaff.filter(x=>x.role==='barber').map(x=>
-        `<div class="row team-member-row"><div><b>👤 ${escapeHtml(x.name)}</b><small>Barbeiro · ativo</small></div><button type="button" class="team-delete" data-staff-id="${x.id}" style="border:0;border-radius:9px;background:#fee2e2;color:#b91c1c;padding:10px 12px;font-weight:700">Excluir</button></div>`
+        `<div class="row team-member-row"><div class="team-member-main">${x.avatar_url?`<img class="staff-avatar" src="${escapeHtml(x.avatar_url)}" alt="Foto de ${escapeHtml(x.name)}">`:`<span class="avatar-placeholder">${escapeHtml((x.name||'?').trim().slice(0,1).toUpperCase())}</span>`}<div><b>${escapeHtml(x.name)}</b><small>Barbeiro · ativo</small></div></div><div class="team-buttons"><button type="button" class="team-edit" data-staff-id="${x.id}">Editar</button><button type="button" class="team-delete" data-staff-id="${x.id}" style="border:0;border-radius:9px;background:#fee2e2;color:#b91c1c;padding:10px 12px;font-weight:700">Excluir</button></div></div>`
       ).join('')||'<div class="row"><b>Nenhum barbeiro cadastrado.</b></div>';
       list.querySelectorAll('.team-delete').forEach(btn=>btn.addEventListener('click',()=>window.removeTeamMember(btn.dataset.staffId)));
+      list.querySelectorAll('.team-edit').forEach(btn=>btn.addEventListener('click',()=>window.openStaffProfile(btn.dataset.staffId)));
     }
     if($('teamCount')) $('teamCount').textContent=dbStaff.filter(x=>x.role==='barber').length;
     if($('teamAppointments')) $('teamAppointments').textContent=dbAppointments.filter(a=>dateKey(a.starts_at)===todayKey() && dbStaff.some(st=>st.id===a.barber_id&&st.role==='barber')).length;
@@ -411,6 +415,42 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
     }catch(e){alert('Não foi possível cadastrar o barbeiro: '+(e.message||e));}
     finally{if(btn){btn.disabled=false;btn.textContent='Salvar barbeiro';}}
   };
+
+  let editingStaffId=null, pendingStaffPhoto=null;
+  window.openStaffProfile=function(id){
+    const member=dbStaff.find(x=>String(x.id)===String(id)&&x.role==='barber');if(!member)return;
+    editingStaffId=member.id;pendingStaffPhoto=null;
+    $('staffProfileTitle').textContent='Editar perfil';$('staffProfileName').value=member.name||'';$('staffPhotoInput').value='';
+    $('staffPhotoPreview').innerHTML=member.avatar_url?`<img class="staff-avatar large" src="${escapeHtml(member.avatar_url)}" alt="Foto atual">`:`<div class="avatar-placeholder" style="width:92px;height:92px;border-radius:50%;margin:0 auto 10px;font-size:30px">${escapeHtml((member.name||'?').trim().slice(0,1).toUpperCase())}</div>`;
+    $('staffProfileModal').classList.add('open');
+  };
+  window.closeStaffProfile=function(){$('staffProfileModal').classList.remove('open');editingStaffId=null;pendingStaffPhoto=null;};
+  $('staffPhotoInput').addEventListener('change',async e=>{
+    const file=e.target.files&&e.target.files[0];if(!file)return;
+    if(!file.type.startsWith('image/')){alert('Selecione um arquivo de imagem.');e.target.value='';return;}
+    if(file.size>5*1024*1024){alert('A foto deve ter até 5 MB.');e.target.value='';return;}
+    pendingStaffPhoto=file;
+    const url=URL.createObjectURL(file);$('staffPhotoPreview').innerHTML=`<img class="staff-avatar large" src="${url}" alt="Prévia da foto">`;
+  });
+  $('saveStaffProfile').addEventListener('click',async()=>{
+    const member=dbStaff.find(x=>String(x.id)===String(editingStaffId));if(!member)return;
+    const name=$('staffProfileName').value.trim();if(!name){alert('Informe o nome do barbeiro.');return;}
+    const btn=$('saveStaffProfile');btn.disabled=true;btn.textContent='Salvando...';
+    try{
+      let avatar_url=member.avatar_url||null;
+      if(pendingStaffPhoto){
+        const ext=(pendingStaffPhoto.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg';
+        const path=`${shopId}/${member.id}-${Date.now()}.${ext}`;
+        const up=await sb.storage.from('staff-photos').upload(path,pendingStaffPhoto,{upsert:true,contentType:pendingStaffPhoto.type||'image/jpeg'});
+        if(up.error)throw new Error('Foto: '+up.error.message+' — confira se o bucket staff-photos foi criado e as permissões foram configuradas.');
+        const pub=sb.storage.from('staff-photos').getPublicUrl(path);avatar_url=pub.data.publicUrl;
+      }
+      const {error}=await sb.from('staff').update({name,avatar_url}).eq('id',member.id).eq('barbershop_id',shopId);
+      if(error)throw error;
+      closeStaffProfile();await loadAll();alert('Perfil do barbeiro atualizado.');
+    }catch(e){alert('Não foi possível salvar o perfil: '+(e.message||e));}
+    finally{btn.disabled=false;btn.textContent='Salvar perfil';}
+  });
 
   window.removeTeamMember=async function(id){
     const member=dbStaff.find(x=>x.id===id && x.role==='barber');
@@ -468,7 +508,7 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
     const todayRows=rows.filter(a=>dateKey(a.starts_at)===todayKey());
     let html=`<div class="week-help">Hoje: ${dayLabel}. Cada coluna é um barbeiro. Deslize para os lados para ver a equipe e para baixo para ver os horários.</div><div class="day-calendar-scroll week-calendar-scroll"><div class="day-calendar" style="--barber-count:${barbers.length}">`;
     html+='<div class="day-head day-time-head">Horário</div>';
-    barbers.forEach(b=>{html+=`<div class="day-head day-barber-head">${escapeHtml(b.name)}</div>`;});
+    barbers.forEach(b=>{const avatar=b.avatar_url?`<img class="staff-avatar" src="${escapeHtml(b.avatar_url)}" alt="">`:`<span class="avatar-placeholder">${escapeHtml((b.name||'?').trim().slice(0,1).toUpperCase())}</span>`;html+=`<div class="day-head day-barber-head"><span style="display:flex;align-items:center;justify-content:center;gap:4px">${avatar}<span>${escapeHtml(b.name)}</span></span></div>`;});
     times.forEach(min=>{
       const hh=String(Math.floor(min/60)).padStart(2,'0'),mm=String(min%60).padStart(2,'0'),time=`${hh}:${mm}`;
       html+=`<div class="day-time">${time}</div>`;
