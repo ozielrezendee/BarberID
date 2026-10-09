@@ -40,7 +40,7 @@ main{padding:16px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9p
 <div class="appt" data-status="confirmed" data-price="40"><div class="time">10:30</div><div><div class="name">Lucas Lima</div><div class="service">Corte · Barbeiro 1</div></div><button class="status statusBtn" type="button">Confirmado ▾</button></div><div class="appt" data-status="confirmed" data-price="40"><div class="time">11:00</div><div><div class="name">Rafael Costa</div><div class="service">Corte · Barbeiro 3</div></div><button class="status statusBtn" type="button">Confirmado ▾</button></div></div>
 
 </main></section>
-<section id="agenda" class="page"><div class="head"><button class="back" onclick="show('home')">‹ Voltar</button><h1>Agenda</h1></div><main><button class="primary" onclick="openAppointmentModal()">＋ Novo agendamento</button><div class="list"><div class="row"><b>09:00 · João Silva</b><small>Corte · Barbeiro 1 · Confirmado</small></div><div class="row"><b>09:30 · Marcos Souza</b><small>Barba · Barbeiro 1 · Confirmado</small></div><div class="row"><b>10:00 · Pedro Alves</b><small>Corte + Barba · Barbeiro 2 · Confirmado</small></div><div class="row"><b>11:00 · Horário livre</b><small>Disponível para agendamento</small></div></div></main></section>
+<section id="agenda" class="page"><div class="head"><button class="back" onclick="show('home')">‹ Voltar</button><h1>Agenda</h1></div><main><button class="primary" onclick="openAppointmentModal()">＋ Novo agendamento</button><div class="list" id="agendaList"><div class="row"><b>Carregando agenda...</b><small>Os agendamentos serão carregados do Supabase.</small></div></div></main></section>
 <section id="caixa" class="page"><div class="head"><button class="back" onclick="show('mais')">‹ Voltar</button><h1>Caixa</h1></div><main>
 <div class="cash-card" style="margin-bottom:10px"><span>Saldo do caixa</span><b id="cashBalance">R$ 0,00</b><div style="margin-top:7px"><span id="cashStatus" class="cash-status">Caixa fechado</span></div></div>
 <div class="caixa-grid"><div class="cash-card"><span>Entradas</span><b id="cashIn">R$ 0,00</b></div><div class="cash-card"><span>Saídas</span><b id="cashOut">R$ 0,00</b></div></div>
@@ -455,6 +455,19 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
         <button class="status statusBtn" type="button">${label} ▾</button>
       </div>`;
     }).join('') || '<div class="row"><b>Nenhum atendimento hoje.</b><small>Os novos agendamentos aparecerão aqui.</small></div>';
+
+    // A aba Agenda usa exatamente os mesmos registros do Supabase que a tela inicial.
+    const agendaList=$('agendaList');
+    if(agendaList){
+      agendaList.innerHTML=today.map(a=>{
+        const c=dbCustomers.find(x=>x.id===a.customer_id);
+        const b=dbStaff.find(x=>x.id===a.barber_id);
+        const sv=dbServices.find(x=>x.id===a.service_id);
+        const t=new Intl.DateTimeFormat('pt-BR',{hour:'2-digit',minute:'2-digit',timeZone:tz}).format(new Date(a.starts_at));
+        const labels={pending:'Pendente',confirmed:'Confirmado',in_service:'Em atendimento',completed:'Concluído ✓',cancelled:'Cancelado',no_show:'Ausente'};
+        return `<div class="row agenda-appointment" data-appointment-id="${a.id}"><b>${t} · ${escapeHtml(c?.name||'Cliente')}</b><small>${escapeHtml(sv?.name||'Serviço')} · ${escapeHtml(b?.name||'Sem barbeiro')} · ${labels[a.status]||escapeHtml(a.status)}</small></div>`;
+      }).join('') || '<div class="row"><b>Nenhum atendimento hoje.</b><small>Crie um agendamento para ele aparecer aqui.</small></div>';
+    }
 
     bindStatusButtons();
     applyBarberFilter();
