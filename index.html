@@ -7,6 +7,8 @@ header,.head{background:#0b1220;color:#fff;padding:22px 18px;border-radius:0 0 2
 main{padding:16px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.stat,.card,.row{background:#fff;border:1px solid #e7eaf0;border-radius:15px}.stat{padding:13px}.stat b{display:block;font-size:20px}.stat span,.row small{font-size:11px;color:#667085}.primary{width:100%;padding:15px;margin:15px 0;border:0;border-radius:13px;background:#1d4ed8;color:white;font-weight:bold;font-size:16px}.section{display:flex;justify-content:space-between;margin:20px 2px 10px}.card{overflow:visible}.appt{display:grid;grid-template-columns:55px 1fr auto;gap:10px;padding:15px;border-bottom:1px solid #e7eaf0}.appt:last-child{border:0}.time,.name{font-weight:bold}.service{font-size:12px;color:#667085;margin-top:3px}.status{font-size:10px;color:#15803d;background:#ecfdf3;padding:5px 7px;border-radius:8px}.page{display:none}.page.active{display:block}.head h1{margin:0}.back{border:0;background:none;color:#fff;font-size:15px;padding:0 0 15px}.list{display:grid;gap:10px}.row{padding:15px}.row b{display:block;margin-bottom:4px}.bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(520px,100%);display:grid;grid-template-columns:repeat(4,1fr);background:#fff;border-top:1px solid #ddd;padding:8px}.bottom button{border:0;background:none;color:#667085;font-size:11px}.bottom button.active{color:#1d4ed8;font-weight:bold}.ico{display:block;font-size:20px;margin-bottom:3px}.modal{display:none;position:fixed;inset:0;background:#0008;align-items:end;z-index:90}.sheet{background:#fff;width:100%;max-width:520px;margin:auto;padding:22px;border-radius:22px 22px 0 0}.sheet input,.sheet select{width:100%;padding:13px;margin:7px 0 12px;border:1px solid #ddd;border-radius:10px}.sheet button{width:100%;padding:14px;border:0;border-radius:11px;background:#1d4ed8;color:white;font-weight:bold}.close{margin-top:8px;background:#eee!important;color:#111!important}
 
 .barber-tabs{display:flex;gap:7px;overflow-x:auto;margin:0 0 12px;padding-bottom:2px}.barber-tab{white-space:nowrap;border:1px solid #e2e6ee;background:#fff;color:#667085;border-radius:10px;padding:9px 13px;font-size:12px;font-weight:700}.barber-tab.active{background:#0b1220;color:#fff;border-color:#0b1220}.fat-card{position:relative}.fat-tabs{display:flex;gap:3px;margin-top:7px}.fat-tab{border:0;background:#f1f3f7;color:#667085;border-radius:7px;padding:4px 5px;font-size:9px;font-weight:700}.fat-tab.active{background:#e8efff;color:#1d4ed8}
+.period-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 14px}.period-tab{padding:12px;border:1px solid #e2e6ee;background:#fff;color:#667085;border-radius:11px;font-weight:800;font-size:14px}.period-tab.active{background:#1d4ed8;color:#fff;border-color:#1d4ed8}
+.dashboard-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px}.dashboard-card{background:#fff;border:1px solid #e7eaf0;border-radius:15px;padding:15px;min-width:0}.dashboard-card .dashboard-icon{font-size:20px;margin-bottom:8px}.dashboard-card span{display:block;color:#667085;font-size:11px}.dashboard-card b{display:block;font-size:22px;margin-top:5px;overflow-wrap:anywhere}.dashboard-secondary{display:flex;justify-content:space-between;align-items:center;background:#f0f4fa;border-radius:10px;padding:9px 12px;margin-top:9px;font-size:12px;color:#667085}.dashboard-secondary b{color:#101828;font-size:14px}.agenda-day{padding:12px 14px;background:#f0f4fa;border-bottom:1px solid #e7eaf0;font-weight:800;font-size:12px;color:#344054}.appt.cancelled{opacity:.55}.appt .status{max-width:105px}
 
 .appt{position:relative}.statusBtn{border:0;cursor:pointer}.status-menu{position:absolute;right:10px;top:54px;z-index:4;background:#fff;border:1px solid #ddd;border-radius:12px;padding:6px;box-shadow:0 8px 25px #0002;display:grid;min-width:145px}.status-menu button{border:0;background:#fff;text-align:left;padding:11px;border-radius:8px;font-weight:600}.status-menu button:hover{background:#f1f3f7}.appt.inservice{background:#fff8e6}.appt.done{background:#dcfce7}.appt.done .status{background:#bbf7d0;color:#166534}.appt.absent{background:#fee2e2}.appt.absent .status{background:#fecaca;color:#991b1b}
 .finish-modal{display:none;position:fixed;inset:0;background:#0008;align-items:center;justify-content:center;z-index:20;padding:20px}.finish-box{background:#fff;border-radius:18px;padding:22px;width:min(360px,100%)}.finish-box h2{margin:0 0 8px}.finish-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}.finish-actions button{padding:13px;border:0;border-radius:11px;font-weight:700}.yes{background:#16a34a;color:#fff}.no{background:#eef2f7}
@@ -23,24 +25,15 @@ main{padding:16px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9p
 </style>
 </head><body><div id="loginScreen" class="login-screen"><div class="login-box"><h1>BarberID</h1><p>Entre para acessar os dados reais da sua barbearia.</p><input id="loginEmail" type="email" placeholder="E-mail"><input id="loginPassword" type="password" placeholder="Senha"><button id="loginBtn" type="button">Entrar</button><div id="loginError" class="login-error"></div><div class="db-note">Dados sincronizados com Supabase</div></div></div>
 <div class="app">
-<section id="home" class="page active"><header><div class="top"><div class="brand">BarberID</div><div>🔔</div></div><div class="greet"><small>Quarta-feira, 7 de outubro</small><h1>Bom dia, Administrador 👋</h1></div></header><main>
-<div class="barber-tabs" id="barberTabs"><button class="barber-tab active" data-barber="all" type="button">Todos</button><button class="barber-tab" data-barber="Barbeiro 1" type="button">Barbeiro 1</button><button class="barber-tab" data-barber="Barbeiro 2" type="button">Barbeiro 2</button><button class="barber-tab" data-barber="Barbeiro 3" type="button">Barbeiro 3</button></div><div class="stats">
-<div class="stat"><b id="apptCount">8</b><span>Atendimentos</span></div>
-<div class="stat fat-card"><b id="fatValue">R$ 320</b><span>Faturamento</span><div class="fat-tabs">
-<button class="fat-tab active" data-value="R$ 320" type="button">Hoje</button>
-<button class="fat-tab" data-value="R$ 2.480" type="button">Semana</button>
-<button class="fat-tab" data-value="R$ 9.760" type="button">Mês</button>
-</div></div>
-<div class="stat"><b id="waitingCount">1</b><span>Aguardando</span></div></div>
-<button class="primary" onclick="openAppointmentModal()">＋ Novo agendamento</button><div class="section"><b>Agenda de hoje</b><a onclick="show('agenda')">Ver agenda</a></div>
-<div class="card" id="todayAgenda">
-<div class="appt" data-status="confirmed" data-price="40"><div class="time">09:00</div><div><div class="name">João Silva</div><div class="service">Corte · Barbeiro 1</div></div><button class="status statusBtn" type="button">Confirmado ▾</button></div>
-<div class="appt" data-status="confirmed" data-price="40"><div class="time">09:30</div><div><div class="name">Marcos Souza</div><div class="service">Barba · Barbeiro 1</div></div><button class="status statusBtn" type="button">Confirmado ▾</button></div>
-<div class="appt" data-status="confirmed" data-price="80"><div class="time">10:00</div><div><div class="name">Pedro Alves</div><div class="service">Corte + Barba · Barbeiro 2</div></div><button class="status statusBtn" type="button">Confirmado ▾</button></div>
-<div class="appt" data-status="confirmed" data-price="40"><div class="time">10:30</div><div><div class="name">Lucas Lima</div><div class="service">Corte · Barbeiro 1</div></div><button class="status statusBtn" type="button">Confirmado ▾</button></div><div class="appt" data-status="confirmed" data-price="40"><div class="time">11:00</div><div><div class="name">Rafael Costa</div><div class="service">Corte · Barbeiro 3</div></div><button class="status statusBtn" type="button">Confirmado ▾</button></div></div>
-
+<section id="home" class="page active"><header><div class="top"><div class="brand">BarberID</div><div>🔔</div></div><div class="greet"><small id="dashboardDate"></small><h1>Agenda do dia 👋</h1></div></header><main>
+<div class="period-tabs" id="periodTabs"><button class="period-tab active" data-period="today" type="button">Hoje</button><button class="period-tab" data-period="week" type="button">Semana</button></div>
+<div class="barber-tabs" id="barberTabs"><button class="barber-tab active" data-barber="all" type="button">Todos</button><button class="barber-tab" data-barber="Barbeiro 1" type="button">Barbeiro 1</button><button class="barber-tab" data-barber="Barbeiro 2" type="button">Barbeiro 2</button><button class="barber-tab" data-barber="Barbeiro 3" type="button">Barbeiro 3</button></div>
+<div class="dashboard-cards"><div class="dashboard-card"><div class="dashboard-icon">💰</div><span id="revenueLabel">Faturamento de hoje</span><b id="fatValue">R$ 0,00</b></div><div class="dashboard-card"><div class="dashboard-icon">📅</div><span id="appointmentsLabel">Agendamentos de hoje</span><b id="apptCount">0</b></div></div>
+<div class="dashboard-secondary"><span>Aguardando</span><b id="waitingCount">0</b></div>
+<button class="primary" onclick="openAppointmentModal()">＋ Novo agendamento</button><div class="section"><b id="agendaListTitle">Agenda de hoje</b></div>
+<div class="card" id="todayAgenda"><div class="empty-state">Carregando agendamentos...</div></div>
 </main></section>
-<section id="agenda" class="page"><div class="head"><button class="back" onclick="show('home')">‹ Voltar</button><h1>Agenda</h1></div><main><button class="primary" onclick="openAppointmentModal()">＋ Novo agendamento</button><div class="list" id="agendaAppointments"><div class="row"><b>Carregando agenda...</b><small>Buscando agendamentos do Supabase.</small></div></div></main></section>
+<section id="agenda" class="page"><div class="head"><button class="back" onclick="show('home')">‹ Voltar</button><h1>Agenda</h1></div><main><p>A agenda do dia e da semana está disponível na tela principal.</p><button class="primary" onclick="show('home')">Voltar para Agenda</button></main></section>
 <section id="caixa" class="page"><div class="head"><button class="back" onclick="show('mais')">‹ Voltar</button><h1>Caixa</h1></div><main>
 <div class="cash-card" style="margin-bottom:10px"><span>Saldo do caixa</span><b id="cashBalance">R$ 0,00</b><div style="margin-top:7px"><span id="cashStatus" class="cash-status">Caixa fechado</span></div></div>
 <div class="caixa-grid"><div class="cash-card"><span>Entradas</span><b id="cashIn">R$ 0,00</b></div><div class="cash-card"><span>Saídas</span><b id="cashOut">R$ 0,00</b></div></div>
@@ -102,7 +95,7 @@ main{padding:16px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9p
 <section id="mais" class="page"><div class="head"><button class="back" onclick="show('home')">‹ Voltar</button><h1>Mais</h1></div><main><div class="list">
 <div class="row" onclick="show('caixa')" style="cursor:pointer"><b>💰 Caixa</b><small>Abertura, entradas, saídas e fechamento</small></div><div class="row" onclick="show('equipe')" style="cursor:pointer"><b>👨‍💼 Equipe</b><small>Barbeiros, horários e permissões</small></div><div class="row" onclick="show('comanda')" style="cursor:pointer"><b>🧾 Comanda</b><small>Serviços, produtos, descontos e pagamento</small></div><div class="row" onclick="show('estoque')" style="cursor:pointer"><b>📦 Estoque</b><small>Produtos, entradas, saídas e estoque mínimo</small></div><div class="row" onclick="show('fidelidade')" style="cursor:pointer"><b>❤️ Fidelidade</b><small>Pontos, cashback, cartões e pacotes</small></div><div class="row" onclick="show('financeiro')" style="cursor:pointer"><b>💳 Financeiro</b><small>Contas, recebimentos e fluxo de caixa</small></div><div class="row" onclick="show('relatorios')" style="cursor:pointer"><b>📊 Relatórios</b><small>Faturamento, ocupação, ticket e desempenho</small></div><div class="row"><b>🌐 Agendamento público</b><small>Link, QR Code e fila de espera</small></div><div class="row"><b>🔔 Comunicação</b><small>Confirmações, lembretes e pós-atendimento</small></div><div class="row"><b>⭐ Avaliações</b><small>Notas e comentários dos clientes</small></div><div class="row"><b>⚙️ Configurações</b><small>Barbearia, horários, regras e permissões</small></div>
 </div></main></section>
-<nav class="bottom"><button class="active" onclick="show('home',this)"><span class="ico">⌂</span>Início</button><button onclick="show('agenda',this)"><span class="ico">📅</span>Agenda</button><button onclick="show('clientes',this)"><span class="ico">👥</span>Clientes</button><button onclick="show('mais',this)"><span class="ico">☰</span>Mais</button></nav></div>
+<nav class="bottom"><button class="active" data-target="home" onclick="show('home',this)"><span class="ico">📅</span>Agenda</button><button data-target="caixa" onclick="show('caixa',this)"><span class="ico">💰</span>Caixa</button><button data-target="clientes" onclick="show('clientes',this)"><span class="ico">👥</span>Clientes</button><button data-target="mais" onclick="show('mais',this)"><span class="ico">☰</span>Mais</button></nav></div>
 <div id="m" class="modal"><div class="sheet">
 <h2>Novo agendamento</h2>
 <label style="font-size:12px;color:#667085">Cliente</label><select id="appointmentCustomer"></select>
@@ -134,54 +127,8 @@ main{padding:16px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9p
 <div class="finish-actions"><button class="no" type="button" id="finishNo">Voltar</button><button class="yes" type="button" id="finishYes">Confirmar pagamento</button></div>
 </div></div>
 
-<script>function show(id,b){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.bottom button').forEach(x=>x.classList.remove('active'));if(b)b.classList.add('active');scrollTo(0,0)}
-const barberTabs=document.querySelectorAll('.barber-tab');
-const appts=document.querySelectorAll('#todayAgenda .appt');
-const apptCount=document.getElementById('apptCount');
-const waitingCount=document.getElementById('waitingCount');
-const barberRevenue={
-  all:{today:320,week:2480,month:9760},
-  'Barbeiro 1':{today:120,week:1240,month:4880},
-  'Barbeiro 2':{today:200,week:1240,month:4880},
-  'Barbeiro 3':{today:40,week:0,month:0}
-};
-let selectedBarber='all';
-function updateBarberDashboard(){
-  let visible=0, waiting=0;
-  appts.forEach(function(appt){
-    const service=appt.querySelector('.service')?.textContent || '';
-    const barber=service.includes('· Barbeiro 1')?'Carlos':service.includes('· Barbeiro 2')?'Renner':service.includes('· Barbeiro 3')?'Barbeiro 3':'';
-    const show=selectedBarber==='all' || barber===selectedBarber;
-    appt.style.display=show?'grid':'none';
-    if(show){ visible++; if(appt.dataset.status==='confirmed') waiting++; }
-  });
-  apptCount.textContent=visible;
-  waitingCount.textContent=waiting;
-  document.querySelectorAll('.fat-tab').forEach(function(btn){
-    const period=btn.textContent.toLowerCase();
-    const key=period==='hoje'?'today':period==='semana'?'week':'month';
-    btn.dataset.value='R$ '+barberRevenue[selectedBarber][key].toLocaleString('pt-BR');
-  });
-  const active=document.querySelector('.fat-tab.active');
-  if(active) document.getElementById('fatValue').textContent=active.dataset.value;
-}
-barberTabs.forEach(function(btn){
-  btn.addEventListener('click',function(){
-    barberTabs.forEach(function(b){b.classList.remove('active')});
-    btn.classList.add('active');
-    selectedBarber=btn.dataset.barber;
-    updateBarberDashboard();
-  });
-});
+<script>function show(id,b){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));const page=document.getElementById(id);if(page)page.classList.add('active');document.querySelectorAll('.bottom button').forEach(x=>x.classList.toggle('active',(b&&x===b)||(!b&&x.dataset.target===id)));scrollTo(0,0)}
 
-document.querySelectorAll('.fat-tab').forEach(function(btn){
-  btn.addEventListener('click',function(){
-    document.querySelectorAll('.fat-tab').forEach(function(b){b.classList.remove('active')});
-    btn.classList.add('active');
-    document.getElementById('fatValue').textContent=btn.dataset.value;
-  });
-});
-updateBarberDashboard();
 
 
 </script>
@@ -213,13 +160,18 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
 
   let shopId=null, currentUser=null;
   let dbAppointments=[], dbStaff=[], dbServices=[], dbCustomers=[], dbPayments=[];
-  let cashSession=null, selectedBarber='all', activeAppointment=null, selectedPay='Pix', isShopAdmin=false, correctionSession=null;
+  let cashSession=null, selectedBarber='all', selectedPeriod='today', activeAppointment=null, selectedPay='Pix', isShopAdmin=false, correctionSession=null;
 
   const $=id=>document.getElementById(id);
   const money=v=>'R$ '+Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
   const tz='America/Campo_Grande';
   const dateKey=d=>new Intl.DateTimeFormat('en-CA',{timeZone:tz}).format(new Date(d));
   const todayKey=()=>dateKey(new Date());
+  const weekStartDate=()=>{const d=new Date();d.setHours(0,0,0,0);const offset=d.getDay()===0?6:d.getDay()-1;d.setDate(d.getDate()-offset);return d;};
+  const weekEndDate=()=>{const d=weekStartDate();d.setDate(d.getDate()+7);return d;};
+  const sameBarber=a=>selectedBarber==='all'||a.barber_id===selectedBarber;
+  function dateLabel(key){const [y,m,d]=key.split('-').map(Number);return new Date(y,m-1,d,12).toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'2-digit',timeZone:tz});}
+  const periodAppointments=()=>dbAppointments.filter(a=>{const k=dateKey(a.starts_at);if(selectedPeriod==='today')return k===todayKey();const dt=new Date(a.starts_at);return dt>=weekStartDate()&&dt<weekEndDate();}).filter(sameBarber);
 
   function setLoginError(msg){
     $('loginError').textContent=msg||'';
@@ -243,6 +195,8 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
   }
 
   $('loginBtn').addEventListener('click',login);
+  bindPeriodTabs();
+  const dateEl=$('dashboardDate');if(dateEl)dateEl.textContent=new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long',timeZone:tz});
   $('loginPassword').addEventListener('keydown',e=>{if(e.key==='Enter')login()});
 
   async function init(){
@@ -425,64 +379,37 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
   function appointmentForToday(a){ return dateKey(a.starts_at)===todayKey(); }
 
   function renderAppointments(){
-    const list=$('todayAgenda');
-    if(!list)return;
-
-    const today=dbAppointments.filter(appointmentForToday);
-
-    list.innerHTML=today.map(a=>{
-      const c=dbCustomers.find(x=>x.id===a.customer_id);
-      const b=dbStaff.find(x=>x.id===a.barber_id);
-      const sv=dbServices.find(x=>x.id===a.service_id);
-      const t=new Intl.DateTimeFormat('pt-BR',{hour:'2-digit',minute:'2-digit',timeZone:tz}).format(new Date(a.starts_at));
-      const labels={
-        pending:'Pendente',
-        confirmed:'Confirmado',
-        in_service:'Em atendimento',
-        completed:'Concluído ✓',
-        cancelled:'Cancelado',
-        no_show:'Ausente'
-      };
-      const label=labels[a.status]||a.status;
-      const cls=a.status==='completed'?'done':a.status==='in_service'?'inservice':a.status==='no_show'?'absent':'';
-
-      return `<div class="appt ${cls}" data-status="${a.status}" data-price="${a.price||sv?.price||0}" data-appointment-id="${a.id}" data-barber-id="${a.barber_id||''}">
-        <div class="time">${t}</div>
-        <div>
-          <div class="name">${escapeHtml(c?.name||'Cliente')}</div>
-          <div class="service">${escapeHtml(sv?.name||'Serviço')} · ${escapeHtml(b?.name||'Sem barbeiro')}</div>
-        </div>
-        <button class="status statusBtn" type="button">${label} ▾</button>
-      </div>`;
-    }).join('') || '<div class="row"><b>Nenhum atendimento hoje.</b><small>Os novos agendamentos aparecerão aqui.</small></div>';
-
-    bindStatusButtons();
-    renderAgendaPage(today);
-    applyBarberFilter();
-  }
-
-  function renderAgendaPage(today){
-    const list=$('agendaAppointments');
-    if(!list)return;
+    const list=$('todayAgenda'); if(!list)return;
+    const rows=periodAppointments().slice().sort((a,b)=>new Date(a.starts_at)-new Date(b.starts_at));
     const labels={pending:'Pendente',confirmed:'Confirmado',in_service:'Em atendimento',completed:'Concluído',cancelled:'Cancelado',no_show:'Ausente'};
-    const rows=(today||[]).slice().sort((a,b)=>new Date(a.starts_at)-new Date(b.starts_at));
-    list.innerHTML=rows.map(a=>{
-      const c=dbCustomers.find(x=>x.id===a.customer_id);
-      const b=dbStaff.find(x=>x.id===a.barber_id);
-      const sv=dbServices.find(x=>x.id===a.service_id);
-      const t=new Intl.DateTimeFormat('pt-BR',{hour:'2-digit',minute:'2-digit',timeZone:tz}).format(new Date(a.starts_at));
-      const status=labels[a.status]||a.status||'Pendente';
-      return `<div class="row" data-appointment-id="${a.id}"><b>${t} · ${escapeHtml(c?.name||'Cliente')}</b><small>${escapeHtml(sv?.name||'Serviço')} · ${escapeHtml(b?.name||'Sem barbeiro')} · ${escapeHtml(status)} · ${money(a.price||sv?.price||0)}</small></div>`;
-    }).join('')||'<div class="row"><b>Nenhum agendamento para hoje.</b><small>Os novos agendamentos salvos aparecerão aqui.</small></div>';
+    const groups={}; rows.forEach(a=>{const k=dateKey(a.starts_at);(groups[k]||(groups[k]=[])).push(a);});
+    list.innerHTML=Object.keys(groups).sort().map(k=>{
+      const heading=selectedPeriod==='week'?`<div class="agenda-day">${escapeHtml(dateLabel(k))}</div>`:'';
+      const appointments=groups[k].map(a=>{
+        const c=dbCustomers.find(x=>x.id===a.customer_id), b=dbStaff.find(x=>x.id===a.barber_id), sv=dbServices.find(x=>x.id===a.service_id);
+        const t=new Intl.DateTimeFormat('pt-BR',{hour:'2-digit',minute:'2-digit',timeZone:tz}).format(new Date(a.starts_at));
+        const status=labels[a.status]||a.status||'Pendente';
+        const cls=a.status==='completed'?'done':a.status==='in_service'?'inservice':a.status==='no_show'?'absent':a.status==='cancelled'?'cancelled':'';
+        return `<div class="appt ${cls}" data-status="${a.status}" data-price="${a.price||sv?.price||0}" data-appointment-id="${a.id}" data-barber-id="${a.barber_id||''}"><div class="time">${t}</div><div><div class="name">${escapeHtml(c?.name||'Cliente')}</div><div class="service">${escapeHtml(sv?.name||'Serviço')} · ${escapeHtml(b?.name||'Sem barbeiro')}</div></div><button class="status statusBtn" type="button">${status} ▾</button></div>`;
+      }).join(''); return heading+appointments;
+    }).join('') || `<div class="empty-state">Nenhum agendamento ${selectedPeriod==='today'?'para hoje':'nesta semana'}.<br><small>Os novos agendamentos salvos aparecerão aqui.</small></div>`;
+    bindStatusButtons(); updateDashboardFromDB();
   }
 
   function updateDashboardFromDB(){
-    const today=dbAppointments.filter(appointmentForToday);
-    const shown=today.filter(a=>selectedBarber==='all'||a.barber_id===selectedBarber);
+    const shown=periodAppointments();
     if($('apptCount'))$('apptCount').textContent=shown.length;
     if($('waitingCount'))$('waitingCount').textContent=shown.filter(x=>['pending','confirmed'].includes(x.status)).length;
-    updateRevenueTabs();
+    if($('revenueLabel'))$('revenueLabel').textContent=selectedPeriod==='today'?'Faturamento de hoje':'Faturamento da semana';
+    if($('appointmentsLabel'))$('appointmentsLabel').textContent=selectedPeriod==='today'?'Agendamentos de hoje':'Agendamentos da semana';
+    if($('agendaListTitle'))$('agendaListTitle').textContent=selectedPeriod==='today'?'Agenda de hoje':'Agenda da semana';
+    const start=selectedPeriod==='today'?new Date(new Date().setHours(0,0,0,0)):weekStartDate();
+    const end=selectedPeriod==='today'?new Date(start.getTime()+86400000):weekEndDate();
+    const ids=new Set(shown.map(a=>a.id));
+    const revenue=dbPayments.filter(p=>p.paid_at&&new Date(p.paid_at)>=start&&new Date(p.paid_at)<end&&ids.has(p.appointment_id)).reduce((sum,p)=>sum+Number(p.amount||0),0);
+    if($('fatValue'))$('fatValue').textContent=money(revenue);
   }
+  function bindPeriodTabs(){document.querySelectorAll('.period-tab').forEach(btn=>btn.onclick=()=>{selectedPeriod=btn.dataset.period;document.querySelectorAll('.period-tab').forEach(x=>x.classList.toggle('active',x===btn));renderAppointments();});}
 
   function paymentsInRange(start){
     return dbPayments.filter(p=>p.paid_at && new Date(p.paid_at)>=start);
@@ -498,55 +425,9 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
     return d;
   }
 
-  function startOfMonth(){
-    const d=new Date();
-    d.setHours(0,0,0,0);
-    d.setDate(1);
-    return d;
-  }
-
-  function revenueFor(start, barberId='all'){
-    const ids=new Set(dbAppointments
-      .filter(a=>barberId==='all'||a.barber_id===barberId)
-      .map(a=>a.id));
-    return dbPayments.filter(p=>p.paid_at && new Date(p.paid_at)>=start && ids.has(p.appointment_id))
-      .reduce((sum,p)=>sum+Number(p.amount||0),0);
-  }
-
-  function updateRevenueTabs(){
-    const values={
-      hoje:revenueFor(new Date(new Date().setHours(0,0,0,0)),selectedBarber),
-      semana:revenueFor(startOfWeek(),selectedBarber),
-      mês:revenueFor(startOfMonth(),selectedBarber)
-    };
-    document.querySelectorAll('.fat-tab').forEach(btn=>{
-      const k=btn.textContent.trim().toLowerCase();
-      btn.dataset.value=money(values[k]||0);
-    });
-    const active=document.querySelector('.fat-tab.active');
-    if(active&&$('fatValue'))$('fatValue').textContent=active.dataset.value;
-  }
-
-  function bindBarberTabs(){
-    document.querySelectorAll('.barber-tab').forEach(btn=>{
-      btn.onclick=()=>{
-        document.querySelectorAll('.barber-tab').forEach(b=>b.classList.remove('active'));
-        btn.classList.add('active');
-        selectedBarber=btn.dataset.barberId||'all';
-        updateDashboardFromDB();
-        applyBarberFilter();
-      };
-    });
-  }
-
-  function applyBarberFilter(){
-    document.querySelectorAll('#todayAgenda .appt').forEach(a=>{
-      a.style.display=(selectedBarber==='all'||a.dataset.barberId===selectedBarber)?'grid':'none';
-    });
-    const shown=[...document.querySelectorAll('#todayAgenda .appt')].filter(a=>a.style.display!=='none');
-    if($('apptCount'))$('apptCount').textContent=shown.length;
-    if($('waitingCount'))$('waitingCount').textContent=shown.filter(a=>['pending','confirmed'].includes(a.dataset.status)).length;
-  }
+  function updateRevenueTabs(){updateDashboardFromDB();}
+  function bindBarberTabs(){document.querySelectorAll('.barber-tab').forEach(btn=>{btn.onclick=()=>{document.querySelectorAll('.barber-tab').forEach(b=>b.classList.toggle('active',b===btn));selectedBarber=btn.dataset.barberId||'all';renderAppointments();};});}
+  function applyBarberFilter(){renderAppointments();}
 
   function bindStatusButtons(){
     document.querySelectorAll('#todayAgenda .statusBtn').forEach(btn=>{
