@@ -19,6 +19,23 @@ main{padding:16px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9p
 
 .login-screen{position:fixed;inset:0;background:#f5f7fa;z-index:100;display:flex;align-items:center;justify-content:center;padding:20px}.login-box{width:min(420px,100%);background:#fff;border:1px solid #e7eaf0;border-radius:20px;padding:24px;box-shadow:0 15px 50px #0001}.login-box h1{margin:0 0 6px}.login-box p{color:#667085;font-size:13px}.login-box input{width:100%;padding:13px;margin:7px 0 10px;border:1px solid #ddd;border-radius:10px}.login-box button{width:100%;padding:14px;border:0;border-radius:11px;background:#1d4ed8;color:#fff;font-weight:700}.login-error{color:#b42318;font-size:12px;margin-top:8px;display:none}.loading{opacity:.7;pointer-events:none}.db-note{font-size:11px;color:#667085;margin-top:10px;text-align:center}
 .modal.open{display:flex!important;align-items:center!important;justify-content:center!important;z-index:9999}.modal.open .sheet{display:block!important;width:min(92vw,420px);max-height:85vh;overflow:auto}
+
+.week-calendar-scroll{width:100%;max-height:62vh;overflow:auto;overscroll-behavior:contain;border:1px solid #e2e6ee;border-radius:14px;background:#fff;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y}
+.week-calendar{display:grid;grid-template-columns:58px repeat(7,minmax(145px,1fr));min-width:1093px;position:relative}
+.week-head{position:sticky;top:0;z-index:5;background:#f0f4fa;text-align:center;padding:10px 5px;border-bottom:1px solid #dfe5ee;border-right:1px solid #e7eaf0;font-size:11px;font-weight:800;color:#344054}
+.week-head.today{background:#e8efff;color:#1d4ed8}
+.week-time-head{position:sticky;left:0;z-index:7;background:#f0f4fa}
+.week-time{position:sticky;left:0;z-index:3;background:#f8fafc;color:#667085;font-size:10px;text-align:center;padding:8px 2px;border-right:1px solid #e7eaf0;border-bottom:1px solid #e7eaf0;min-height:52px}
+.week-cell{padding:3px;border-right:1px solid #e7eaf0;border-bottom:1px solid #e7eaf0;min-height:52px;background:#fff}
+.week-cell.available{background:#fcfdff}
+.week-event{border-radius:7px;background:#e8efff;border-left:3px solid #2563eb;padding:5px 6px;margin:1px 0;font-size:10px;line-height:1.3;overflow-wrap:anywhere;color:#1e3a8a}
+.week-event.completed{background:#ecfdf3;border-left-color:#16a34a;color:#166534}
+.week-event.cancelled{opacity:.5;text-decoration:line-through}
+.week-event b{display:block;font-size:10px;margin-bottom:2px}
+.week-event small{display:block;font-size:9px;color:inherit;margin-top:2px}
+.week-empty{font-size:10px;color:#c0c7d2;text-align:center;padding-top:13px}
+.week-help{font-size:11px;color:#667085;margin:8px 2px 12px}
+
 </style>
 <style>
 .module-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}.module-card{background:#fff;border:1px solid #e7eaf0;border-radius:15px;padding:15px}.module-card span{display:block;font-size:11px;color:#667085}.module-card b{display:block;font-size:22px;margin-top:4px}.module-actions{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.module-actions button,.mini-btn{border:0;border-radius:11px;padding:11px 13px;font-weight:700;background:#eef3ff;color:#1d4ed8}.mini-btn.danger{background:#fff0f0;color:#b42318}.module-list .row{cursor:pointer}.tag{display:inline-block;padding:5px 8px;border-radius:999px;background:#eef3ff;color:#1d4ed8;font-size:11px;font-weight:700}.muted{color:#667085}.empty-state{text-align:center;padding:30px 15px;color:#667085}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.form-grid input,.form-grid select,.module-form input,.module-form select{width:100%;box-sizing:border-box;padding:12px;border:1px solid #dfe3ea;border-radius:10px;background:#fff}.module-form{display:grid;gap:9px;background:#fff;border:1px solid #e7eaf0;border-radius:15px;padding:14px;margin:12px 0}.module-form button{padding:12px;border:0;border-radius:11px;background:#1d4ed8;color:#fff;font-weight:800}.table-row{display:grid;grid-template-columns:1.3fr .8fr .8fr;gap:8px;align-items:center;padding:12px 0;border-bottom:1px solid #edf0f4}.table-row:last-child{border-bottom:0}.report-bar{height:10px;border-radius:99px;background:#e9edf3;overflow:hidden}.report-bar i{display:block;height:100%;background:#2563eb;border-radius:99px}.switch-row{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid #edf0f4}.switch{width:44px;height:24px;border-radius:20px;background:#d0d5dd;position:relative}.switch.on{background:#2563eb}.switch:after{content:'';position:absolute;width:20px;height:20px;background:#fff;border-radius:50%;top:2px;left:2px}.switch.on:after{left:22px}
@@ -382,18 +399,47 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
     const list=$('todayAgenda'); if(!list)return;
     const rows=periodAppointments().slice().sort((a,b)=>new Date(a.starts_at)-new Date(b.starts_at));
     const labels={pending:'Pendente',confirmed:'Confirmado',in_service:'Em atendimento',completed:'Concluído',cancelled:'Cancelado',no_show:'Ausente'};
-    const groups={}; rows.forEach(a=>{const k=dateKey(a.starts_at);(groups[k]||(groups[k]=[])).push(a);});
-    list.innerHTML=Object.keys(groups).sort().map(k=>{
-      const heading=selectedPeriod==='week'?`<div class="agenda-day">${escapeHtml(dateLabel(k))}</div>`:'';
-      const appointments=groups[k].map(a=>{
+    if(selectedPeriod==='week'){
+      list.innerHTML=renderWeeklyCalendar(rows,labels);
+    }else{
+      const groups={}; rows.forEach(a=>{const k=dateKey(a.starts_at);(groups[k]||(groups[k]=[])).push(a);});
+      list.innerHTML=Object.keys(groups).sort().map(k=>groups[k].map(a=>{
         const c=dbCustomers.find(x=>x.id===a.customer_id), b=dbStaff.find(x=>x.id===a.barber_id), sv=dbServices.find(x=>x.id===a.service_id);
         const t=new Intl.DateTimeFormat('pt-BR',{hour:'2-digit',minute:'2-digit',timeZone:tz}).format(new Date(a.starts_at));
         const status=labels[a.status]||a.status||'Pendente';
         const cls=a.status==='completed'?'done':a.status==='in_service'?'inservice':a.status==='no_show'?'absent':a.status==='cancelled'?'cancelled':'';
         return `<div class="appt ${cls}" data-status="${a.status}" data-price="${a.price||sv?.price||0}" data-appointment-id="${a.id}" data-barber-id="${a.barber_id||''}"><div class="time">${t}</div><div><div class="name">${escapeHtml(c?.name||'Cliente')}</div><div class="service">${escapeHtml(sv?.name||'Serviço')} · ${escapeHtml(b?.name||'Sem barbeiro')}</div></div><button class="status statusBtn" type="button">${status} ▾</button></div>`;
-      }).join(''); return heading+appointments;
-    }).join('') || `<div class="empty-state">Nenhum agendamento ${selectedPeriod==='today'?'para hoje':'nesta semana'}.<br><small>Os novos agendamentos salvos aparecerão aqui.</small></div>`;
+      }).join('')).join('') || `<div class="empty-state">Nenhum agendamento para hoje.<br><small>Os novos agendamentos salvos aparecerão aqui.</small></div>`;
+    }
     bindStatusButtons(); updateDashboardFromDB();
+  }
+
+  function renderWeeklyCalendar(rows,labels){
+    const start=weekStartDate();
+    const days=[];
+    for(let i=0;i<7;i++){const d=new Date(start);d.setDate(start.getDate()+i);days.push({date:d,key:dateKey(d)});}
+    const fmtDay=new Intl.DateTimeFormat('pt-BR',{weekday:'short',timeZone:tz});
+    const fmtDate=new Intl.DateTimeFormat('pt-BR',{day:'2-digit',month:'2-digit',timeZone:tz});
+    const times=[];for(let m=9*60;m<=19*60;m+=30)times.push(m);
+    let html='<div class="week-help">Deslize para os lados para ver os 7 dias e para baixo para ver todos os horários. Cada coluna representa um dia.</div><div class="week-calendar-scroll"><div class="week-calendar">';
+    html+='<div class="week-head week-time-head">Horário</div>';
+    days.forEach(d=>{const isToday=d.key===todayKey();html+=`<div class="week-head ${isToday?'today':''}">${fmtDay.format(d.date).replace('.','')}<br>${fmtDate.format(d.date)}</div>`;});
+    times.forEach(min=>{
+      const hh=String(Math.floor(min/60)).padStart(2,'0'),mm=String(min%60).padStart(2,'0'),time=`${hh}:${mm}`;
+      html+=`<div class="week-time">${time}</div>`;
+      days.forEach(d=>{
+        const atSlot=rows.filter(a=>dateKey(a.starts_at)===d.key&&(()=>{const parts=new Intl.DateTimeFormat('en-GB',{hour:'2-digit',minute:'2-digit',hour12:false,timeZone:tz}).format(new Date(a.starts_at)).split(':').map(Number);return Math.floor((parts[0]*60+parts[1])/30)*30===min;})());
+        if(!atSlot.length){html+='<div class="week-cell available"><div class="week-empty">Livre</div></div>';return;}
+        html+='<div class="week-cell">'+atSlot.map(a=>{
+          const c=dbCustomers.find(x=>x.id===a.customer_id),b=dbStaff.find(x=>x.id===a.barber_id),sv=dbServices.find(x=>x.id===a.service_id);
+          const tm=new Intl.DateTimeFormat('pt-BR',{hour:'2-digit',minute:'2-digit',timeZone:tz}).format(new Date(a.starts_at));
+          const cls=a.status==='completed'?'completed':a.status==='cancelled'?'cancelled':'';
+          return `<div class="week-event ${cls}" data-appointment-id="${a.id}" data-status="${a.status}" data-price="${a.price||sv?.price||0}" data-barber-id="${a.barber_id||''}"><b>${tm} · ${escapeHtml(c?.name||'Cliente')}</b>${escapeHtml(sv?.name||'Serviço')}<small>${escapeHtml(b?.name||'Sem barbeiro')}</small><button class="status statusBtn" type="button">${escapeHtml(labels[a.status]||a.status||'Pendente')} ▾</button></div>`;
+        }).join('')+'</div>';
+      });
+    });
+    html+='</div></div>';
+    return html;
   }
 
   function updateDashboardFromDB(){
@@ -433,7 +479,7 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
     document.querySelectorAll('#todayAgenda .statusBtn').forEach(btn=>{
       btn.onclick=()=>{
         document.querySelectorAll('.status-menu').forEach(x=>x.remove());
-        const ap=btn.closest('.appt');
+        const ap=btn.closest('[data-appointment-id]');
         const menu=document.createElement('div');
         menu.className='status-menu';
 
