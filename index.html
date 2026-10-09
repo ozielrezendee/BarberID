@@ -45,6 +45,13 @@ main{padding:16px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9p
 .day-slot.available{background:#fcfdff;color:#98a2b3;font-size:11px;display:flex;align-items:center}
 .day-event{border-radius:8px;background:#e8efff;border-left:4px solid #2563eb;padding:7px 8px;font-size:12px;line-height:1.35;overflow-wrap:anywhere;color:#1e3a8a}
 .day-event b{display:block;font-size:13px;margin-bottom:2px}.day-event small{display:block;font-size:11px;margin-top:3px}.day-event.completed{background:#ecfdf3;border-left-color:#16a34a;color:#166534}.day-event.cancelled{opacity:.55}
+.day-event.confirmed,.week-event.confirmed{background:#e8efff;border-left-color:#2563eb;color:#1e40af}
+.day-event.in_service,.week-event.in_service{background:#fff7d6;border-left-color:#d97706;color:#92400e}
+.day-event.no_show,.week-event.no_show{background:#fee2e2;border-left-color:#dc2626;color:#991b1b}
+.day-event.completed,.week-event.completed{background:#dcfce7;border-left-color:#16a34a;color:#166534}
+.day-event.cancelled,.week-event.cancelled{background:#f3f4f6;border-left-color:#9ca3af;color:#6b7280;opacity:.8}
+.day-event .statusBtn,.week-event .statusBtn{display:block;margin-top:6px;font-size:10px;padding:5px 7px;background:#fff;border:1px solid currentColor;color:inherit}
+.day-event .statusBtn[hidden],.week-event .statusBtn[hidden]{display:none!important}
 
 </style>
 <style>
@@ -442,8 +449,10 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
           const c=dbCustomers.find(x=>x.id===a.customer_id),sv=dbServices.find(x=>x.id===a.service_id);
           const tm=new Intl.DateTimeFormat('pt-BR',{hour:'2-digit',minute:'2-digit',timeZone:tz}).format(new Date(a.starts_at));
           const status=labels[a.status]||a.status||'Pendente';
-          const cls=a.status==='completed'?'completed':a.status==='cancelled'?'cancelled':'';
-          return `<div class="day-event ${cls}" data-appointment-id="${a.id}" data-status="${a.status}" data-price="${a.price||sv?.price||0}" data-barber-id="${a.barber_id||''}"><b>${tm} · ${escapeHtml(c?.name||'Cliente')}</b>${escapeHtml(sv?.name||'Serviço')}<small>${escapeHtml(status)} · ${escapeHtml(sv?.duration_minutes||30)} min</small><button class="status statusBtn" type="button">Alterar status ▾</button></div>`;
+          const cls=a.status||'';
+          const alreadyPaid=dbPayments.some(p=>p.appointment_id===a.id&&p.status==='paid');
+          const canChange=!(a.status==='completed'&&alreadyPaid);
+          return `<div class="day-event ${cls}" data-appointment-id="${a.id}" data-status="${a.status}" data-price="${a.price||sv?.price||0}" data-barber-id="${a.barber_id||''}"><b>${tm} · ${escapeHtml(c?.name||'Cliente')}</b>${escapeHtml(sv?.name||'Serviço')}<small>${escapeHtml(status)} · ${escapeHtml(sv?.duration_minutes||30)} min</small><button class="status statusBtn" type="button" ${canChange?'':'hidden'}>Alterar status ▾</button></div>`;
         }).join('')+'</div>';
       });
     });
@@ -470,8 +479,10 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
         html+='<div class="week-cell">'+atSlot.map(a=>{
           const c=dbCustomers.find(x=>x.id===a.customer_id),b=dbStaff.find(x=>x.id===a.barber_id),sv=dbServices.find(x=>x.id===a.service_id);
           const tm=new Intl.DateTimeFormat('pt-BR',{hour:'2-digit',minute:'2-digit',timeZone:tz}).format(new Date(a.starts_at));
-          const cls=a.status==='completed'?'completed':a.status==='cancelled'?'cancelled':'';
-          return `<div class="week-event ${cls}" data-appointment-id="${a.id}" data-status="${a.status}" data-price="${a.price||sv?.price||0}" data-barber-id="${a.barber_id||''}"><b>${tm} · ${escapeHtml(c?.name||'Cliente')}</b>${escapeHtml(sv?.name||'Serviço')}<small>${escapeHtml(b?.name||'Sem barbeiro')}</small><button class="status statusBtn" type="button">${escapeHtml(labels[a.status]||a.status||'Pendente')} ▾</button></div>`;
+          const cls=a.status||'';
+          const alreadyPaid=dbPayments.some(p=>p.appointment_id===a.id&&p.status==='paid');
+          const canChange=!(a.status==='completed'&&alreadyPaid);
+          return `<div class="week-event ${cls}" data-appointment-id="${a.id}" data-status="${a.status}" data-price="${a.price||sv?.price||0}" data-barber-id="${a.barber_id||''}"><b>${tm} · ${escapeHtml(c?.name||'Cliente')}</b>${escapeHtml(sv?.name||'Serviço')}<small>${escapeHtml(b?.name||'Sem barbeiro')} · ${escapeHtml(labels[a.status]||a.status||'Pendente')}</small><button class="status statusBtn" type="button" ${canChange?'':'hidden'}>${escapeHtml(labels[a.status]||a.status||'Pendente')} ▾</button></div>`;
         }).join('')+'</div>';
       });
     });
