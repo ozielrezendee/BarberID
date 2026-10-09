@@ -53,6 +53,7 @@ main{padding:16px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9p
 <div id="cashHistoryPanel" style="display:none"><div class="section"><b>Caixas anteriores</b><button class="mini-btn" id="refreshCashHistory" type="button">Atualizar</button></div><div class="admin-note">Os fechamentos anteriores ficam guardados. Correções exigem perfil administrador e justificativa.</div><div id="cashHistoryList" class="list"><div class="row">Carregando histórico...</div></div></div>
 </main></section>
 <div id="cashCorrectionModal" class="cash-modal"><div class="cash-sheet"><h2>Corrigir caixa</h2><p class="muted" id="correctionSessionLabel">Sessão</p><label for="correctionField">O que será corrigido?</label><select id="correctionField"><option value="opening_amount">Saldo inicial</option><option value="closing_amount">Saldo final registrado (caixa fechado)</option></select><label for="correctionValue">Novo valor (R$)</label><input id="correctionValue" type="number" min="0" step="0.01" placeholder="Novo valor"><label for="correctionReason">Justificativa obrigatória</label><textarea id="correctionReason" rows="3" placeholder="Explique o motivo da correção" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:10px;margin:7px 0 12px"></textarea><button id="confirmCashCorrection" type="button">Salvar correção</button><button class="close" id="cancelCashCorrection" type="button">Cancelar</button></div></div>
+<div id="cashMovementCorrectionModal" class="cash-modal"><div class="cash-sheet"><h2>Corrigir lançamento</h2><p class="muted" id="movementCorrectionLabel">Lançamento financeiro</p><label for="movementCorrectionDescription">Descrição / comanda</label><input id="movementCorrectionDescription" type="text" maxlength="180" placeholder="Descrição do lançamento"><label for="movementCorrectionAmount">Novo valor (R$)</label><input id="movementCorrectionAmount" type="number" min="0" step="0.01" placeholder="Novo valor"><label for="movementCorrectionMethod">Forma de pagamento</label><select id="movementCorrectionMethod"><option value="pix">Pix</option><option value="cash">Dinheiro</option><option value="credit">Crédito</option><option value="debit">Débito</option></select><label for="movementCorrectionReason">Justificativa obrigatória</label><textarea id="movementCorrectionReason" rows="3" placeholder="Explique o motivo da correção (mínimo 8 caracteres)" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:10px;margin:7px 0 12px"></textarea><button id="confirmMovementCorrection" type="button">Salvar correção</button><button class="close" id="cancelMovementCorrection" type="button">Cancelar</button></div></div>
 <section id="clientes" class="page"><div class="head"><button class="back" onclick="show('home')">‹ Voltar</button><h1>Clientes</h1></div><main><button id="newCustomerBtn" class="primary" type="button">＋ Novo cliente</button><div class="list"><div class="row"><b>João Silva</b><small>Telefone · Histórico de atendimentos</small></div><div class="row"><b>Marcos Souza</b><small>Telefone · Histórico de atendimentos</small></div><div class="row"><b>Pedro Alves</b><small>12 atendimentos</small></div></div></main></section>
 <section id="servicos" class="page"><div class="head"><button class="back" onclick="show('home')">‹ Voltar</button><h1>Serviços</h1></div><main><button class="primary">＋ Novo serviço</button><div class="list"><div class="row"><b>Corte de cabelo</b><small>30 min · R$ 40,00</small></div><div class="row"><b>Barba</b><small>30 min · R$ 40,00</small></div><div class="row"><b>Corte + Barba</b><small>60 min · R$ 80,00</small></div><div class="row"><b>Sobrancelha</b><small>15 min · R$ 20,00</small></div></div></main></section>
 
@@ -739,18 +740,26 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
     if(error){list.innerHTML='<div class="row"><b>Não foi possível carregar o histórico</b><small>'+escapeHtml(error.message)+'</small></div>';return;}
     if(!sessions?.length){list.innerHTML='<div class="row"><b>Nenhum caixa anterior</b><small>As sessões aparecerão aqui após o primeiro fechamento.</small></div>';return;}
     const ids=sessions.map(x=>x.id);
-    const {data:movements,error:me}=await sb.from('cash_movements').select('cash_session_id,type,amount').in('cash_session_id',ids);
+    const {data:movements,error:me}=await sb.from('cash_movements').select('id,cash_session_id,type,description,amount,method,payment_id,created_at').in('cash_session_id',ids).order('created_at',{ascending:false});
     if(me){list.innerHTML='<div class="row"><b>Erro ao carregar movimentos</b><small>'+escapeHtml(me.message)+'</small></div>';return;}
     let corrections=[];const {data:corrData,error:corrError}=await sb.from('cash_corrections').select('cash_session_id,field_name,old_value,new_value,reason,corrected_by,created_at').in('cash_session_id',ids).order('created_at',{ascending:false});if(!corrError)corrections=corrData||[];
+    let movementCorrections=[];const {data:mcData,error:mcError}=await sb.from('cash_movement_corrections').select('cash_session_id,cash_movement_id,old_amount,new_amount,old_method,new_method,old_description,new_description,reason,corrected_by,created_at').in('cash_session_id',ids).order('created_at',{ascending:false});if(!mcError)movementCorrections=mcData||[];
     const totals={};(movements||[]).forEach(m=>{const t=totals[m.cash_session_id]||(totals[m.cash_session_id]={in:0,out:0,count:0});if(m.type==='entry')t.in+=Number(m.amount||0);else t.out+=Number(m.amount||0);t.count++;});
+    const bySession={};(movements||[]).forEach(m=>(bySession[m.cash_session_id]||(bySession[m.cash_session_id]=[])).push(m));
     list.innerHTML=sessions.map((x,i)=>{
       const t=totals[x.id]||{in:0,out:0,count:0};const expected=Number(x.opening_amount||0)+t.in-t.out;
       const closed=x.status==='closed';const opened=x.opened_at?new Date(x.opened_at).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'}):'—';
       const closedAt=x.closed_at?new Date(x.closed_at).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'}):'Em andamento';
-      const closing=x.closing_amount==null?expected:Number(x.closing_amount);const audit=corrections.filter(c=>c.cash_session_id===x.id);
-      return `<div class="history-item"><div class="history-head"><b>Caixa #${sessions.length-i}</b><span class="tag">${closed?'Fechado':'Aberto'}</span></div><small>Abertura: ${escapeHtml(opened)} · ${closed?'Fechamento: '+escapeHtml(closedAt):'Sessão atual'}</small><div class="table-row"><span>Inicial</span><b>${money(x.opening_amount)}</b><span> </span></div><div class="table-row"><span>Entradas</span><b>${money(t.in)}</b><span> </span></div><div class="table-row"><span>Saídas</span><b>${money(t.out)}</b><span> </span></div><div class="table-row"><span>Saldo final</span><b>${money(closing)}</b><span> </span></div><small>${t.count} movimentação(ões)</small>${audit.length?`<div class="admin-note"><b>Auditoria de correções</b>${audit.map(c=>`<div style="margin-top:7px"><small>${new Date(c.created_at).toLocaleString('pt-BR')} · ${c.field_name==='opening_amount'?'Saldo inicial':'Saldo final'}: ${money(c.old_value)} → ${money(c.new_value)}<br>Motivo: ${escapeHtml(c.reason)}<br>Responsável: ${escapeHtml(String(c.corrected_by||'').slice(0,8)||'—')}</small></div>`).join('')}</div>`:''}${isShopAdmin?`<br><button class="mini-btn" data-correct-session="${x.id}" type="button">Corrigir valores</button>`:''}</div>`;
+      const closing=x.closing_amount==null?expected:Number(x.closing_amount);const audit=corrections.filter(c=>c.cash_session_id===x.id);const movementAudit=movementCorrections.filter(c=>c.cash_session_id===x.id);
+      const sessionMovements=(bySession[x.id]||[]).map(m=>{
+        const typeLabel=m.type==='entry'?'Entrada':(m.type==='expense'?'Despesa':'Retirada');
+        const methodLabel=({pix:'Pix',cash:'Dinheiro',credit:'Crédito',debit:'Débito'})[m.method]||m.method||'—';
+        return `<div class="row" style="margin-top:8px"><div class="cash-tx"><div><b>${escapeHtml(m.description||typeLabel)}</b><small>${typeLabel} · ${escapeHtml(methodLabel)} · ${m.created_at?new Date(m.created_at).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'}):''}</small></div><strong class="${m.type==='entry'?'cash-plus':'cash-minus'}">${m.type==='entry'?'+':'−'} ${money(m.amount)}</strong></div>${isShopAdmin?`<button class="mini-btn" style="margin-top:9px" data-correct-movement="${m.id}" type="button">Corrigir lançamento / comanda</button>`:''}</div>`;
+      }).join('');
+      return `<div class="history-item"><div class="history-head"><b>Caixa #${sessions.length-i}</b><span class="tag">${closed?'Fechado':'Aberto'}</span></div><small>Abertura: ${escapeHtml(opened)} · ${closed?'Fechamento: '+escapeHtml(closedAt):'Sessão atual'}</small><div class="table-row"><span>Inicial</span><b>${money(x.opening_amount)}</b><span> </span></div><div class="table-row"><span>Entradas</span><b>${money(t.in)}</b><span> </span></div><div class="table-row"><span>Saídas</span><b>${money(t.out)}</b><span> </span></div><div class="table-row"><span>Saldo final</span><b>${money(closing)}</b><span> </span></div><small>${t.count} movimentação(ões)</small>${sessionMovements?`<div style="margin-top:10px"><b>Movimentações desta sessão</b>${sessionMovements}</div>`:''}${audit.length?`<div class="admin-note"><b>Auditoria de saldos</b>${audit.map(c=>`<div style="margin-top:7px"><small>${new Date(c.created_at).toLocaleString('pt-BR')} · ${c.field_name==='opening_amount'?'Saldo inicial':'Saldo final'}: ${money(c.old_value)} → ${money(c.new_value)}<br>Motivo: ${escapeHtml(c.reason)}<br>Responsável: ${escapeHtml(String(c.corrected_by||'').slice(0,8)||'—')}</small></div>`).join('')}</div>`:''}${movementAudit.length?`<div class="admin-note"><b>Auditoria de lançamentos</b>${movementAudit.map(c=>`<div style="margin-top:7px"><small>${new Date(c.created_at).toLocaleString('pt-BR')} · ${money(c.old_amount)} → ${money(c.new_amount)}<br>Descrição: ${escapeHtml(c.old_description||'—')} → ${escapeHtml(c.new_description||'—')}<br>Forma: ${escapeHtml(c.old_method||'—')} → ${escapeHtml(c.new_method||'—')}<br>Motivo: ${escapeHtml(c.reason)}<br>Responsável: ${escapeHtml(String(c.corrected_by||'').slice(0,8)||'—')}</small></div>`).join('')}</div>`:''}${isShopAdmin?`<br><button class="mini-btn" data-correct-session="${x.id}" type="button">Corrigir saldo inicial/final</button>`:''}</div>`;
     }).join('');
     list.querySelectorAll('[data-correct-session]').forEach(btn=>btn.onclick=()=>openCashCorrection(sessions.find(x=>x.id===btn.dataset.correctSession)));
+    list.querySelectorAll('[data-correct-movement]').forEach(btn=>btn.onclick=()=>{const m=(movements||[]).find(x=>x.id===btn.dataset.correctMovement);const session=sessions.find(x=>x.id===m?.cash_session_id);if(m&&session)openMovementCorrection(m,session);});
   }
   function openCashCorrection(session){
     if(!isShopAdmin){alert('Somente o administrador pode corrigir o caixa.');return;}
@@ -758,6 +767,16 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
     const closingOption=$('correctionField').querySelector('option[value="closing_amount"]');if(closingOption)closingOption.disabled=session.status!=='closed';
     $('correctionField').value=session.status==='closed'?'closing_amount':'opening_amount';
     $('correctionValue').value=Number(session[$('correctionField').value]||0).toFixed(2);$('correctionReason').value='';$('cashCorrectionModal').style.display='flex';
+  }
+  let correctionMovement=null;
+  function openMovementCorrection(movement,session){
+    if(!isShopAdmin){alert('Somente o administrador pode corrigir lançamentos.');return;}
+    correctionMovement=movement;
+    $('movementCorrectionLabel').textContent='Caixa da sessão aberta em '+new Date(session.opened_at).toLocaleString('pt-BR')+(movement.payment_id?' · pagamento vinculado':'');
+    $('movementCorrectionDescription').value=movement.description||'';
+    $('movementCorrectionAmount').value=Number(movement.amount||0).toFixed(2);
+    $('movementCorrectionMethod').value=['pix','cash','credit','debit'].includes(movement.method)?movement.method:'cash';
+    $('movementCorrectionReason').value='';$('cashMovementCorrectionModal').style.display='flex';
   }
   $('correctionField').onchange=()=>{if(correctionSession)$('correctionValue').value=Number(correctionSession[$('correctionField').value]||0).toFixed(2);};
   $('cancelCashCorrection').onclick=()=>{$('cashCorrectionModal').style.display='none';correctionSession=null;};
@@ -773,6 +792,22 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
       if(error)throw new Error(error.message);
       $('cashCorrectionModal').style.display='none';correctionSession=null;await loadCash();await loadCashHistory();alert('Correção registrada com auditoria.');
     }catch(e){alert('Não foi possível corrigir. Confira se executou o SQL de segurança e expôs a tabela cash_corrections no Data API. Detalhe: '+e.message);}
+    finally{btn.disabled=false;btn.textContent='Salvar correção';}
+  };
+  $('cancelMovementCorrection').onclick=()=>{$('cashMovementCorrectionModal').style.display='none';correctionMovement=null;};
+  $('confirmMovementCorrection').onclick=async()=>{
+    if(!isShopAdmin){alert('Somente o administrador pode corrigir lançamentos.');return;}
+    if(!correctionMovement)return;
+    const amount=Number($('movementCorrectionAmount').value),method=$('movementCorrectionMethod').value,description=$('movementCorrectionDescription').value.trim(),reason=$('movementCorrectionReason').value.trim();
+    if(!Number.isFinite(amount)||amount<0){alert('Informe um valor válido.');return;}
+    if(!description){alert('Informe a descrição ou identificação da comanda.');return;}
+    if(reason.length<8){alert('A justificativa é obrigatória e deve ter pelo menos 8 caracteres.');return;}
+    const btn=$('confirmMovementCorrection');btn.disabled=true;btn.textContent='Salvando...';
+    try{
+      const {error}=await sb.rpc('correct_cash_movement',{p_movement_id:correctionMovement.id,p_new_amount:amount,p_new_method:method,p_new_description:description,p_reason:reason});
+      if(error)throw new Error(error.message);
+      $('cashMovementCorrectionModal').style.display='none';correctionMovement=null;await loadCash();await loadCashHistory();alert('Lançamento corrigido. O valor anterior e a justificativa ficaram registrados na auditoria.');
+    }catch(e){alert('Não foi possível corrigir o lançamento. Execute o SQL complementar de correções de movimentações no Supabase. Detalhe: '+e.message);}
     finally{btn.disabled=false;btn.textContent='Salvar correção';}
   };
   $('cashCurrentTab').onclick=()=>{ $('cashCurrentTab').classList.add('active');$('cashHistoryTab').classList.remove('active');$('cashHistoryPanel').style.display='none';document.querySelectorAll('#caixa main > :not(#cashHistoryPanel):not(.cash-tabs)').forEach(el=>el.style.display='');};
