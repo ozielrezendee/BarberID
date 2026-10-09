@@ -87,7 +87,7 @@ main{padding:16px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9p
 <section id="equipe" class="page"><div class="head"><button class="back" onclick="show('mais')">‹ Voltar</button><h1>Equipe</h1></div><main>
 <div class="module-grid"><div class="module-card"><span>Barbeiros ativos</span><b id="teamCount">3</b></div><div class="module-card"><span>Atendimentos hoje</span><b id="teamAppointments">4</b></div></div>
 <div class="module-actions"><button onclick="openTeamForm()">＋ Novo barbeiro</button></div>
-<div id="teamList" class="list module-list"><div class="row"><b>👤 Carlos</b><small>Barbeiro · 09:00–19:00 · 4 atendimentos hoje</small></div><div class="row"><b>👤 Renner</b><small>Barbeiro · 09:00–19:00 · 1 atendimento hoje</small></div><div class="row"><b>👤 Barbeiro 3</b><small>Barbeiro · 09:00–19:00 · 0 atendimentos hoje</small></div></div>
+<div id="teamList" class="list module-list"><div class="row">Carregando equipe...</div></div>
 <div id="teamForm" class="module-form" style="display:none"><input id="teamName" placeholder="Nome do barbeiro"><select id="teamRole"><option>Barbeiro</option><option>Gerente</option><option>Recepcionista</option></select><input id="teamSchedule" placeholder="Horário (ex.: 09:00–19:00)"><button onclick="addTeamMember()">Salvar barbeiro</button></div>
 <div class="module-form"><b>Permissões</b><div class="switch-row">Agendamentos <span class="switch on"></span></div><div class="switch-row">Clientes <span class="switch on"></span></div><div class="switch-row">Serviços e preços <span class="switch"></span></div></div>
 </main></section>
@@ -173,7 +173,7 @@ main{padding:16px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9p
 <script>
 // Navegação e funções dos módulos do BarberID.
 function openTeamForm(){var e=document.getElementById('teamForm');e.style.display=e.style.display==='none'?'grid':'none'}
-function addTeamMember(){var n=document.getElementById('teamName').value.trim();if(!n){alert('Informe o nome do barbeiro.');return}var sch=document.getElementById('teamSchedule').value.trim()||'09:00–19:00';var list=document.getElementById('teamList');var d=document.createElement('div');d.className='row';d.innerHTML='<b>👤 '+n.replace(/[<>]/g,'')+'</b><small>Barbeiro · '+sch.replace(/[<>]/g,'')+' · 0 atendimentos hoje</small>';list.appendChild(d);document.getElementById('teamName').value='';document.getElementById('teamSchedule').value='';document.getElementById('teamForm').style.display='none';document.getElementById('teamCount').textContent=list.children.length}
+function addTeamMember(){if(window.saveTeamMember)window.saveTeamMember()}
 function newOrder(){document.getElementById('orderForm').style.display='grid'}
 function addOrder(){var n=document.getElementById('orderClient').value.trim()||'Cliente';var v=Number(document.getElementById('orderService').value||0);var dis=Number(document.getElementById('orderDiscount').value||0);v=Math.max(0,v-dis);var d=document.createElement('div');d.className='row';d.innerHTML='<b>'+n.replace(/[<>]/g,'')+' · #'+String(Date.now()).slice(-3)+'</b><small>Serviço · R$ '+v.toFixed(2).replace('.',',')+' · <span class="tag">Aberta</span></small>';document.getElementById('orderList').appendChild(d);document.getElementById('openOrders').textContent=document.getElementById('orderList').children.length;document.getElementById('ordersTotal').textContent='R$ '+(40+v).toFixed(2).replace('.',',');document.getElementById('orderForm').style.display='none';document.getElementById('orderClient').value='';}
 function toggleStockForm(){var e=document.getElementById('stockForm');e.style.display=e.style.display==='none'?'grid':'none'}
@@ -388,11 +388,43 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
     const list=$('teamList');
     if(list){
       list.innerHTML=dbStaff.filter(x=>x.role==='barber').map(x=>
-        `<div class="row"><b>👤 ${x.name}</b><small>Barbeiro · ativo</small></div>`
-      ).join('')||'<div class="row"><b>Nenhum barbeiro</b></div>';
+        `<div class="row team-member-row"><div><b>👤 ${escapeHtml(x.name)}</b><small>Barbeiro · ativo</small></div><button type="button" class="team-delete" data-staff-id="${x.id}" style="border:0;border-radius:9px;background:#fee2e2;color:#b91c1c;padding:10px 12px;font-weight:700">Excluir</button></div>`
+      ).join('')||'<div class="row"><b>Nenhum barbeiro cadastrado.</b></div>';
+      list.querySelectorAll('.team-delete').forEach(btn=>btn.addEventListener('click',()=>window.removeTeamMember(btn.dataset.staffId)));
     }
     if($('teamCount')) $('teamCount').textContent=dbStaff.filter(x=>x.role==='barber').length;
+    if($('teamAppointments')) $('teamAppointments').textContent=dbAppointments.filter(a=>dateKey(a.starts_at)===todayKey() && dbStaff.some(st=>st.id===a.barber_id&&st.role==='barber')).length;
   }
+
+  window.saveTeamMember=async function(){
+    const name=$('teamName').value.trim();
+    if(!name){alert('Informe o nome do barbeiro.');return;}
+    if(!shopId || !currentUser){alert('Entre na sua conta antes de cadastrar um barbeiro.');return;}
+    const btn=$('teamForm').querySelector('button');
+    if(btn){btn.disabled=true;btn.textContent='Salvando...';}
+    try{
+      const {error}=await sb.from('staff').insert({barbershop_id:shopId,name,role:'barber',active:true});
+      if(error) throw error;
+      $('teamName').value=''; $('teamSchedule').value=''; $('teamForm').style.display='none';
+      await loadAll();
+      alert('Barbeiro cadastrado com sucesso.');
+    }catch(e){alert('Não foi possível cadastrar o barbeiro: '+(e.message||e));}
+    finally{if(btn){btn.disabled=false;btn.textContent='Salvar barbeiro';}}
+  };
+
+  window.removeTeamMember=async function(id){
+    const member=dbStaff.find(x=>x.id===id && x.role==='barber');
+    if(!member)return;
+    if(!confirm(`Deseja retirar ${member.name} da equipe ativa? Os agendamentos e o histórico serão preservados, mas ele deixará de aparecer nas colunas da agenda de hoje.`))return;
+    try{
+      // Desativação preserva a integridade dos agendamentos antigos e do histórico financeiro.
+      const {error}=await sb.from('staff').update({active:false}).eq('id',id).eq('barbershop_id',shopId);
+      if(error)throw error;
+      if(selectedBarber===id)selectedBarber='all';
+      await loadAll();
+      alert('Barbeiro removido da equipe ativa.');
+    }catch(e){alert('Não foi possível remover o barbeiro: '+(e.message||e));}
+  };
 
   function renderServices(){
     const list=document.querySelector('#servicos .list');
