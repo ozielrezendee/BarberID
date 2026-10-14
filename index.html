@@ -58,6 +58,18 @@ main{padding:16px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9p
 </style>
 <style>
 .module-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}.module-card{background:#fff;border:1px solid #e7eaf0;border-radius:15px;padding:15px}.module-card span{display:block;font-size:11px;color:#667085}.module-card b{display:block;font-size:22px;margin-top:4px}.module-actions{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.module-actions button,.mini-btn{border:0;border-radius:11px;padding:11px 13px;font-weight:700;background:#eef3ff;color:#1d4ed8}.mini-btn.danger{background:#fff0f0;color:#b42318}.module-list .row{cursor:pointer}.tag{display:inline-block;padding:5px 8px;border-radius:999px;background:#eef3ff;color:#1d4ed8;font-size:11px;font-weight:700}.muted{color:#667085}.empty-state{text-align:center;padding:30px 15px;color:#667085}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.form-grid input,.form-grid select,.module-form input,.module-form select{width:100%;box-sizing:border-box;padding:12px;border:1px solid #dfe3ea;border-radius:10px;background:#fff}.module-form{display:grid;gap:9px;background:#fff;border:1px solid #e7eaf0;border-radius:15px;padding:14px;margin:12px 0}.module-form button{padding:12px;border:0;border-radius:11px;background:#1d4ed8;color:#fff;font-weight:800}.table-row{display:grid;grid-template-columns:1.3fr .8fr .8fr;gap:8px;align-items:center;padding:12px 0;border-bottom:1px solid #edf0f4}.table-row:last-child{border-bottom:0}.report-bar{height:10px;border-radius:99px;background:#e9edf3;overflow:hidden}.report-bar i{display:block;height:100%;background:#2563eb;border-radius:99px}.switch-row{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid #edf0f4}.switch{width:44px;height:24px;border-radius:20px;background:#d0d5dd;position:relative}.switch.on{background:#2563eb}.switch:after{content:'';position:absolute;width:20px;height:20px;background:#fff;border-radius:50%;top:2px;left:2px}.switch.on:after{left:22px}
+
+.schedule-day{border:1px solid #e7eaf0;background:#fff;border-radius:14px;padding:14px;margin-bottom:10px}
+.schedule-day-head{display:flex;align-items:center;gap:10px;font-weight:800;margin-bottom:10px}
+.schedule-day-head input,.schedule-lunch input{width:18px;height:18px;accent-color:#1d4ed8}
+.schedule-times{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.schedule-times label,.schedule-lunch label{font-size:11px;color:#667085;display:block}
+.schedule-times input,.schedule-lunch input[type=time],.profile-field{width:100%;padding:12px;border:1px solid #dfe3ea;border-radius:10px;margin-top:5px;background:#fff;color:#101828}
+.schedule-lunch{margin-top:12px;padding-top:10px;border-top:1px solid #edf0f4}
+.schedule-lunch-toggle{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:#344054}
+.schedule-lunch-times{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:9px}
+.schedule-disabled{opacity:.55}
+.profile-help{font-size:12px;color:#667085;line-height:1.5;margin:0 0 12px}
 </style>
 </head><body><div id="loginScreen" class="login-screen"><div class="login-box"><h1>BarberID</h1><p>Entre para acessar os dados reais da sua barbearia.</p><input id="loginEmail" type="email" placeholder="E-mail"><input id="loginPassword" type="password" placeholder="Senha"><button id="loginBtn" type="button">Entrar</button><div id="loginError" class="login-error"></div><div class="db-note">Dados sincronizados com Supabase</div></div></div>
 <div class="app">
@@ -128,8 +140,13 @@ main{padding:16px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9p
 <div class="module-form"><b>Desempenho por barbeiro</b><div class="row"><b>Carlos</b><small>3 atendimentos · R$ 120</small></div><div class="row"><b>Renner</b><small>1 atendimento · R$ 200</small></div><div class="row"><b>Barbeiro 3</b><small>0 atendimentos · R$ 0</small></div></div>
 </main></section>
 
+<section id="perfil" class="page"><div class="head"><button class="back" onclick="show('mais')">‹ Voltar</button><h1>Perfil da barbearia</h1></div><main>
+<div class="card" style="padding:15px;margin-bottom:14px"><label for="shopProfileName" style="font-size:12px;color:#667085">Nome da barbearia</label><input id="shopProfileName" class="profile-field" readonly><p class="profile-help">Configure abaixo os dias e horários em que sua barbearia aceita agendamentos.</p></div>
+<div class="section"><b>Horários de funcionamento</b></div><div class="profile-help">Marque os dias em que abre. Cada dia pode ter horários diferentes. O intervalo para almoço é opcional.</div>
+<div id="shopHoursList"><div class="row">Carregando horários...</div></div><button id="saveShopHours" class="primary" type="button">Salvar horários da barbearia</button><div id="shopHoursMessage" class="profile-help" role="status"></div>
+</main></section>
 <section id="mais" class="page"><div class="head"><button class="back" onclick="show('home')">‹ Voltar</button><h1>Mais</h1></div><main><div class="list">
-<div class="row" onclick="show('caixa')" style="cursor:pointer"><b>💰 Caixa</b><small>Abertura, entradas, saídas e fechamento</small></div><div class="row" onclick="show('equipe')" style="cursor:pointer"><b>👨‍💼 Equipe</b><small>Barbeiros, horários e permissões</small></div><div class="row" onclick="show('comanda')" style="cursor:pointer"><b>🧾 Comanda</b><small>Serviços, produtos, descontos e pagamento</small></div><div class="row" onclick="show('estoque')" style="cursor:pointer"><b>📦 Estoque</b><small>Produtos, entradas, saídas e estoque mínimo</small></div><div class="row" onclick="show('fidelidade')" style="cursor:pointer"><b>❤️ Fidelidade</b><small>Pontos, cashback, cartões e pacotes</small></div><div class="row" onclick="show('financeiro')" style="cursor:pointer"><b>💳 Financeiro</b><small>Contas, recebimentos e fluxo de caixa</small></div><div class="row" onclick="show('relatorios')" style="cursor:pointer"><b>📊 Relatórios</b><small>Faturamento, ocupação, ticket e desempenho</small></div><div class="row"><b>🌐 Agendamento público</b><small>Link, QR Code e fila de espera</small></div><div class="row"><b>🔔 Comunicação</b><small>Confirmações, lembretes e pós-atendimento</small></div><div class="row"><b>⭐ Avaliações</b><small>Notas e comentários dos clientes</small></div><div class="row"><b>⚙️ Configurações</b><small>Barbearia, horários, regras e permissões</small></div>
+<div class="row" onclick="show('perfil')" style="cursor:pointer"><b>🏪 Perfil da barbearia</b><small>Dados e horários de funcionamento</small></div><div class="row" onclick="show('caixa')" style="cursor:pointer"><b>💰 Caixa</b><small>Abertura, entradas, saídas e fechamento</small></div><div class="row" onclick="show('equipe')" style="cursor:pointer"><b>👨‍💼 Equipe</b><small>Barbeiros, horários e permissões</small></div><div class="row" onclick="show('comanda')" style="cursor:pointer"><b>🧾 Comanda</b><small>Serviços, produtos, descontos e pagamento</small></div><div class="row" onclick="show('estoque')" style="cursor:pointer"><b>📦 Estoque</b><small>Produtos, entradas, saídas e estoque mínimo</small></div><div class="row" onclick="show('fidelidade')" style="cursor:pointer"><b>❤️ Fidelidade</b><small>Pontos, cashback, cartões e pacotes</small></div><div class="row" onclick="show('financeiro')" style="cursor:pointer"><b>💳 Financeiro</b><small>Contas, recebimentos e fluxo de caixa</small></div><div class="row" onclick="show('relatorios')" style="cursor:pointer"><b>📊 Relatórios</b><small>Faturamento, ocupação, ticket e desempenho</small></div><div class="row"><b>🌐 Agendamento público</b><small>Link, QR Code e fila de espera</small></div><div class="row"><b>🔔 Comunicação</b><small>Confirmações, lembretes e pós-atendimento</small></div><div class="row"><b>⭐ Avaliações</b><small>Notas e comentários dos clientes</small></div><div class="row"><b>⚙️ Configurações</b><small>Barbearia, horários, regras e permissões</small></div>
 </div></main></section>
 <nav class="bottom"><button class="active" data-target="home" onclick="show('home',this)"><span class="ico">📅</span>Agenda</button><button data-target="caixa" onclick="show('caixa',this)"><span class="ico">💰</span>Caixa</button><button data-target="clientes" onclick="show('clientes',this)"><span class="ico">👥</span>Clientes</button><button data-target="mais" onclick="show('mais',this)"><span class="ico">☰</span>Mais</button></nav></div>
 <div id="m" class="modal"><div class="sheet">
@@ -265,6 +282,7 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
     if(error) throw new Error('Barbearia: '+error.message);
     shopId=data.id;
     isShopAdmin=!!currentUser && data.owner_id===currentUser.id;
+    if($('shopProfileName')) $('shopProfileName').value=data.name||'';
     return data;
   }
 
@@ -377,6 +395,56 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
       setLoginError('Login realizado, mas houve um erro ao carregar os dados: '+(e?.message||e));
     }
   }
+
+  const weekDays=[
+    {day:0,label:'Domingo'},{day:1,label:'Segunda-feira'},{day:2,label:'Terça-feira'},
+    {day:3,label:'Quarta-feira'},{day:4,label:'Quinta-feira'},{day:5,label:'Sexta-feira'},
+    {day:6,label:'Sábado'}
+  ];
+  let shopHoursRows=[];
+  function defaultShopHour(day){return {barbershop_id:shopId,day_of_week:day,is_open:false,opens_at:'09:00',closes_at:'18:00',has_lunch_break:false,lunch_starts_at:'12:00',lunch_ends_at:'13:00'};}
+  function renderShopHours(){
+    const root=$('shopHoursList'); if(!root)return;
+    root.innerHTML=weekDays.map(d=>{
+      const r=shopHoursRows.find(x=>Number(x.day_of_week)===d.day)||defaultShopHour(d.day);
+      const open=!!r.is_open,lunch=!!r.has_lunch_break;
+      return `<div class="schedule-day" data-day="${d.day}">
+      <label class="schedule-day-head"><input class="shop-day-open" type="checkbox" ${open?'checked':''}><span>${d.label}</span></label>
+      <div class="schedule-times ${open?'':'schedule-disabled'}">
+      <label>Abre às<input class="shop-opens" type="time" value="${escapeHtml(String(r.opens_at||'09:00').slice(0,5))}" ${open?'':'disabled'}></label>
+      <label>Fecha às<input class="shop-closes" type="time" value="${escapeHtml(String(r.closes_at||'18:00').slice(0,5))}" ${open?'':'disabled'}></label></div>
+      <div class="schedule-lunch"><label class="schedule-lunch-toggle"><input class="shop-lunch-enabled" type="checkbox" ${lunch?'checked':''} ${open?'':'disabled'}> Intervalo para almoço</label>
+      <div class="schedule-lunch-times ${open&&lunch?'':'schedule-disabled'}">
+      <label>Início do almoço<input class="shop-lunch-start" type="time" value="${escapeHtml(String(r.lunch_starts_at||'12:00').slice(0,5))}" ${open&&lunch?'':'disabled'}></label>
+      <label>Fim do almoço<input class="shop-lunch-end" type="time" value="${escapeHtml(String(r.lunch_ends_at||'13:00').slice(0,5))}" ${open&&lunch?'':'disabled'}></label></div></div></div>`;
+    }).join('');
+    root.querySelectorAll('.schedule-day').forEach(card=>{
+      const open=card.querySelector('.shop-day-open'),lunch=card.querySelector('.shop-lunch-enabled');
+      const sync=()=>{const enabled=open.checked;card.querySelector('.schedule-times').classList.toggle('schedule-disabled',!enabled);card.querySelectorAll('.shop-opens,.shop-closes').forEach(el=>el.disabled=!enabled);lunch.disabled=!enabled;const showLunch=enabled&&lunch.checked;card.querySelector('.schedule-lunch-times').classList.toggle('schedule-disabled',!showLunch);card.querySelectorAll('.shop-lunch-start,.shop-lunch-end').forEach(el=>el.disabled=!showLunch);};
+      open.addEventListener('change',sync);lunch.addEventListener('change',sync);
+    });
+  }
+  async function loadShopHours(){
+    const msg=$('shopHoursMessage');
+    try{const {data,error}=await sb.from('barbershop_hours').select('*').eq('barbershop_id',shopId).order('day_of_week');if(error)throw error;shopHoursRows=data||[];renderShopHours();if(msg)msg.textContent='';}
+    catch(e){if(msg)msg.textContent='Não foi possível carregar os horários: '+(e.message||e);const root=$('shopHoursList');if(root)root.innerHTML='<div class="row">Confira as permissões da tabela barbershop_hours no Supabase.</div>';}
+  }
+  async function saveShopHours(){
+    const btn=$('saveShopHours'),msg=$('shopHoursMessage');if(!shopId){alert('Barbearia não identificada.');return;}
+    const records=[];
+    for(const card of document.querySelectorAll('#shopHoursList .schedule-day')){
+      const day=Number(card.dataset.day),isOpen=card.querySelector('.shop-day-open').checked,opens=card.querySelector('.shop-opens').value,closes=card.querySelector('.shop-closes').value;
+      const hasLunch=isOpen&&card.querySelector('.shop-lunch-enabled').checked,lunchStart=card.querySelector('.shop-lunch-start').value,lunchEnd=card.querySelector('.shop-lunch-end').value;
+      if(isOpen&&(!opens||!closes||opens>=closes)){alert('Confira abertura e fechamento de '+weekDays[day].label+'.');return;}
+      if(hasLunch&&(!lunchStart||!lunchEnd||lunchStart>=lunchEnd||lunchStart<opens||lunchEnd>closes)){alert('Confira o intervalo de almoço de '+weekDays[day].label+'. Ele deve ficar dentro do horário de funcionamento.');return;}
+      records.push({barbershop_id:shopId,day_of_week:day,is_open:isOpen,opens_at:isOpen?opens:null,closes_at:isOpen?closes:null,has_lunch_break:hasLunch,lunch_starts_at:hasLunch?lunchStart:null,lunch_ends_at:hasLunch?lunchEnd:null});
+    }
+    btn.disabled=true;btn.textContent='Salvando...';if(msg)msg.textContent='';
+    try{const {error}=await sb.from('barbershop_hours').upsert(records,{onConflict:'barbershop_id,day_of_week'});if(error)throw error;shopHoursRows=records;renderShopHours();if(msg)msg.textContent='Horários da barbearia salvos com sucesso.';alert('Horários da barbearia salvos. Agora vamos configurar os horários individuais dos barbeiros.');}
+    catch(e){if(msg)msg.textContent='Não foi possível salvar: '+(e.message||e);alert('Erro ao salvar os horários: '+(e.message||e));}
+    finally{btn.disabled=false;btn.textContent='Salvar horários da barbearia';}
+  }
+  $('saveShopHours')?.addEventListener('click',saveShopHours);
 
   function renderStaff(){
     const tabs=$('barberTabs');
