@@ -140,13 +140,16 @@ main{padding:16px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9p
 <div class="module-form"><b>Desempenho por barbeiro</b><div class="row"><b>Carlos</b><small>3 atendimentos · R$ 120</small></div><div class="row"><b>Renner</b><small>1 atendimento · R$ 200</small></div><div class="row"><b>Barbeiro 3</b><small>0 atendimentos · R$ 0</small></div></div>
 </main></section>
 
-<section id="perfil" class="page"><div class="head"><button class="back" onclick="show('mais')">‹ Voltar</button><h1>Perfil da barbearia</h1></div><main>
-<div class="card" style="padding:15px;margin-bottom:14px"><label for="shopProfileName" style="font-size:12px;color:#667085">Nome da barbearia</label><input id="shopProfileName" class="profile-field" readonly><p class="profile-help">Configure abaixo os dias e horários em que sua barbearia aceita agendamentos.</p></div>
+<section id="perfil" class="page"><div class="head"><button class="back" onclick="show('mais')">‹ Voltar</button><h1>Perfil</h1></div><main>
+<div class="row" style="margin-bottom:12px"><b>👤 Dados pessoais</b><small>Informações da sua conta de administrador.</small></div>
+<div class="module-form" id="personalProfileForm"><label for="personalName">Nome completo</label><input id="personalName" autocomplete="name" placeholder="Seu nome"><label for="personalEmail">E-mail</label><input id="personalEmail" type="email" autocomplete="email" placeholder="seu@email.com"><label for="personalPhone">Telefone</label><input id="personalPhone" type="tel" autocomplete="tel" placeholder="(00) 00000-0000"><label for="personalPhoto">Foto de perfil</label><input id="personalPhoto" type="file" accept="image/*"><div id="personalPhotoNote" class="profile-help">A foto será configurada após conectar o armazenamento de imagens.</div><button id="savePersonalProfile" type="button">Salvar dados pessoais</button><div id="personalProfileMessage" class="profile-help" role="status"></div></div>
+<div class="row" style="margin:18px 0 12px"><b>🏪 Dados da sua barbearia</b><small>Informações públicas e horários de funcionamento.</small></div>
+<div class="module-form" id="shopProfileForm"><label for="shopProfileName">Nome da barbearia</label><input id="shopProfileName" placeholder="Nome do estabelecimento"><label for="shopProfilePhone">Telefone</label><input id="shopProfilePhone" type="tel" placeholder="Telefone da barbearia"><label for="shopProfileEmail">E-mail</label><input id="shopProfileEmail" type="email" placeholder="contato@barbearia.com"><label for="shopProfileAddress">Endereço</label><input id="shopProfileAddress" placeholder="Rua, número, bairro e cidade"><label for="shopLogo">Foto ou logotipo</label><input id="shopLogo" type="file" accept="image/*"><div id="shopLogoNote" class="profile-help">O envio permanente da imagem depende de configurar o armazenamento no Supabase.</div><button id="saveShopProfile" type="button">Salvar dados da barbearia</button><div id="shopProfileMessage" class="profile-help" role="status"></div></div>
 <div class="section"><b>Horários de funcionamento</b></div><div class="profile-help">Marque os dias em que abre. Cada dia pode ter horários diferentes. O intervalo para almoço é opcional.</div>
 <div id="shopHoursList"><div class="row">Carregando horários...</div></div><button id="saveShopHours" class="primary" type="button">Salvar horários da barbearia</button><div id="shopHoursMessage" class="profile-help" role="status"></div>
 </main></section>
 <section id="mais" class="page"><div class="head"><button class="back" onclick="show('home')">‹ Voltar</button><h1>Mais</h1></div><main><div class="list">
-<div class="row" onclick="show('perfil')" style="cursor:pointer"><b>🏪 Perfil da barbearia</b><small>Dados e horários de funcionamento</small></div><div class="row" onclick="show('caixa')" style="cursor:pointer"><b>💰 Caixa</b><small>Abertura, entradas, saídas e fechamento</small></div><div class="row" onclick="show('equipe')" style="cursor:pointer"><b>👨‍💼 Equipe</b><small>Barbeiros, horários e permissões</small></div><div class="row" onclick="show('comanda')" style="cursor:pointer"><b>🧾 Comanda</b><small>Serviços, produtos, descontos e pagamento</small></div><div class="row" onclick="show('estoque')" style="cursor:pointer"><b>📦 Estoque</b><small>Produtos, entradas, saídas e estoque mínimo</small></div><div class="row" onclick="show('fidelidade')" style="cursor:pointer"><b>❤️ Fidelidade</b><small>Pontos, cashback, cartões e pacotes</small></div><div class="row" onclick="show('financeiro')" style="cursor:pointer"><b>💳 Financeiro</b><small>Contas, recebimentos e fluxo de caixa</small></div><div class="row" onclick="show('relatorios')" style="cursor:pointer"><b>📊 Relatórios</b><small>Faturamento, ocupação, ticket e desempenho</small></div><div class="row"><b>🌐 Agendamento público</b><small>Link, QR Code e fila de espera</small></div><div class="row"><b>🔔 Comunicação</b><small>Confirmações, lembretes e pós-atendimento</small></div><div class="row"><b>⭐ Avaliações</b><small>Notas e comentários dos clientes</small></div><div class="row"><b>⚙️ Configurações</b><small>Barbearia, horários, regras e permissões</small></div>
+<div class="row" onclick="show('perfil')" style="cursor:pointer"><b>👤 Perfil</b><small>Dados pessoais e dados da sua barbearia</small></div><div class="row" onclick="show('caixa')" style="cursor:pointer"><b>💰 Caixa</b><small>Abertura, entradas, saídas e fechamento</small></div><div class="row" onclick="show('equipe')" style="cursor:pointer"><b>👨‍💼 Equipe</b><small>Barbeiros, horários e permissões</small></div><div class="row" onclick="show('comanda')" style="cursor:pointer"><b>🧾 Comanda</b><small>Serviços, produtos, descontos e pagamento</small></div><div class="row" onclick="show('estoque')" style="cursor:pointer"><b>📦 Estoque</b><small>Produtos, entradas, saídas e estoque mínimo</small></div><div class="row" onclick="show('fidelidade')" style="cursor:pointer"><b>❤️ Fidelidade</b><small>Pontos, cashback, cartões e pacotes</small></div><div class="row" onclick="show('financeiro')" style="cursor:pointer"><b>💳 Financeiro</b><small>Contas, recebimentos e fluxo de caixa</small></div><div class="row" onclick="show('relatorios')" style="cursor:pointer"><b>📊 Relatórios</b><small>Faturamento, ocupação, ticket e desempenho</small></div><div class="row"><b>🌐 Agendamento público</b><small>Link, QR Code e fila de espera</small></div><div class="row"><b>🔔 Comunicação</b><small>Confirmações, lembretes e pós-atendimento</small></div><div class="row"><b>⭐ Avaliações</b><small>Notas e comentários dos clientes</small></div><div class="row"><b>⚙️ Configurações</b><small>Barbearia, horários, regras e permissões</small></div>
 </div></main></section>
 <nav class="bottom"><button class="active" data-target="home" onclick="show('home',this)"><span class="ico">📅</span>Agenda</button><button data-target="caixa" onclick="show('caixa',this)"><span class="ico">💰</span>Caixa</button><button data-target="clientes" onclick="show('clientes',this)"><span class="ico">👥</span>Clientes</button><button data-target="mais" onclick="show('mais',this)"><span class="ico">☰</span>Mais</button></nav></div>
 <div id="m" class="modal"><div class="sheet">
@@ -276,13 +279,19 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
 
   async function getShop(){
     const {data,error}=await sb.from('barbershops')
-      .select('id,name,owner_id')
+      .select('id,name,owner_id,phone,email,address')
       .eq('owner_id',currentUser.id)
       .single();
     if(error) throw new Error('Barbearia: '+error.message);
     shopId=data.id;
     isShopAdmin=!!currentUser && data.owner_id===currentUser.id;
     if($('shopProfileName')) $('shopProfileName').value=data.name||'';
+    if($('shopProfilePhone')) $('shopProfilePhone').value=data.phone||'';
+    if($('shopProfileEmail')) $('shopProfileEmail').value=data.email||'';
+    if($('shopProfileAddress')) $('shopProfileAddress').value=data.address||'';
+    if($('personalName')) $('personalName').value=currentUser.user_metadata?.full_name||currentUser.user_metadata?.name||'';
+    if($('personalEmail')) $('personalEmail').value=currentUser.email||'';
+    if($('personalPhone')) $('personalPhone').value=currentUser.user_metadata?.phone||'';
     return data;
   }
 
@@ -445,6 +454,36 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
     finally{btn.disabled=false;btn.textContent='Salvar horários da barbearia';}
   }
   $('saveShopHours')?.addEventListener('click',saveShopHours);
+
+  $('savePersonalProfile')?.addEventListener('click',async()=>{
+    const btn=$('savePersonalProfile'),msg=$('personalProfileMessage');
+    const full_name=$('personalName').value.trim(),phone=$('personalPhone').value.trim(),email=$('personalEmail').value.trim();
+    if(!full_name){alert('Informe seu nome completo.');return;}
+    if(!email){alert('Informe seu e-mail.');return;}
+    btn.disabled=true;btn.textContent='Salvando...';msg.textContent='';
+    try{
+      const {error}=await sb.auth.updateUser({data:{...currentUser.user_metadata,full_name,phone}});
+      if(error)throw error;
+      if(email!==currentUser.email){const {error:emailError}=await sb.auth.updateUser({email});if(emailError)throw emailError;msg.textContent='Dados salvos. Confira sua caixa de entrada para confirmar a alteração do e-mail.';}
+      else msg.textContent='Dados pessoais salvos com sucesso.';
+      const {data:{user}}=await sb.auth.getUser();if(user)currentUser=user;
+    }catch(e){msg.textContent='Não foi possível salvar: '+(e.message||e);}
+    finally{btn.disabled=false;btn.textContent='Salvar dados pessoais';}
+  });
+
+  $('saveShopProfile')?.addEventListener('click',async()=>{
+    const btn=$('saveShopProfile'),msg=$('shopProfileMessage');
+    const name=$('shopProfileName').value.trim(),phone=$('shopProfilePhone').value.trim(),email=$('shopProfileEmail').value.trim(),address=$('shopProfileAddress').value.trim();
+    if(!name){alert('Informe o nome da barbearia.');return;}
+    if($('shopLogo')?.files?.length){msg.textContent='Os dados podem ser salvos agora; o envio permanente do logotipo ainda precisa da configuração do Storage no Supabase.';}
+    btn.disabled=true;btn.textContent='Salvando...';
+    try{
+      const {error}=await sb.from('barbershops').update({name,phone:phone||null,email:email||null,address:address||null}).eq('id',shopId).eq('owner_id',currentUser.id);
+      if(error)throw error;
+      msg.textContent='Dados da barbearia salvos com sucesso.';
+    }catch(e){msg.textContent='Não foi possível salvar: '+(e.message||e);}
+    finally{btn.disabled=false;btn.textContent='Salvar dados da barbearia';}
+  });
 
   function renderStaff(){
     const tabs=$('barberTabs');
