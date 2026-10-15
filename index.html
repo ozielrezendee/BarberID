@@ -188,7 +188,7 @@ main{padding:16px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9p
 <div class="finish-actions"><button class="no" type="button" id="finishNo">Voltar</button><button class="yes" type="button" id="finishYes">Confirmar pagamento</button></div>
 </div></div>
 
-<script>function show(id,b){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));const page=document.getElementById(id);if(page)page.classList.add('active');document.querySelectorAll('.bottom button').forEach(x=>x.classList.toggle('active',(b&&x===b)||(!b&&x.dataset.target===id)));scrollTo(0,0)}
+<script>function show(id,b){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));const page=document.getElementById(id);if(page)page.classList.add('active');document.querySelectorAll('.bottom button').forEach(x=>x.classList.toggle('active',(b&&x===b)||(!b&&x.dataset.target===id)));scrollTo(0,0);if(id==='perfil-barbearia'&&window.loadShopHoursForProfile)window.loadShopHoursForProfile();}
 
 
 
@@ -439,7 +439,9 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
     });
   }
   async function loadShopHours(){
+    const root=$('shopHoursList');if(root)root.innerHTML='<div class="row">Carregando horários...</div>';
     const msg=$('shopHoursMessage');
+    if(!shopId){if(root)root.innerHTML='<div class="row">Entre na sua conta para carregar os horários.</div>';if(msg)msg.textContent='Barbearia ainda não identificada.';return;}
     try{const {data,error}=await sb.from('barbershop_hours').select('*').eq('barbershop_id',shopId).order('day_of_week');if(error)throw error;shopHoursRows=data||[];renderShopHours();if(msg)msg.textContent='';}
     catch(e){if(msg)msg.textContent='Não foi possível carregar os horários: '+(e.message||e);const root=$('shopHoursList');if(root)root.innerHTML='<div class="row">Confira as permissões da tabela barbershop_hours no Supabase.</div>';}
   }
@@ -458,6 +460,7 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
     catch(e){if(msg)msg.textContent='Não foi possível salvar: '+(e.message||e);alert('Erro ao salvar os horários: '+(e.message||e));}
     finally{btn.disabled=false;btn.textContent='Salvar horários da barbearia';}
   }
+  window.loadShopHoursForProfile=loadShopHours;
   $('saveShopHours')?.addEventListener('click',saveShopHours);
 
   $('savePersonalProfile')?.addEventListener('click',async()=>{
