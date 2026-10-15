@@ -132,6 +132,17 @@ main{padding:16px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9p
 <div class="module-grid"><div class="module-card"><span>Receitas do mês</span><b id="finRevenue">R$ 9.760,00</b></div><div class="module-card"><span>Despesas do mês</span><b id="finExpenses">R$ 1.850,00</b></div><div class="module-card"><span>Resultado</span><b id="finResult">R$ 7.910,00</b></div><div class="module-card"><span>Ticket médio</span><b>R$ 61,25</b></div></div>
 <div class="module-actions"><button onclick="addFinanceEntry()">＋ Nova movimentação</button><button onclick="show('caixa')">Abrir Caixa</button></div>
 <div class="list module-list"><div class="row"><b>Recebimentos</b><small>Hoje · R$ 320,00</small></div><div class="row"><b>Aluguel</b><small>Despesa · R$ 1.200,00 · Pendente</small></div><div class="row"><b>Produtos</b><small>Despesa · R$ 650,00 · Pago</small></div></div>
+<div class="section"><b>Comissões dos profissionais</b><button class="mini-btn" type="button" onclick="loadCommissionReport()">Atualizar</button></div>
+<div class="module-actions"><button type="button" onclick="showCommissionReport()">Ver comissões</button></div>
+<div id="commissionPanel" style="display:none">
+ <div class="barber-tabs" id="commissionPeriodTabs"><button class="barber-tab active" data-period="day" type="button">Dia</button><button class="barber-tab" data-period="week" type="button">Semana</button><button class="barber-tab" data-period="month" type="button">Mês</button><button class="barber-tab" data-period="custom" type="button">Período</button></div>
+ <div id="commissionCustomDates" style="display:none;gap:8px;grid-template-columns:1fr 1fr;margin-bottom:10px"><label>Data inicial<input id="commissionStart" type="date" style="width:100%;padding:11px;border:1px solid #ddd;border-radius:9px"></label><label>Data final<input id="commissionEnd" type="date" style="width:100%;padding:11px;border:1px solid #ddd;border-radius:9px"></label></div>
+ <select id="commissionStaffFilter" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:10px;margin-bottom:8px"><option value="all">Todos os profissionais</option></select>
+ <select id="commissionStatusFilter" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:10px;margin-bottom:10px"><option value="all">Todas as situações</option><option value="pending">Pendentes</option><option value="paid">Pagas</option></select>
+ <button class="primary" type="button" onclick="loadCommissionReport()">Pesquisar</button>
+ <div class="module-grid"><div class="module-card"><span>Total de comissões</span><b id="commissionTotal">R$ 0,00</b></div><div class="module-card"><span>Pendente</span><b id="commissionPending">R$ 0,00</b></div></div>
+ <div id="commissionReportList" class="list module-list"><div class="row">Carregue o relatório de comissões.</div></div>
+</div>
 </main></section>
 
 <section id="relatorios" class="page"><div class="head"><button class="back" onclick="show('mais')">‹ Voltar</button><h1>Relatórios</h1></div><main>
@@ -197,7 +208,8 @@ main{padding:16px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9p
 
 </script>
 
-<div id="staffProfileModal" class="modal"><div class="sheet"><h2 id="staffProfileTitle">Perfil do barbeiro</h2><div id="staffPhotoPreview"></div><label for="staffPhotoInput">Foto do profissional</label><p style="font-size:12px;color:#667085;margin:4px 0 8px">Toque no campo abaixo para escolher uma foto da galeria do celular.</p><input id="staffPhotoInput" type="file" accept="image/*"><input id="staffProfileName" placeholder="Nome do barbeiro"><button id="saveStaffProfile" type="button">Salvar perfil</button><button class="close" type="button" onclick="closeStaffProfile()">Cancelar</button><p style="font-size:11px;color:#667085">A foto será enviada ao armazenamento do Supabase.</p></div></div>
+<div id="staffProfileModal" class="modal"><div class="sheet"><h2 id="staffProfileTitle">Perfil do barbeiro</h2><div id="staffPhotoPreview"></div><label for="staffPhotoInput">Foto do profissional</label><p style="font-size:12px;color:#667085;margin:4px 0 8px">Toque no campo abaixo para escolher uma foto da galeria do celular.</p><input id="staffPhotoInput" type="file" accept="image/*"><input id="staffProfileName" placeholder="Nome do barbeiro"><button id="saveStaffProfile" type="button">Salvar dados pessoais</button><div class="section"><b>Configurações do profissional</b></div><button type="button" class="close" onclick="openStaffCommissionConfig()">Serviços e comissões</button><button class="close" type="button" onclick="closeStaffProfile()">Cancelar</button><p style="font-size:11px;color:#667085">A foto será enviada ao armazenamento do Supabase.</p></div></div>
+<div id="staffCommissionModal" class="cash-modal"><div class="cash-sheet"><h2 id="staffCommissionTitle">Serviços e comissões</h2><p class="muted">Marque os serviços realizados e defina a comissão de cada um.</p><div id="staffCommissionServices" class="list"><div class="row">Carregando serviços...</div></div><button type="button" id="saveStaffCommissions">Salvar serviços e comissões</button><button type="button" class="close" onclick="closeStaffCommissionConfig()">Voltar</button></div></div>
 <div id="cashOpenModal" class="cash-modal"><div class="cash-sheet"><h2>Abrir caixa</h2><div style="color:#667085;font-size:13px;margin-bottom:8px">Informe o valor inicial disponível no caixa.</div><input id="openingAmount" type="number" min="0" step="0.01" placeholder="Valor inicial (R$)"><button id="confirmOpenCash" type="button">Abrir caixa</button><button class="close" id="cancelOpenCash" type="button">Cancelar</button></div></div>
 <div id="cashExpenseModal" class="cash-modal"><div class="cash-sheet"><h2>Registrar saída</h2><input id="expenseDesc" placeholder="Descrição (ex.: Compra de material)"><input id="expenseAmount" type="number" min="0.01" step="0.01" placeholder="Valor (R$)"><select id="expenseMethod"><option>Dinheiro</option><option>Pix</option><option>Crédito</option><option>Débito</option></select><button id="confirmExpense" type="button">Registrar saída</button><button class="close" id="cancelExpense" type="button">Cancelar</button></div></div>
 <div id="cashCloseModal" class="cash-modal"><div class="cash-sheet"><h2>Fechar caixa</h2><div style="color:#667085;font-size:13px;margin-bottom:12px">Confira o saldo antes de fechar.</div><div class="cash-card"><span>Saldo calculado</span><b id="closeBalance">R$ 0,00</b></div><button id="confirmCloseCash" type="button" style="margin-top:12px">Confirmar fechamento</button><button class="close" id="cancelCloseCash" type="button">Cancelar</button></div></div>
@@ -221,10 +233,10 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
 (function(){
   const SUPABASE_URL='https://pwaskeyrxjnlqlawolzg.supabase.co';
   const SUPABASE_KEY='sb_publishable_shQrnV_zhVQIEngfvtpjqg_XFXe-ap1';
-  const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+  const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY); window.sb=sb;
 
-  let shopId=null, currentUser=null;
-  let dbAppointments=[], dbStaff=[], dbServices=[], dbCustomers=[], dbPayments=[];
+  let shopId=null, currentUser=null; Object.defineProperty(window,"shopId",{configurable:true,get:()=>shopId}); Object.defineProperty(window,"currentUser",{configurable:true,get:()=>currentUser}); Object.defineProperty(window,"editingStaffId",{configurable:true,get:()=>editingStaffId});
+  let dbAppointments=[], dbStaff=[], dbServices=[], dbCustomers=[], dbPayments=[]; Object.defineProperty(window,"dbStaff",{configurable:true,get:()=>dbStaff}); Object.defineProperty(window,"dbServices",{configurable:true,get:()=>dbServices});
   let cashSession=null, selectedBarber='all', selectedPeriod='today', activeAppointment=null, selectedPay='Pix', isShopAdmin=false, correctionSession=null;
 
   const $=id=>document.getElementById(id);
@@ -286,7 +298,7 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
   }
 
   async function getShop(){
-    const {data,error}=await sb.from('barbershops')
+    const {data,error}=await window.sb.from('barbershops')
       .select('id,name,owner_id,phone,email,address')
       .eq('owner_id',currentUser.id)
       .single();
@@ -322,10 +334,10 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
     if(!name){alert('Informe o nome do cliente.');return;}
     const btn=$('saveCustomer'); btn.disabled=true; btn.textContent='Cadastrando...';
     try{
-      const {data:existing,error:fe}=await sb.from('customers').select('id').eq('barbershop_id',shopId).ilike('name',name).limit(1);
+      const {data:existing,error:fe}=await sb.from('customers').select('id').eq('barbershop_id',window.shopId).ilike('name',name).limit(1);
       if(fe) throw new Error(fe.message);
       if(existing?.length){alert('Já existe um cliente com esse nome.');return;}
-      const {error}=await sb.from('customers').insert({barbershop_id:shopId,name,phone:phone||null,loyalty_points:0});
+      const {error}=await window.sb.from('customers').insert({barbershop_id:shopId,name,phone:phone||null,loyalty_points:0});
       if(error) throw new Error(error.message);
       closeCustomerModal(); await loadAll(); alert('Cliente cadastrado com sucesso.');
     }catch(e){alert('Não foi possível cadastrar o cliente: '+e.message);}
@@ -336,7 +348,7 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
     if(!dbCustomers.length){alert('Cadastre pelo menos um cliente primeiro.');openCustomerModal();return;}
     if(!dbServices.length){alert('Não há serviços cadastrados.');return;}
     $('appointmentCustomer').innerHTML=dbCustomers.map(c=>`<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
-    $('appointmentService').innerHTML=dbServices.map(s=>`<option value="${s.id}">${escapeHtml(s.name)} — ${money(s.price)}</option>`).join('');
+    $('appointmentService').innerHTML=(window.dbServices||[]).map(s=>`<option value="${s.id}">${escapeHtml(s.name)} — ${money(s.price)}</option>`).join('');
     const barbers=dbStaff.filter(x=>x.role==='barber');
     if(!barbers.length){alert('Não há barbeiros cadastrados.');return;}
     $('appointmentBarber').innerHTML=barbers.map(b=>`<option value="${b.id}">${escapeHtml(b.name)}</option>`).join('');
@@ -359,12 +371,12 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
     try{
       const startIso=start.toISOString(), endIso=end.toISOString();
       const {data:conflicts,error:ce}=await sb.from('appointments').select('id')
-        .eq('barbershop_id',shopId).eq('barber_id',barber_id)
+        .eq('barbershop_id',window.shopId).eq('barber_id',barber_id)
         .lt('starts_at',endIso).gt('ends_at',startIso)
         .not('status','in','("cancelled","no_show")');
       if(ce) throw new Error(ce.message);
       if(conflicts?.length){alert('Esse barbeiro já possui atendimento nesse horário.');return;}
-      const {error}=await sb.from('appointments').insert({
+      const {error}=await window.sb.from('appointments').insert({
         barbershop_id:shopId,customer_id,barber_id,service_id,
         starts_at:startIso,ends_at:endIso,status:'confirmed',price:Number(service.price||0)
       });
@@ -379,11 +391,11 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
       await getShop();
 
       const [st,sv,cu,ap,pa]=await Promise.all([
-        sb.from('staff').select('id,name,role,active,avatar_url').eq('barbershop_id',shopId).eq('active',true).order('name'),
-        sb.from('services').select('id,name,price,duration_minutes').eq('barbershop_id',shopId).eq('active',true).order('name'),
-        sb.from('customers').select('id,name,phone,loyalty_points').eq('barbershop_id',shopId).order('name'),
-        sb.from('appointments').select('id,customer_id,barber_id,service_id,starts_at,ends_at,status,price').eq('barbershop_id',shopId).order('starts_at'),
-        sb.from('payments').select('id,appointment_id,amount,method,status,paid_at,created_at').eq('barbershop_id',shopId).eq('status','paid').order('paid_at',{ascending:false})
+        sb.from('staff').select('id,name,role,active,avatar_url').eq('barbershop_id',window.shopId).eq('active',true).order('name'),
+        sb.from('services').select('id,name,price,duration_minutes').eq('barbershop_id',window.shopId).eq('active',true).order('name'),
+        sb.from('customers').select('id,name,phone,loyalty_points').eq('barbershop_id',window.shopId).order('name'),
+        sb.from('appointments').select('id,customer_id,barber_id,service_id,starts_at,ends_at,status,price').eq('barbershop_id',window.shopId).order('starts_at'),
+        sb.from('payments').select('id,appointment_id,amount,method,status,paid_at,created_at').eq('barbershop_id',window.shopId).eq('status','paid').order('paid_at',{ascending:false})
       ]);
 
       if(st.error) throw new Error('Equipe: '+st.error.message);
@@ -392,8 +404,8 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
       if(ap.error) throw new Error('Agenda: '+ap.error.message);
       if(pa.error) throw new Error('Pagamentos: '+pa.error.message);
 
-      dbStaff=st.data||[];
-      dbServices=sv.data||[];
+      dbStaff=st.data||[]; window.dbStaff=dbStaff;
+      dbServices=sv.data||[]; window.dbServices=dbServices;
       dbCustomers=cu.data||[];
       dbAppointments=ap.data||[];
       dbPayments=pa.data||[];
@@ -445,7 +457,7 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
     const root=$('shopHoursList');if(root)root.innerHTML='<div class="row">Carregando horários...</div>';
     const msg=$('shopHoursMessage');
     if(!shopId){if(root)root.innerHTML='<div class="row">Entre na sua conta para carregar os horários.</div>';if(msg)msg.textContent='Barbearia ainda não identificada.';return;}
-    try{const {data,error}=await sb.from('barbershop_hours').select('*').eq('barbershop_id',shopId).order('day_of_week');if(error)throw error;shopHoursRows=data||[];renderShopHours();if(msg)msg.textContent='';}
+    try{const {data,error}=await window.sb.from('barbershop_hours').select('*').eq('barbershop_id',window.shopId).order('day_of_week');if(error)throw error;shopHoursRows=data||[];renderShopHours();if(msg)msg.textContent='';}
     catch(e){if(msg)msg.textContent='Não foi possível carregar os horários: '+(e.message||e);const root=$('shopHoursList');if(root)root.innerHTML='<div class="row">Confira as permissões da tabela barbershop_hours no Supabase.</div>';}
   }
   async function saveShopHours(){
@@ -459,7 +471,7 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
       records.push({barbershop_id:shopId,day_of_week:day,is_open:isOpen,opens_at:isOpen?opens:null,closes_at:isOpen?closes:null,has_lunch_break:hasLunch,lunch_starts_at:hasLunch?lunchStart:null,lunch_ends_at:hasLunch?lunchEnd:null});
     }
     btn.disabled=true;btn.textContent='Salvando...';if(msg)msg.textContent='';
-    try{const {error}=await sb.from('barbershop_hours').upsert(records,{onConflict:'barbershop_id,day_of_week'});if(error)throw error;shopHoursRows=records;if(msg)msg.textContent='Horários da barbearia salvos com sucesso.';alert('Horários da barbearia salvos com sucesso.');show('perfil-barbearia');}
+    try{const {error}=await window.sb.from('barbershop_hours').upsert(records,{onConflict:'barbershop_id,day_of_week'});if(error)throw error;shopHoursRows=records;if(msg)msg.textContent='Horários da barbearia salvos com sucesso.';alert('Horários da barbearia salvos com sucesso.');show('perfil-barbearia');}
     catch(e){if(msg)msg.textContent='Não foi possível salvar: '+(e.message||e);alert('Erro ao salvar os horários: '+(e.message||e));}
     finally{btn.disabled=false;btn.textContent='Salvar horários da barbearia';}
   }
@@ -477,7 +489,7 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
       if(error)throw error;
       if(email!==currentUser.email){const {error:emailError}=await sb.auth.updateUser({email});if(emailError)throw emailError;msg.textContent='Dados salvos. Confira sua caixa de entrada para confirmar a alteração do e-mail.';}
       else msg.textContent='Dados pessoais salvos com sucesso.';
-      const {data:{user}}=await sb.auth.getUser();if(user)currentUser=user;
+      const {data:{user}}=await sb.auth.getUser();if(user)currentUser=user; window.currentUser=currentUser;
     }catch(e){msg.textContent='Não foi possível salvar: '+(e.message||e);}
     finally{btn.disabled=false;btn.textContent='Salvar dados pessoais';}
   });
@@ -489,7 +501,7 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
     if($('shopLogo')?.files?.length){msg.textContent='Os dados podem ser salvos agora; o envio permanente do logotipo ainda precisa da configuração do Storage no Supabase.';}
     btn.disabled=true;btn.textContent='Salvando...';
     try{
-      const {error}=await sb.from('barbershops').update({name,phone:phone||null,email:email||null,address:address||null}).eq('id',shopId).eq('owner_id',currentUser.id);
+      const {error}=await window.sb.from('barbershops').update({name,phone:phone||null,email:email||null,address:address||null}).eq('id',shopId).eq('owner_id',currentUser.id);
       if(error)throw error;
       msg.textContent='Dados da barbearia salvos com sucesso.';
     }catch(e){msg.textContent='Não foi possível salvar: '+(e.message||e);}
@@ -525,7 +537,7 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
     const btn=$('teamForm').querySelector('button');
     if(btn){btn.disabled=true;btn.textContent='Salvando...';}
     try{
-      const {error}=await sb.from('staff').insert({barbershop_id:shopId,name,role:'barber',active:true});
+      const {error}=await window.sb.from('staff').insert({barbershop_id:shopId,name,role:'barber',active:true});
       if(error) throw error;
       $('teamName').value=''; $('teamSchedule').value=''; $('teamForm').style.display='none';
       await loadAll();
@@ -551,7 +563,7 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
     const url=URL.createObjectURL(file);$('staffPhotoPreview').innerHTML=`<img class="staff-avatar large" src="${url}" alt="Prévia da foto">`;
   });
   $('saveStaffProfile').addEventListener('click',async()=>{
-    const member=dbStaff.find(x=>String(x.id)===String(editingStaffId));if(!member)return;
+    const member=(window.dbStaff||[]).find(x=>String(x.id)===String(editingStaffId));if(!member)return;
     const name=$('staffProfileName').value.trim();if(!name){alert('Informe o nome do barbeiro.');return;}
     const btn=$('saveStaffProfile');btn.disabled=true;btn.textContent='Salvando...';
     try{
@@ -563,7 +575,7 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
         if(up.error)throw new Error('Foto: '+up.error.message+' — confira se o bucket staff-photos foi criado e as permissões foram configuradas.');
         const pub=sb.storage.from('staff-photos').getPublicUrl(path);avatar_url=pub.data.publicUrl;
       }
-      const {error}=await sb.from('staff').update({name,avatar_url}).eq('id',member.id).eq('barbershop_id',shopId);
+      const {error}=await window.sb.from('staff').update({name,avatar_url}).eq('id',member.id).eq('barbershop_id',window.shopId);
       if(error)throw error;
       closeStaffProfile();await loadAll();alert('Perfil do barbeiro atualizado.');
     }catch(e){alert('Não foi possível salvar o perfil: '+(e.message||e));}
@@ -576,7 +588,7 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
     if(!confirm(`Deseja retirar ${member.name} da equipe ativa? Os agendamentos e o histórico serão preservados, mas ele deixará de aparecer nas colunas da agenda de hoje.`))return;
     try{
       // Desativação preserva a integridade dos agendamentos antigos e do histórico financeiro.
-      const {error}=await sb.from('staff').update({active:false}).eq('id',id).eq('barbershop_id',shopId);
+      const {error}=await window.sb.from('staff').update({active:false}).eq('id',id).eq('barbershop_id',window.shopId);
       if(error)throw error;
       if(selectedBarber===id)selectedBarber='all';
       await loadAll();
@@ -746,10 +758,10 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
   }
 
   async function updateAppointmentStatus(id,status){
-    const {error}=await sb.from('appointments')
+    const {error}=await window.sb.from('appointments')
       .update({status,updated_at:new Date().toISOString()})
       .eq('id',id)
-      .eq('barbershop_id',shopId);
+      .eq('barbershop_id',window.shopId);
 
     if(error){alert('Não foi possível atualizar o atendimento: '+error.message);return;}
     await loadAll();
@@ -811,7 +823,7 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
 
       if(existing&&existing.length){
         await sb.from('appointments').update({status:'completed',updated_at:new Date().toISOString()})
-          .eq('id',a.id).eq('barbershop_id',shopId);
+          .eq('id',a.id).eq('barbershop_id',window.shopId);
         alert('Este atendimento já possui pagamento registrado.');
         closeFinishModal();
         await loadAll();
@@ -845,9 +857,10 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
 
       const {error:ae}=await sb.from('appointments')
         .update({status:'completed',updated_at:new Date().toISOString()})
-        .eq('id',a.id).eq('barbershop_id',shopId);
+        .eq('id',a.id).eq('barbershop_id',window.shopId);
 
       if(ae)throw new Error('Agendamento: '+ae.message);
+      await createCommissionForAppointment(a,amount,p.id);
 
       closeFinishModal();
       await loadAll();
@@ -860,9 +873,9 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
   };
 
   async function loadCash(){
-    const {data,error}=await sb.from('cash_sessions')
+    const {data,error}=await window.sb.from('cash_sessions')
       .select('*')
-      .eq('barbershop_id',shopId)
+      .eq('barbershop_id',window.shopId)
       .eq('status','open')
       .order('opened_at',{ascending:false})
       .limit(1)
@@ -917,7 +930,7 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
   async function loadCashHistory(){
     const list=$('cashHistoryList'); if(!list||!shopId)return;
     list.innerHTML='<div class="row">Carregando histórico...</div>';
-    const {data:sessions,error}=await sb.from('cash_sessions').select('*').eq('barbershop_id',shopId).order('opened_at',{ascending:false}).limit(100);
+    const {data:sessions,error}=await sb.from('cash_sessions').select('*').eq('barbershop_id',window.shopId).order('opened_at',{ascending:false}).limit(100);
     if(error){list.innerHTML='<div class="row"><b>Não foi possível carregar o histórico</b><small>'+escapeHtml(error.message)+'</small></div>';return;}
     if(!sessions?.length){list.innerHTML='<div class="row"><b>Nenhum caixa registrado</b><small>As sessões aparecerão aqui quando o caixa for utilizado.</small></div>';return;}
     const ids=sessions.map(x=>x.id);
@@ -1019,9 +1032,9 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
     const btn=$('confirmOpenCash');
     btn.disabled=true;btn.textContent='Abrindo...';
     try{
-      const {data:existing}=await sb.from('cash_sessions').select('id').eq('barbershop_id',shopId).eq('status','open').limit(1);
+      const {data:existing}=await sb.from('cash_sessions').select('id').eq('barbershop_id',window.shopId).eq('status','open').limit(1);
       if(existing?.length){cashSession=existing[0];throw new Error('Já existe um caixa aberto.');}
-      const {error}=await sb.from('cash_sessions').insert({
+      const {error}=await window.sb.from('cash_sessions').insert({
         barbershop_id:shopId,opened_by:currentUser.id,opening_amount:amount,status:'open'
       });
       if(error)throw new Error(error.message);
@@ -1049,7 +1062,7 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
     if(amount<=0){alert('Informe um valor válido.');return;}
     const btn=$('confirmExpense');btn.disabled=true;btn.textContent='Registrando...';
     try{
-      const {error}=await sb.from('cash_movements').insert({
+      const {error}=await window.sb.from('cash_movements').insert({
         barbershop_id:shopId,cash_session_id:cashSession.id,type:'expense',
         description,amount,method:methodMap[$('expenseMethod').value],created_by:currentUser.id
       });
@@ -1075,7 +1088,7 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
       const entries=(movs||[]).filter(x=>x.type==='entry').reduce((s,x)=>s+Number(x.amount||0),0);
       const exits=(movs||[]).filter(x=>x.type!=='entry').reduce((s,x)=>s+Number(x.amount||0),0);
       const closing=Number(cashSession.opening_amount||0)+entries-exits;
-      const {error}=await sb.from('cash_sessions').update({closing_amount:closing,closed_at:new Date().toISOString(),status:'closed'}).eq('id',cashSession.id).eq('barbershop_id',shopId);
+      const {error}=await window.sb.from('cash_sessions').update({closing_amount:closing,closed_at:new Date().toISOString(),status:'closed'}).eq('id',cashSession.id).eq('barbershop_id',window.shopId);
       if(error)throw new Error(error.message);
       $('cashCloseModal').style.display='none';
       cashSession=null;
@@ -1127,4 +1140,19 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
   updateHeader();
   init();
 })();
-</script></body></html>
+</script>
+<script>
+// Módulo de comissões BarberID: configuração por profissional/serviço e relatório por período.
+let commissionPeriod='day', commissionEditingStaffId=null;
+function showCommissionReport(){const p=document.getElementById('commissionPanel');if(p)p.style.display='block';loadCommissionReport();}
+function commissionDateRange(){const now=new Date();let a=new Date(now),b=new Date(now);a.setHours(0,0,0,0);b.setHours(23,59,59,999);if(commissionPeriod==='week'){const dow=(a.getDay()+6)%7;a.setDate(a.getDate()-dow);b=new Date(a);b.setDate(a.getDate()+6);b.setHours(23,59,59,999);}else if(commissionPeriod==='month'){a.setDate(1);b=new Date(a.getFullYear(),a.getMonth()+1,0,23,59,59,999);}else if(commissionPeriod==='custom'){const sv=document.getElementById('commissionStart')?.value,ev=document.getElementById('commissionEnd')?.value;if(sv)a=new Date(sv+'T00:00:00');if(ev)b=new Date(ev+'T23:59:59.999');}return {start:a.toISOString(),end:b.toISOString()};}
+document.querySelectorAll('#commissionPeriodTabs [data-period]').forEach(btn=>btn.addEventListener('click',()=>{commissionPeriod=btn.dataset.period;document.querySelectorAll('#commissionPeriodTabs [data-period]').forEach(x=>x.classList.toggle('active',x===btn));const d=document.getElementById('commissionCustomDates');if(d)d.style.display=commissionPeriod==='custom'?'grid':'none';}));
+async function loadCommissionReport(){const list=document.getElementById('commissionReportList');if(!list)return;if(!window.sb||!window.shopId){list.innerHTML='<div class="row">Entre na conta para consultar as comissões.</div>';return;}list.innerHTML='<div class="row">Carregando comissões...</div>';try{const range=commissionDateRange();let q=window.sb.from('staff_commissions').select('id,staff_id,service_id,appointment_id,service_amount,commission_percent,commission_amount,status,created_at,paid_at').eq('barbershop_id',window.shopId).gte('created_at',range.start).lte('created_at',range.end).order('created_at',{ascending:false});const sid=document.getElementById('commissionStaffFilter')?.value||'all',st=document.getElementById('commissionStatusFilter')?.value||'all';if(sid!=='all')q=q.eq('staff_id',sid);if(st!=='all')q=q.eq('status',st);const {data,error}=await q;if(error)throw error;const rows=data||[];const total=rows.reduce((n,r)=>n+Number(r.commission_amount||0),0),pending=rows.filter(r=>r.status==='pending').reduce((n,r)=>n+Number(r.commission_amount||0),0);document.getElementById('commissionTotal').textContent=money(total);document.getElementById('commissionPending').textContent=money(pending);list.innerHTML=rows.map(r=>{const person=(window.dbStaff||[]).find(x=>String(x.id)===String(r.staff_id));const service=(window.dbServices||[]).find(x=>String(x.id)===String(r.service_id));return `<div class="row"><b>${escapeHtml(person?.name||'Profissional')} · ${money(r.commission_amount)}</b><small>${escapeHtml(service?.name||'Serviço')} · ${Number(r.commission_percent)}% de ${money(r.service_amount)} · ${new Date(r.created_at).toLocaleDateString('pt-BR')} · ${r.status==='paid'?'Paga':'Pendente'}</small>${r.status==='pending'?`<button type="button" class="mini-btn" onclick="markCommissionPaid('${r.id}')">Marcar como paga</button>`:''}</div>`}).join('')||'<div class="row">Nenhuma comissão encontrada neste período.</div>';const sel=document.getElementById('commissionStaffFilter');if(sel&&sel.options.length<=1){(window.dbStaff||[]).filter(x=>x.role==='barber'&&x.active!==false).forEach(x=>{const o=document.createElement('option');o.value=x.id;o.textContent=x.name;sel.appendChild(o);});}}catch(e){list.innerHTML='<div class="row"><b>Não foi possível carregar as comissões.</b><small>'+escapeHtml(e.message||String(e))+' — confira se executou o SQL de comissões no Supabase.</small></div>';}}
+async function markCommissionPaid(id){if(!confirm('Confirmar o pagamento desta comissão?'))return;try{const {error}=await window.sb.from('staff_commissions').update({status:'paid',paid_at:new Date().toISOString(),paid_by:window.currentUser?.id||null}).eq('id',id).eq('barbershop_id',window.shopId).eq('status','pending');if(error)throw error;await loadCommissionReport();alert('Comissão marcada como paga.');}catch(e){alert('Não foi possível registrar o pagamento: '+e.message);}}
+window.openStaffCommissionConfig=async function(){if(!window.editingStaffId)return;commissionEditingStaffId=window.editingStaffId;document.getElementById('staffCommissionTitle').textContent='Serviços e comissões · '+((window.dbStaff||[]).find(x=>String(x.id)===String(editingStaffId))?.name||'Profissional');document.getElementById('staffProfileModal').classList.remove('open');document.getElementById('staffCommissionModal').style.display='flex';const box=document.getElementById('staffCommissionServices');box.innerHTML='<div class="row">Carregando serviços...</div>';try{const {data,error}=await window.sb.from('staff_service_commissions').select('service_id,commission_percent,active').eq('barbershop_id',window.shopId).eq('staff_id',commissionEditingStaffId);if(error)throw error;const configured=new Map((data||[]).map(x=>[String(x.service_id),x]));box.innerHTML=(window.dbServices||[]).map(s=>{const c=configured.get(String(s.id));return `<div class="row"><label style="display:flex;gap:9px;align-items:center"><input type="checkbox" data-service-id="${s.id}" ${c?.active?'checked':''} style="width:auto;margin:0"> <span><b>${escapeHtml(s.name)}</b><small>${money(s.price)}</small></span></label><label style="display:block;margin-top:9px">Comissão (%)<input data-commission-service="${s.id}" type="number" min="0" max="100" step="0.01" value="${c?Number(c.commission_percent):50}" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:9px;margin-top:5px"></label></div>`}).join('')||'<div class="row">Cadastre serviços primeiro.</div>';}catch(e){box.innerHTML='<div class="row"><b>Erro ao carregar serviços/comissões</b><small>'+escapeHtml(e.message||String(e))+'</small></div>';}};
+window.closeStaffCommissionConfig=function(){document.getElementById('staffCommissionModal').style.display='none';};
+document.getElementById('saveStaffCommissions')?.addEventListener('click',async()=>{const btn=document.getElementById('saveStaffCommissions');btn.disabled=true;try{for(const check of document.querySelectorAll('#staffCommissionServices [data-service-id]')){const serviceId=check.dataset.serviceId;const percent=Number(document.querySelector(`[data-commission-service="${serviceId}"]`)?.value);if(!Number.isFinite(percent)||percent<0||percent>100)throw new Error('A comissão deve ficar entre 0 e 100%.');const payload={barbershop_id:window.shopId,staff_id:commissionEditingStaffId,service_id:serviceId,commission_percent:percent,active:check.checked,updated_at:new Date().toISOString()};const {error}=await window.sb.from('staff_service_commissions').upsert(payload,{onConflict:'barbershop_id,staff_id,service_id'});if(error)throw error;}closeStaffCommissionConfig();alert('Serviços e comissões salvos.');}catch(e){alert('Não foi possível salvar: '+e.message);}finally{btn.disabled=false;}});
+// Registra uma comissão uma única vez ao finalizar um atendimento pago.
+async function createCommissionForAppointment(a,amount,paymentId){try{const {data:existing,error:ee}=await window.sb.from('staff_commissions').select('id').eq('appointment_id',a.id).limit(1);if(ee)throw ee;if(existing?.length)return;const {data:cfg,error:ce}=await window.sb.from('staff_service_commissions').select('commission_percent,active').eq('barbershop_id',window.shopId).eq('staff_id',a.barber_id).eq('service_id',a.service_id).eq('active',true).maybeSingle();if(ce)throw ce;if(!cfg)return;const pct=Number(cfg.commission_percent||0),value=Math.round(Number(amount)*pct)/100;const {error}=await window.sb.from('staff_commissions').insert({barbershop_id:window.shopId,staff_id:a.barber_id,service_id:a.service_id,appointment_id:a.id,payment_id:paymentId,service_amount:Number(amount),commission_percent:pct,commission_amount:value,status:'pending'});if(error&&error.code!=='23505')throw error;}catch(e){console.error('Falha ao gerar comissão:',e);alert('Pagamento foi registrado, mas a comissão não foi gerada: '+(e.message||e));}}
+</script>
+</body></html>
