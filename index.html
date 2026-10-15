@@ -236,8 +236,8 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
   const SUPABASE_KEY='sb_publishable_shQrnV_zhVQIEngfvtpjqg_XFXe-ap1';
   const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY); window.sb=sb;
 
-  let shopId=null, currentUser=null; Object.defineProperty(window,"shopId",{configurable:true,get:()=>shopId,set:v=>{shopId=v}}); Object.defineProperty(window,"currentUser",{configurable:true,get:()=>currentUser,set:v=>{currentUser=v}}); Object.defineProperty(window,"editingStaffId",{configurable:true,get:()=>editingStaffId,set:v=>{editingStaffId=v}});
-  let dbAppointments=[], dbStaff=[], dbServices=[], dbCustomers=[], dbPayments=[]; Object.defineProperty(window,"dbStaff",{configurable:true,get:()=>dbStaff,set:v=>{dbStaff=Array.isArray(v)?v:[]}}); Object.defineProperty(window,"dbServices",{configurable:true,get:()=>dbServices,set:v=>{dbServices=Array.isArray(v)?v:[]}});
+  let shopId=null, currentUser=null; Object.defineProperty(window,"shopId",{configurable:true,get:()=>shopId}); Object.defineProperty(window,"currentUser",{configurable:true,get:()=>currentUser}); Object.defineProperty(window,"editingStaffId",{configurable:true,get:()=>editingStaffId});
+  let dbAppointments=[], dbStaff=[], dbServices=[], dbCustomers=[], dbPayments=[]; Object.defineProperty(window,"dbStaff",{configurable:true,get:()=>dbStaff}); Object.defineProperty(window,"dbServices",{configurable:true,get:()=>dbServices});
   let cashSession=null, selectedBarber='all', selectedPeriod='today', activeAppointment=null, selectedPay='Pix', isShopAdmin=false, correctionSession=null;
 
   const $=id=>document.getElementById(id);
@@ -1124,10 +1124,13 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
     if(h)h.textContent=greeting+', '+ownerName+' 👋';
   }
 
-  function startOfMonth(){const d=new Date();d.setDate(1);d.setHours(0,0,0,0);return d;}
-  function revenueFor(start,barberId='all'){
-    const ids=new Set(dbAppointments.filter(a=>barberId==='all'||String(a.barber_id)===String(barberId)).map(a=>a.id));
-    return dbPayments.filter(p=>p.paid_at&&new Date(p.paid_at)>=start&&ids.has(p.appointment_id)).reduce((sum,p)=>sum+Number(p.amount||0),0);
+  function startOfMonth(){
+    const d=new Date(); d.setDate(1); d.setHours(0,0,0,0); return d;
+  }
+  function revenueFor(start,scope='all'){
+    const end=new Date(start); end.setMonth(end.getMonth()+1);
+    const paidAppointments=new Set(dbAppointments.filter(a=>a.status==='completed' && (scope==='all'||true)).map(a=>a.id));
+    return dbPayments.filter(p=>p.paid_at && new Date(p.paid_at)>=start && new Date(p.paid_at)<end && paidAppointments.has(p.appointment_id)).reduce((sum,p)=>sum+Number(p.amount||0),0);
   }
   function updateRealReports(){
     const monthRevenue=revenueFor(startOfMonth(),'all');
@@ -1142,6 +1145,8 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
   function escapeHtml(v){
     return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
   }
+  // Disponibiliza o escape para os módulos adicionados fora do escopo principal.
+  window.escapeHtml = escapeHtml;
 
   updateHeader();
   init();
