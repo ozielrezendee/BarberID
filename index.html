@@ -10,7 +10,7 @@ main{padding:16px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9p
 .period-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 14px}.period-tab{padding:12px;border:1px solid #e2e6ee;background:#fff;color:#667085;border-radius:11px;font-weight:800;font-size:14px}.period-tab.active{background:#1d4ed8;color:#fff;border-color:#1d4ed8}
 .dashboard-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px}.dashboard-card{background:#fff;border:1px solid #e7eaf0;border-radius:15px;padding:15px;min-width:0}.dashboard-card .dashboard-icon{font-size:20px;margin-bottom:8px}.dashboard-card span{display:block;color:#667085;font-size:11px}.dashboard-card b{display:block;font-size:22px;margin-top:5px;overflow-wrap:anywhere}.dashboard-secondary{display:flex;justify-content:space-between;align-items:center;background:#f0f4fa;border-radius:10px;padding:9px 12px;margin-top:9px;font-size:12px;color:#667085}.dashboard-secondary b{color:#101828;font-size:14px}.agenda-day{padding:12px 14px;background:#f0f4fa;border-bottom:1px solid #e7eaf0;font-weight:800;font-size:12px;color:#344054}.appt.cancelled{opacity:.55}.appt .status{max-width:105px}
 
-.appt{position:relative}.statusBtn{border:0;cursor:pointer}.status-menu{position:absolute;right:10px;top:54px;z-index:4;background:#fff;border:1px solid #ddd;border-radius:12px;padding:6px;box-shadow:0 8px 25px #0002;display:grid;min-width:145px}.status-menu button{border:0;background:#fff;text-align:left;padding:11px;border-radius:8px;font-weight:600}.status-menu button:hover{background:#f1f3f7}.appt.inservice{background:#fff8e6}.appt.done{background:#dcfce7}.appt.done .status{background:#bbf7d0;color:#166534}.appt.absent{background:#fee2e2}.appt.absent .status{background:#fecaca;color:#991b1b}
+.appt{position:relative}.statusBtn{border:0;cursor:pointer}.status-menu{position:fixed;right:auto;top:0;left:0;z-index:9999;background:#fff;border:1px solid #ddd;border-radius:12px;padding:6px;box-shadow:0 8px 25px #0002;display:grid;min-width:145px}.status-menu button{border:0;background:#fff;text-align:left;padding:11px;border-radius:8px;font-weight:600}.status-menu button:hover{background:#f1f3f7}.appt.inservice{background:#fff8e6}.appt.done{background:#dcfce7}.appt.done .status{background:#bbf7d0;color:#166534}.appt.absent{background:#fee2e2}.appt.absent .status{background:#fecaca;color:#991b1b}
 .finish-modal{display:none;position:fixed;inset:0;background:#0008;align-items:center;justify-content:center;z-index:20;padding:20px}.finish-box{background:#fff;border-radius:18px;padding:22px;width:min(360px,100%)}.finish-box h2{margin:0 0 8px}.finish-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}.finish-actions button{padding:13px;border:0;border-radius:11px;font-weight:700}.yes{background:#16a34a;color:#fff}.no{background:#eef2f7}
 
 .pay-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.pay-option{min-height:52px;border:1px solid #dfe3ea;background:#fff;border-radius:11px;display:flex;align-items:center;gap:8px;padding:10px;font-weight:700}.pay-option.active{border:2px solid #1d4ed8;background:#eef4ff;color:#1d4ed8}.pay-option span{font-size:13px}
@@ -742,6 +742,7 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
   function applyBarberFilter(){renderAppointments();}
 
   function bindStatusButtons(){
+    document.querySelectorAll('.status-menu').forEach(x=>x.remove());
     document.querySelectorAll('#todayAgenda .statusBtn').forEach(btn=>{
       btn.onclick=()=>{
         document.querySelectorAll('.status-menu').forEach(x=>x.remove());
@@ -768,7 +769,15 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
           };
           menu.appendChild(b);
         });
-        ap.appendChild(menu);
+        document.body.appendChild(menu);
+        const rect=btn.getBoundingClientRect();
+        const menuWidth=menu.offsetWidth||160;
+        const menuHeight=menu.offsetHeight||190;
+        const left=Math.max(8,Math.min(rect.right-menuWidth,window.innerWidth-menuWidth-8));
+        let top=rect.bottom+6;
+        if(top+menuHeight>window.innerHeight-8) top=Math.max(8,rect.top-menuHeight-6);
+        menu.style.left=left+'px';
+        menu.style.top=top+'px';
       };
     });
   }
