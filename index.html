@@ -84,6 +84,7 @@ main{padding:16px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9p
 .schedule-disabled{opacity:.55}
 .profile-help{font-size:12px;color:#667085;line-height:1.5;margin:0 0 12px}
 .profile-choice{display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:12px;padding:18px;border:1px solid #e4e7ec;border-radius:16px;background:#fff}.profile-choice small{display:block;color:#667085;margin-top:5px;line-height:1.4}.profile-choice:focus{outline:2px solid #2453df;outline-offset:2px}
+.agenda-nav{display:flex;align-items:center;justify-content:space-between;gap:6px;margin:10px 0;padding:8px;background:#fff;border:1px solid #e4e7ec;border-radius:12px;position:sticky;top:0;z-index:5}.agenda-nav button{border:0;border-radius:9px;background:#eef3ff;color:#2453df;font-weight:700;padding:9px 10px;font-size:12px;white-space:nowrap}.agenda-nav b{font-size:11px;text-align:center;color:#344054}
 </style>
 </head><body><div id="loginScreen" class="login-screen"><div class="login-box"><h1>BarberID</h1><p>Entre para acessar os dados reais da sua barbearia.</p><input id="loginEmail" type="email" placeholder="E-mail"><input id="loginPassword" type="password" placeholder="Senha"><button id="loginBtn" type="button">Entrar</button><div id="loginError" class="login-error"></div><div class="db-note">Dados sincronizados com Supabase</div></div></div>
 <div class="app">
@@ -254,6 +255,7 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
   let shopId=null, currentUser=null; Object.defineProperty(window,"shopId",{configurable:true,get:()=>shopId}); Object.defineProperty(window,"currentUser",{configurable:true,get:()=>currentUser}); Object.defineProperty(window,"editingStaffId",{configurable:true,get:()=>editingStaffId});
   let dbAppointments=[], dbStaff=[], dbServices=[], dbCustomers=[], dbPayments=[]; Object.defineProperty(window,"dbStaff",{configurable:true,get:()=>dbStaff}); Object.defineProperty(window,"dbServices",{configurable:true,get:()=>dbServices});
   let cashSession=null, selectedBarber='all', selectedPeriod='today', activeAppointment=null, selectedPay='Pix', isShopAdmin=false, correctionSession=null;
+  let agendaDayOffset=0, agendaWeekOffset=0;
 
   const $=id=>document.getElementById(id);
   const money=v=>'R$ '+Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -261,11 +263,13 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
   const tz='America/Campo_Grande';
   const dateKey=d=>new Intl.DateTimeFormat('en-CA',{timeZone:tz}).format(new Date(d));
   const todayKey=()=>dateKey(new Date());
-  const weekStartDate=()=>{const d=new Date();d.setHours(0,0,0,0);const offset=d.getDay()===0?6:d.getDay()-1;d.setDate(d.getDate()-offset);return d;};
+  const selectedAgendaDate=()=>{const d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()+agendaDayOffset);return d;};
+  const selectedAgendaKey=()=>dateKey(selectedAgendaDate());
+  const weekStartDate=()=>{const d=new Date();d.setHours(12,0,0,0);const offset=d.getDay()===0?6:d.getDay()-1;d.setDate(d.getDate()-offset+agendaWeekOffset*7);d.setHours(0,0,0,0);return d;};
   const weekEndDate=()=>{const d=weekStartDate();d.setDate(d.getDate()+7);return d;};
   const sameBarber=a=>selectedBarber==='all'||a.barber_id===selectedBarber;
   function dateLabel(key){const [y,m,d]=key.split('-').map(Number);return new Date(y,m-1,d,12).toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'2-digit',timeZone:tz});}
-  const periodAppointments=()=>dbAppointments.filter(a=>{const k=dateKey(a.starts_at);if(selectedPeriod==='today')return k===todayKey();const dt=new Date(a.starts_at);return dt>=weekStartDate()&&dt<weekEndDate();}).filter(sameBarber);
+  const periodAppointments=()=>dbAppointments.filter(a=>{const k=dateKey(a.starts_at);if(selectedPeriod==='today')return k===selectedAgendaKey();const dt=new Date(a.starts_at);return dt>=weekStartDate()&&dt<weekEndDate();}).filter(sameBarber);
 
   function setLoginError(msg){
     $('loginError').textContent=msg||'';
@@ -636,24 +640,27 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
     const list=$('todayAgenda'); if(!list)return;
     const rows=periodAppointments().slice().sort((a,b)=>new Date(a.starts_at)-new Date(b.starts_at));
     const labels={pending:'Pendente',confirmed:'Confirmado',in_service:'Em atendimento',completed:'Concluído',cancelled:'Cancelado',no_show:'Ausente'};
+    const nav=selectedPeriod==='week'
+      ? `<div class="agenda-nav"><button type="button" data-agenda-nav="prev-week">‹ Semana anterior</button><b>${dateKey(weekStartDate()).split('-').reverse().join('/')} – ${dateKey(weekEndDate()).split('-').reverse().join('/')}</b><button type="button" data-agenda-nav="next-week">Próxima semana ›</button></div>`
+      : `<div class="agenda-nav"><button type="button" data-agenda-nav="prev-day">‹ Dia anterior</button><b>${new Intl.DateTimeFormat('pt-BR',{weekday:'short',day:'2-digit',month:'2-digit',year:'numeric',timeZone:tz}).format(selectedAgendaDate())}</b><button type="button" data-agenda-nav="next-day">Próximo dia ›</button></div>`;
     if(selectedPeriod==='week'){
-      list.innerHTML=renderWeeklyCalendar(rows,labels);
+      list.innerHTML=nav+renderWeeklyCalendar(rows,labels);
     }else{
-      list.innerHTML=renderDailyCalendar(rows,labels);
+      list.innerHTML=nav+renderDailyCalendar(rows,labels);
     }
+    list.querySelectorAll('[data-agenda-nav]').forEach(btn=>btn.onclick=()=>{const action=btn.dataset.agendaNav;if(action==='prev-day')agendaDayOffset--;if(action==='next-day')agendaDayOffset++;if(action==='prev-week')agendaWeekOffset--;if(action==='next-week')agendaWeekOffset++;renderAppointments();});
     bindStatusButtons(); updateDashboardFromDB();
   }
 
 
   function renderDailyCalendar(rows,labels){
-    const now=new Date();
-    const today=new Date(now); today.setHours(0,0,0,0);
+    const today=selectedAgendaDate(); today.setHours(0,0,0,0);
     const barbers=dbStaff.filter(x=>x.role==='barber');
     if(!barbers.length)return '<div class="week-help">Cadastre barbeiros para visualizar a agenda por coluna.</div>';
     const times=[]; for(let m=9*60;m<=19*60;m+=30)times.push(m);
     const dayLabel=new Intl.DateTimeFormat('pt-BR',{weekday:'long',day:'2-digit',month:'long',timeZone:tz}).format(today);
     const fmtTime=d=>{const p=new Intl.DateTimeFormat('en-GB',{hour:'2-digit',minute:'2-digit',hour12:false,timeZone:tz}).format(new Date(d)).split(':').map(Number);return p[0]*60+p[1];};
-    const todayRows=rows.filter(a=>dateKey(a.starts_at)===todayKey());
+    const todayRows=rows.filter(a=>dateKey(a.starts_at)===selectedAgendaKey());
     let html=`<div class="week-help">Hoje: ${dayLabel}. Cada coluna é um barbeiro. Deslize para os lados para ver a equipe e para baixo para ver os horários.</div><div class="day-calendar-scroll week-calendar-scroll"><div class="day-calendar" style="--barber-count:${barbers.length}">`;
     html+='<div class="day-head day-time-head">Horário</div>';
     barbers.forEach(b=>{const avatar=b.avatar_url?`<img class="staff-avatar" src="${window.escapeHtml(b.avatar_url)}" alt="">`:`<span class="avatar-placeholder">${window.escapeHtml((b.name||'?').trim().slice(0,1).toUpperCase())}</span>`;html+=`<div class="day-head day-barber-head"><span style="display:flex;align-items:center;justify-content:center;gap:4px">${avatar}<span>${window.escapeHtml(b.name)}</span></span></div>`;});
@@ -717,7 +724,7 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
     if($('revenueLabel'))$('revenueLabel').textContent=selectedPeriod==='today'?'Faturamento de hoje':'Faturamento da semana';
     if($('appointmentsLabel'))$('appointmentsLabel').textContent=selectedPeriod==='today'?'Agendamentos de hoje':'Agendamentos da semana';
     if($('agendaListTitle'))$('agendaListTitle').textContent=selectedPeriod==='today'?'Agenda de hoje':'Agenda da semana';
-    const start=selectedPeriod==='today'?new Date(new Date().setHours(0,0,0,0)):weekStartDate();
+    const start=selectedPeriod==='today'?new Date(selectedAgendaDate().setHours(0,0,0,0)):weekStartDate();
     const end=selectedPeriod==='today'?new Date(start.getTime()+86400000):weekEndDate();
     const ids=new Set(shown.map(a=>a.id));
     const revenue=dbPayments.filter(p=>p.paid_at&&new Date(p.paid_at)>=start&&new Date(p.paid_at)<end&&ids.has(p.appointment_id)).reduce((sum,p)=>sum+Number(p.amount||0),0);
