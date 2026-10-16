@@ -120,11 +120,13 @@ main{padding:16px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9p
 <div class="module-form"><b>Permissões</b><div class="switch-row">Agendamentos <span class="switch on"></span></div><div class="switch-row">Clientes <span class="switch on"></span></div><div class="switch-row">Serviços e preços <span class="switch"></span></div></div>
 </main></section>
 
-<section id="comanda" class="page"><div class="head"><button class="back" onclick="show('mais')">‹ Voltar</button><h1>Comanda</h1></div><main>
-<div class="module-grid"><div class="module-card"><span>Comandas abertas</span><b id="openOrders">1</b></div><div class="module-card"><span>Total em aberto</span><b id="ordersTotal">R$ 40,00</b></div></div>
-<div class="module-actions"><button onclick="newOrder()">＋ Nova comanda</button></div>
-<div id="orderList" class="list module-list"><div class="row"><b>João Silva · #001</b><small>Corte de cabelo · R$ 40,00 · <span class="tag">Aberta</span></small></div></div>
-<div id="orderForm" class="module-form" style="display:none"><input id="orderClient" placeholder="Cliente"><select id="orderService"><option value="40">Corte de cabelo — R$ 40,00</option><option value="40">Barba — R$ 40,00</option><option value="80">Corte + Barba — R$ 80,00</option><option value="20">Sobrancelha — R$ 20,00</option></select><input id="orderDiscount" type="number" min="0" value="0" placeholder="Desconto"><button onclick="addOrder()">Adicionar comanda</button></div>
+<section id="comanda" class="page"><div class="head"><button class="back" onclick="show('mais')">‹ Voltar</button><h1>Comandas</h1></div><main>
+<div class="module-grid"><div class="module-card"><span>Atendimentos encontrados</span><b id="ordersFound">0</b></div><div class="module-card"><span>Total no período</span><b id="ordersPeriodTotal">R$ 0,00</b></div></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0"><label style="font-size:12px">Data inicial<input id="orderDateStart" type="date" style="display:block;width:100%;box-sizing:border-box;padding:11px;border:1px solid #ddd;border-radius:10px;margin-top:5px"></label><label style="font-size:12px">Data final<input id="orderDateEnd" type="date" style="display:block;width:100%;box-sizing:border-box;padding:11px;border:1px solid #ddd;border-radius:10px;margin-top:5px"></label></div>
+<button type="button" class="mini-btn" id="toggleOrderFilters" style="margin:0 0 10px">＋ Filtros</button>
+<div id="orderExtraFilters" class="module-form" style="display:none;margin-bottom:12px"><input id="orderClientFilter" placeholder="Nome do cliente"><select id="orderBarberFilter"><option value="all">Todos os profissionais</option></select><select id="orderStatusFilter"><option value="all">Todas as situações</option><option value="open">Em aberto / não pagos</option><option value="paid">Pagos</option><option value="completed">Concluídos</option><option value="cancelled">Cancelados ou ausentes</option></select></div>
+<button type="button" id="searchOrdersBtn" style="width:100%;margin-bottom:12px">Pesquisar comandas</button>
+<div id="orderList" class="list module-list"><div class="row">Carregando atendimentos...</div></div>
 </main></section>
 
 <section id="estoque" class="page"><div class="head"><button class="back" onclick="show('mais')">‹ Voltar</button><h1>Estoque</h1></div><main>
@@ -1208,4 +1210,41 @@ document.getElementById('saveStaffHours')?.addEventListener('click',async()=>{co
 // Registra uma comissão uma única vez ao finalizar um atendimento pago.
 async function createCommissionForAppointment(a,amount,paymentId){try{const {data:existing,error:ee}=await window.sb.from('staff_commissions').select('id').eq('appointment_id',a.id).limit(1);if(ee)throw ee;if(existing?.length)return;const {data:cfg,error:ce}=await window.sb.from('staff_service_commissions').select('commission_percent,active').eq('barbershop_id',window.shopId).eq('staff_id',a.barber_id).eq('service_id',a.service_id).eq('active',true).maybeSingle();if(ce)throw ce;if(!cfg)return;const pct=Number(cfg.commission_percent||0),value=Math.round(Number(amount)*pct)/100;const {error}=await window.sb.from('staff_commissions').insert({barbershop_id:window.shopId,staff_id:a.barber_id,service_id:a.service_id,appointment_id:a.id,payment_id:paymentId,service_amount:Number(amount),commission_percent:pct,commission_amount:value,status:'pending'});if(error&&error.code!=='23505')throw error;}catch(e){console.error('Falha ao gerar comissão:',e);alert('Pagamento foi registrado, mas a comissão não foi gerada: '+(e.message||e));}}
 </script>
+
+<script>
+(function(){
+ const $=id=>document.getElementById(id); const money=v=>'R$ '+Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+ let orderRows=[];
+ const dateLocal=d=>{const x=new Date(d);return isNaN(x)?'':x.toLocaleDateString('pt-BR')};
+ function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+ async function loadOrderRecords(){const root=$('orderList');if(!root)return;root.innerHTML='<div class="row">Buscando comandas e atendimentos atuais...</div>';try{if(!window.sb||!window.shopId)throw new Error('Entre na sua conta para consultar as comandas.');
+ const [ar,cr,sr,vr,pr]=await Promise.all([
+ window.sb.from('appointments').select('id,customer_id,barber_id,service_id,starts_at,ends_at,status,price').eq('barbershop_id',window.shopId).order('starts_at',{ascending:false}),
+ window.sb.from('customers').select('id,name,phone').eq('barbershop_id',window.shopId),
+ window.sb.from('staff').select('id,name,role,active').eq('barbershop_id',window.shopId),
+ window.sb.from('services').select('id,name,price').eq('barbershop_id',window.shopId),
+ window.sb.from('payments').select('id,appointment_id,amount,status,paid_at,created_at').eq('barbershop_id',window.shopId)
+ ]);
+ for(const r of [ar,cr,sr,vr,pr])if(r.error)throw r.error;
+ const customers=new Map((cr.data||[]).map(x=>[x.id,x])), staff=new Map((sr.data||[]).map(x=>[x.id,x])), services=new Map((vr.data||[]).map(x=>[x.id,x]));
+ const payments=new Map();(pr.data||[]).forEach(x=>{if(x.status==='paid')payments.set(x.appointment_id,x)});
+ orderRows=(ar.data||[]).map(a=>({ ...a,customer:customers.get(a.customer_id),barber:staff.get(a.barber_id),service:services.get(a.service_id),payment:payments.get(a.id)}));
+ const select=$('orderBarberFilter'), previous=select.value;select.innerHTML='<option value="all">Todos os profissionais</option>'+(sr.data||[]).filter(x=>x.active!==false).map(x=>`<option value="${esc(x.id)}">${esc(x.name)}</option>`).join('');if([...select.options].some(o=>o.value===previous))select.value=previous;
+ const today=new Date();const iso=d=>{const z=new Date(d.getTime()-d.getTimezoneOffset()*60000);return z.toISOString().slice(0,10)};
+ if(!$('orderDateStart').value)$('orderDateStart').value=iso(new Date(today.getFullYear(),today.getMonth(),1));if(!$('orderDateEnd').value)$('orderDateEnd').value=iso(today);
+ renderOrderRecords();
+ }catch(e){root.innerHTML=`<div class="row"><b>Não foi possível carregar as comandas.</b><small>${esc(e.message||e)}</small></div>`;}}
+ function renderOrderRecords(){const root=$('orderList');if(!root)return;const start=$('orderDateStart').value,end=$('orderDateEnd').value,client=($('orderClientFilter').value||'').trim().toLocaleLowerCase('pt-BR'),barber=$('orderBarberFilter').value,status=$('orderStatusFilter').value;
+ let rows=orderRows.filter(a=>{const d=new Date(a.starts_at);const day=isNaN(d)?'':`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;if(start&&day<start||end&&day>end)return false;if(client&&!String(a.customer?.name||'Cliente').toLocaleLowerCase('pt-BR').includes(client))return false;if(barber!=='all'&&a.barber_id!==barber)return false;const st=String(a.status||'').toLowerCase();if(status==='paid'&&!a.payment)return false;if(status==='open'&&(a.payment||['cancelled','canceled','absent','no_show'].includes(st)))return false;if(status==='completed'&&!['completed','concluido','concluído'].includes(st))return false;if(status==='cancelled'&&!['cancelled','canceled','absent','no_show'].includes(st))return false;return true;});
+ $('ordersFound').textContent=rows.length;$('ordersPeriodTotal').textContent=money(rows.reduce((n,a)=>n+Number(a.payment?.amount??a.price??0),0));
+ root.innerHTML=rows.map(a=>{const st=String(a.status||'Agendado');const paid=!!a.payment;const statusLabel=paid?'Paga':({'completed':'Concluído','confirmed':'Confirmado','in_progress':'Em atendimento','cancelled':'Cancelado','canceled':'Cancelado','absent':'Ausente','no_show':'Ausente'}[st.toLowerCase()]||st);return `<div class="row"><b>${esc(a.customer?.name||'Cliente')} · #${esc(a.id.slice(0,8).toUpperCase())}</b><small>${esc(a.service?.name||'Serviço')} · ${money(a.payment?.amount??a.price)} · ${dateLocal(a.starts_at)} ${new Date(a.starts_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</small><small>Atendido por: ${esc(a.barber?.name||'Profissional não cadastrado')} · <span class="tag">${esc(statusLabel)}</span></small></div>`}).join('')||'<div class="row">Nenhuma comanda encontrada com esses filtros.</div>';
+ }
+ $('toggleOrderFilters')?.addEventListener('click',()=>{const box=$('orderExtraFilters'),open=box.style.display==='grid';box.style.display=open?'none':'grid';$('toggleOrderFilters').textContent=open?'＋ Filtros':'− Ocultar filtros';});
+ $('searchOrdersBtn')?.addEventListener('click',renderOrderRecords);
+ ['orderClientFilter','orderBarberFilter','orderStatusFilter','orderDateStart','orderDateEnd'].forEach(id=>$(id)?.addEventListener(id==='orderClientFilter'?'keydown':'change',e=>{if(e.type==='keydown'&&e.key!=='Enter')return;renderOrderRecords()}));
+ const oldShow=window.show;window.show=function(id,b){if(typeof oldShow==='function')oldShow(id,b);if(id==='comanda')loadOrderRecords();};
+ if(document.getElementById('comanda')?.classList.contains('active'))loadOrderRecords();
+})();
+</script>
+
 </body></html>
