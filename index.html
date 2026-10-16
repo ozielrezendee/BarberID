@@ -831,16 +831,19 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
     btn.textContent='Registrando...';
 
     try{
-      const {data:existing}=await sb.from('payments')
-        .select('id')
+      const {data:existing,error:existingError}=await sb.from('payments')
+        .select('id,amount')
         .eq('appointment_id',a.id)
         .eq('status','paid')
         .limit(1);
+      if(existingError)throw new Error('Consulta do pagamento: '+existingError.message);
 
       if(existing&&existing.length){
         await sb.from('appointments').update({status:'completed',updated_at:new Date().toISOString()})
           .eq('id',a.id).eq('barbershop_id',window.shopId);
-        alert('Este atendimento já possui pagamento registrado.');
+        // Também tenta gerar a comissão quando o pagamento já existia antes da integração.
+        await createCommissionForAppointment(a,Number(existing[0].amount||amount),existing[0].id);
+        alert('Este atendimento já possui pagamento registrado. Comissão conferida.');
         closeFinishModal();
         await loadAll();
         return;
