@@ -173,7 +173,7 @@ main{padding:16px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9p
 <div class="profile-choice row" onclick="show('perfil-barbearia')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();show('perfil-barbearia')}"><div style="font-size:26px;margin-right:12px">🏪</div><div><b>Dados da sua barbearia</b><small>Contato, endereço, logotipo e horários de funcionamento.</small></div><span style="margin-left:auto;font-size:22px">›</span></div>
 </main></section>
 <section id="perfil-pessoal" class="page"><div class="head"><button class="back" onclick="show('perfil')">‹ Voltar</button><h1>Dados pessoais</h1></div><main>
-<div class="module-form" id="personalProfileForm"><label for="personalName">Nome completo</label><input id="personalName" autocomplete="name" placeholder="Seu nome"><label for="personalEmail">E-mail</label><input id="personalEmail" type="email" autocomplete="email" placeholder="seu@email.com"><label for="personalPhone">Telefone</label><input id="personalPhone" type="tel" autocomplete="tel" placeholder="(00) 00000-0000"><label for="personalPhoto">Foto de perfil</label><input id="personalPhoto" type="file" accept="image/*"><div id="personalPhotoNote" class="profile-help">O envio permanente da foto depende da configuração do armazenamento no Supabase.</div><button id="savePersonalProfile" type="button">Salvar dados pessoais</button><div id="personalProfileMessage" class="profile-help" role="status"></div></div>
+<div class="module-form" id="personalProfileForm"><label for="personalName">Nome completo</label><input id="personalName" autocomplete="name" placeholder="Seu nome"><label for="personalEmail">E-mail</label><input id="personalEmail" type="email" autocomplete="email" placeholder="seu@email.com"><label for="personalPhone">Telefone</label><input id="personalPhone" type="tel" autocomplete="tel" placeholder="(00) 00000-0000"><label for="personalPhoto">Foto de perfil</label><input id="personalPhoto" type="file" accept="image/*"><div id="personalPhotoNote" class="profile-help">O envio permanente da foto depende da configuração do armazenamento no Supabase.</div><div class="row" style="margin:14px 0;background:#f8fafc"><label for="ownerAlsoBarber" style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0"><span><b style="display:block">✂️ DONO TAMBÉM É BARBEIRO</b><small>Quando ativado, seu perfil poderá aparecer como profissional.</small></span><input id="ownerAlsoBarber" type="checkbox" style="width:24px;height:24px;flex-shrink:0"></label><div id="ownerBarberConfig" style="display:none;margin-top:12px"><button type="button" id="ownerBarberHours" class="close">1. Horários</button><button type="button" id="ownerBarberCommissions" class="close">2. Serviços e comissões</button><small>Ative a opção e salve os dados pessoais para liberar as configurações.</small></div></div><button id="savePersonalProfile" type="button">Salvar dados pessoais</button><div id="personalProfileMessage" class="profile-help" role="status"></div></div>
 </main></section>
 <section id="perfil-barbearia" class="page"><div class="head"><button class="back" onclick="show('perfil')">‹ Voltar</button><h1>Dados da barbearia</h1></div><main>
 <div class="module-form" id="shopProfileForm"><label for="shopProfileName">Nome da barbearia</label><input id="shopProfileName" placeholder="Nome do estabelecimento"><label for="shopProfilePhone">Telefone</label><input id="shopProfilePhone" type="tel" placeholder="Telefone da barbearia"><label for="shopProfileEmail">E-mail</label><input id="shopProfileEmail" type="email" placeholder="contato@barbearia.com"><label for="shopProfileAddress">Endereço</label><input id="shopProfileAddress" placeholder="Rua, número, bairro e cidade"><label for="shopLogo">Foto ou logotipo</label><input id="shopLogo" type="file" accept="image/*"><div id="shopLogoNote" class="profile-help">O envio permanente da imagem depende de configurar o armazenamento no Supabase.</div><button id="saveShopProfile" type="button">Salvar dados da barbearia</button><div id="shopProfileMessage" class="profile-help" role="status"></div></div>
@@ -329,7 +329,7 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
 
   async function getShop(){
     const {data,error}=await window.sb.from('barbershops')
-      .select('id,name,owner_id,phone,email,address')
+      .select('id,name,owner_id,phone,email,address,owner_is_barber')
       .eq('owner_id',currentUser.id)
       .single();
     if(error) throw new Error('Barbearia: '+error.message);
@@ -342,6 +342,7 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
     if($('personalName')) $('personalName').value=currentUser.user_metadata?.full_name||currentUser.user_metadata?.name||'';
     if($('personalEmail')) $('personalEmail').value=currentUser.email||'';
     if($('personalPhone')) $('personalPhone').value=currentUser.user_metadata?.phone||'';
+    if($('ownerAlsoBarber')) { $('ownerAlsoBarber').checked=!!data.owner_is_barber; $('ownerBarberConfig').style.display=data.owner_is_barber?'block':'none'; }
     return data;
   }
 
@@ -511,19 +512,41 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
 
   $('savePersonalProfile')?.addEventListener('click',async()=>{
     const btn=$('savePersonalProfile'),msg=$('personalProfileMessage');
-    const full_name=$('personalName').value.trim(),phone=$('personalPhone').value.trim(),email=$('personalEmail').value.trim();
+    const full_name=$('personalName').value.trim(),phone=$('personalPhone').value.trim(),email=$('personalEmail').value.trim(),ownerIsBarber=!!$('ownerAlsoBarber')?.checked;
     if(!full_name){alert('Informe seu nome completo.');return;}
     if(!email){alert('Informe seu e-mail.');return;}
     btn.disabled=true;btn.textContent='Salvando...';msg.textContent='';
     try{
       const {error}=await sb.auth.updateUser({data:{...currentUser.user_metadata,full_name,phone}});
       if(error)throw error;
+      const {error:ownerFlagError}=await sb.from('barbershops').update({owner_is_barber:ownerIsBarber}).eq('id',shopId).eq('owner_id',currentUser.id);
+      if(ownerFlagError)throw new Error('Dados pessoais foram salvos, mas a chave Dono também é barbeiro não foi salva. Execute o SQL de preparação antes de usar: '+ownerFlagError.message);
+      const {data:ownerStaff,error:ownerLookupError}=await sb.from('staff').select('id').eq('barbershop_id',shopId).eq('owner_user_id',currentUser.id).maybeSingle();
+      if(ownerLookupError)throw ownerLookupError;
+      if(ownerIsBarber){const payload={barbershop_id:shopId,owner_user_id:currentUser.id,name:full_name,role:'barber',active:true};const result=ownerStaff?await sb.from('staff').update(payload).eq('id',ownerStaff.id):await sb.from('staff').insert(payload);if(result.error)throw new Error('A chave foi salva, mas não foi possível criar/vincular o perfil profissional: '+result.error.message);}
+      else if(ownerStaff){const {error:offError}=await sb.from('staff').update({active:false}).eq('id',ownerStaff.id);if(offError)throw new Error('A chave foi salva, mas não foi possível desativar o perfil profissional: '+offError.message);}
+      $('ownerBarberConfig').style.display=ownerIsBarber?'block':'none';
+      await loadAll();
       if(email!==currentUser.email){const {error:emailError}=await sb.auth.updateUser({email});if(emailError)throw emailError;msg.textContent='Dados salvos. Confira sua caixa de entrada para confirmar a alteração do e-mail.';}
       else msg.textContent='Dados pessoais salvos com sucesso.';
       const {data:{user}}=await sb.auth.getUser();if(user)currentUser=user; window.currentUser=currentUser;
     }catch(e){msg.textContent='Não foi possível salvar: '+(e.message||e);}
     finally{btn.disabled=false;btn.textContent='Salvar dados pessoais';}
   });
+
+  $('ownerAlsoBarber')?.addEventListener('change',()=>{if($('ownerBarberConfig'))$('ownerBarberConfig').style.display=$('ownerAlsoBarber').checked?'block':'none';});
+  async function openOwnerAsStaffConfig(kind){
+    try{
+      const {data,error}=await window.sb.from('staff').select('id,name,role,active,avatar_url').eq('barbershop_id',window.shopId).eq('owner_user_id',currentUser.id).maybeSingle();
+      if(error)throw error;
+      if(!data)throw new Error('Para configurar horários e comissões, primeiro ative a chave, salve o perfil e execute o SQL de integração do dono como profissional. O cadastro profissional ainda não foi vinculado.');
+      window.dbStaff=window.dbStaff||[]; if(!window.dbStaff.some(x=>x.id===data.id))window.dbStaff.push(data);
+      window.editingStaffId=data.id;
+      if(kind==='hours')await window.openStaffHoursConfig();else await window.openStaffCommissionConfig();
+    }catch(e){alert(e.message||String(e));}
+  }
+  $('ownerBarberHours')?.addEventListener('click',()=>openOwnerAsStaffConfig('hours'));
+  $('ownerBarberCommissions')?.addEventListener('click',()=>openOwnerAsStaffConfig('commissions'));
 
   $('saveShopProfile')?.addEventListener('click',async()=>{
     const btn=$('saveShopProfile'),msg=$('shopProfileMessage');
