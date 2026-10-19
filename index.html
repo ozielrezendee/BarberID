@@ -226,8 +226,9 @@ main{padding:16px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9p
 </script>
 
 <script>
-function publicBookingUrl(){const base=new URL('agendar.html',location.href);const name=(document.getElementById('shopProfileName')?.value||'').trim();const slug=name.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');base.searchParams.set('barbearia',slug);return base.href;}
-function showPublicBooking(){show('agendamento-publico');const link=publicBookingUrl();const input=document.getElementById('publicBookingLink');if(input)input.value=link;const qr=document.getElementById('publicBookingQr');if(qr)qr.src='https://api.qrserver.com/v1/create-qr-code/?size=220x220&data='+encodeURIComponent(link);}
+function publicBookingUrl(){const base=new URL('agendar.html',location.href);base.searchParams.set('barbearia','barberid-3554f6');return base.href;}
+function publicBookingDisplayPath(){return '/BarberID/agendar.html?barbearia=barberid-3554f6';}
+function showPublicBooking(){show('agendamento-publico');const link=publicBookingUrl();const input=document.getElementById('publicBookingLink');if(input)input.value=publicBookingDisplayPath();const qr=document.getElementById('publicBookingQr');if(qr)qr.src='https://api.qrserver.com/v1/create-qr-code/?size=220x220&data='+encodeURIComponent(link);}
 async function copyPublicBookingLink(){const input=document.getElementById('publicBookingLink');try{await navigator.clipboard.writeText(input.value);document.getElementById('publicBookingHelp').textContent='Link copiado! Agora é só enviar ao cliente.';}catch(e){input.select();document.execCommand('copy');document.getElementById('publicBookingHelp').textContent='Selecione e copie o link, se o navegador não permitir a cópia automática.';}}
 function openPublicBookingLink(){const input=document.getElementById('publicBookingLink');if(input?.value)window.open(input.value,'_blank','noopener');}
 </script>
