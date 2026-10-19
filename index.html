@@ -226,8 +226,8 @@ main{padding:16px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9p
 </script>
 
 <script>
-function publicBookingUrl(){const base=new URL('agendar.html',location.href);base.searchParams.set('barbearia','barberid-3554f6');return base.href;}
-function publicBookingDisplayPath(){return '/BarberID/agendar.html?barbearia=barberid-3554f6';}
+function publicBookingUrl(){const base=new URL('agendar.html',location.href);base.searchParams.set('barbearia','barbearia-division-street');return base.href;}
+function publicBookingDisplayPath(){return '/BarberID/agendar.html?barbearia=barbearia-division-street';}
 function showPublicBooking(){show('agendamento-publico');const link=publicBookingUrl();const input=document.getElementById('publicBookingLink');if(input)input.value=publicBookingDisplayPath();const qr=document.getElementById('publicBookingQr');if(qr)qr.src='https://api.qrserver.com/v1/create-qr-code/?size=220x220&data='+encodeURIComponent(link);}
 async function copyPublicBookingLink(){const input=document.getElementById('publicBookingLink');const fullLink=publicBookingUrl();try{await navigator.clipboard.writeText(fullLink);document.getElementById('publicBookingHelp').textContent='Link completo copiado! Agora é só enviar ao cliente.';}catch(e){const temp=document.createElement('textarea');temp.value=fullLink;temp.style.position='fixed';temp.style.opacity='0';document.body.appendChild(temp);temp.select();const ok=document.execCommand('copy');temp.remove();document.getElementById('publicBookingHelp').textContent=ok?'Link completo copiado! Agora é só enviar ao cliente.':'Não foi possível copiar automaticamente. Abra a prévia e copie o endereço completo do navegador.';}}
 function openPublicBookingLink(){window.open(publicBookingUrl(),'_blank','noopener');}
