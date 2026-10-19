@@ -111,7 +111,8 @@ main{padding:16px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9p
 <div id="cashCorrectionModal" class="cash-modal"><div class="cash-sheet"><h2>Corrigir caixa</h2><p class="muted" id="correctionSessionLabel">Sessão</p><label for="correctionField">O que será corrigido?</label><select id="correctionField"><option value="opening_amount">Saldo inicial</option><option value="closing_amount">Saldo final registrado (caixa fechado)</option></select><label for="correctionValue">Novo valor (R$)</label><input id="correctionValue" type="number" min="0" step="0.01" placeholder="Novo valor"><label for="correctionReason">Justificativa obrigatória</label><textarea id="correctionReason" rows="3" placeholder="Explique o motivo da correção" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:10px;margin:7px 0 12px"></textarea><button id="confirmCashCorrection" type="button">Salvar correção</button><button class="close" id="cancelCashCorrection" type="button">Cancelar</button></div></div>
 <div id="cashMovementCorrectionModal" class="cash-modal"><div class="cash-sheet"><h2>Corrigir lançamento</h2><p class="muted" id="movementCorrectionLabel">Lançamento financeiro</p><label for="movementCorrectionDescription">Descrição / comanda</label><input id="movementCorrectionDescription" type="text" maxlength="180" placeholder="Descrição do lançamento"><label for="movementCorrectionAmount">Novo valor (R$)</label><input id="movementCorrectionAmount" type="number" min="0" step="0.01" placeholder="Novo valor"><label for="movementCorrectionMethod">Forma de pagamento</label><select id="movementCorrectionMethod"><option value="pix">Pix</option><option value="cash">Dinheiro</option><option value="credit">Crédito</option><option value="debit">Débito</option></select><label for="movementCorrectionReason">Justificativa obrigatória</label><textarea id="movementCorrectionReason" rows="3" placeholder="Explique o motivo da correção (mínimo 8 caracteres)" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:10px;margin:7px 0 12px"></textarea><button id="confirmMovementCorrection" type="button">Salvar correção</button><button class="close" id="cancelMovementCorrection" type="button">Cancelar</button></div></div>
 <section id="clientes" class="page"><div class="head"><button class="back" onclick="show('home')">‹ Voltar</button><h1>Clientes</h1></div><main><button id="newCustomerBtn" class="primary" type="button">＋ Novo cliente</button><div class="list"><div class="row"><b>João Silva</b><small>Telefone · Histórico de atendimentos</small></div><div class="row"><b>Marcos Souza</b><small>Telefone · Histórico de atendimentos</small></div><div class="row"><b>Pedro Alves</b><small>12 atendimentos</small></div></div></main></section>
-<section id="servicos" class="page"><div class="head"><button class="back" onclick="show('home')">‹ Voltar</button><h1>Serviços</h1></div><main><button class="primary">＋ Novo serviço</button><div class="list"><div class="row"><b>Corte de cabelo</b><small>30 min · R$ 40,00</small></div><div class="row"><b>Barba</b><small>30 min · R$ 40,00</small></div><div class="row"><b>Corte + Barba</b><small>60 min · R$ 80,00</small></div><div class="row"><b>Sobrancelha</b><small>15 min · R$ 20,00</small></div></div></main></section>
+<section id="servicos" class="page"><div class="head"><button class="back" onclick="show('mais')">‹ Voltar</button><h1>Serviços</h1></div><main><p class="muted">Cadastre os serviços, preços e duração. A duração será usada para calcular os horários disponíveis.</p><button id="newServiceBtn" class="primary" type="button">＋ Novo serviço</button><div id="serviceList" class="list"><div class="row">Carregando serviços...</div></div></main></section>
+<div id="serviceModal" class="modal"><div class="sheet"><h2 id="serviceModalTitle">Novo serviço</h2><label for="serviceName">Nome do serviço</label><input id="serviceName" maxlength="100" placeholder="Ex.: Corte degradê"><label for="servicePrice">Preço (R$)</label><input id="servicePrice" type="number" min="0" step="0.01" placeholder="40,00"><label for="serviceDuration">Duração (minutos)</label><input id="serviceDuration" type="number" min="5" step="5" value="30" placeholder="30"><label class="switch-row"><input id="serviceActive" type="checkbox" checked style="width:auto;margin-right:8px"> Serviço ativo e disponível para agendamento</label><button id="saveServiceBtn" type="button">Salvar serviço</button><button class="close" type="button" onclick="closeServiceModal()">Cancelar</button></div></div>
 
 <section id="equipe" class="page"><div class="head"><button class="back" onclick="show('mais')">‹ Voltar</button><h1>Equipe</h1></div><main>
 <div class="module-grid"><div class="module-card"><span>Barbeiros ativos</span><b id="teamCount">3</b></div><div class="module-card"><span>Atendimentos hoje</span><b id="teamAppointments">4</b></div></div>
@@ -651,12 +652,38 @@ function exportReport(){alert('Relatório pronto para exportação. Na integraç
   };
 
   function renderServices(){
-    const list=document.querySelector('#servicos .list');
-    if(!list)return;
-    list.innerHTML=dbServices.map(x=>
-      `<div class="row"><b>${window.escapeHtml(x.name)}</b><small>${x.duration_minutes} min · ${window.money(x.price)}</small></div>`
-    ).join('');
+    const list=$('serviceList'); if(!list)return;
+    if(!dbServices.length){list.innerHTML='<div class="row"><b>Nenhum serviço ativo</b><small>Toque em “Novo serviço” para cadastrar o primeiro.</small></div>';return;}
+    list.innerHTML=dbServices.map(x=>`<div class="row" style="display:flex;justify-content:space-between;align-items:center;gap:12px"><div><b>${window.escapeHtml(x.name)}</b><small>${Number(x.duration_minutes||30)} min · ${window.money(x.price)} · Ativo</small></div><button type="button" class="mini-btn" onclick="editService('${x.id}')">Editar</button></div>`).join('');
   }
+
+  let editingServiceId=null;
+  window.openServiceModal=function(id=null){
+    editingServiceId=id; const item=id?dbServices.find(x=>x.id===id):null;
+    $('serviceModalTitle').textContent=item?'Editar serviço':'Novo serviço';
+    $('serviceName').value=item?.name||''; $('servicePrice').value=item?Number(item.price||0):'';
+    $('serviceDuration').value=item?.duration_minutes||30; $('serviceActive').checked=true;
+    $('serviceModal').style.display='flex'; $('serviceModal').classList.add('open');
+  };
+  window.editService=function(id){window.openServiceModal(id);};
+  window.closeServiceModal=function(){$('serviceModal').style.display='none';$('serviceModal').classList.remove('open');};
+  if($('newServiceBtn'))$('newServiceBtn').addEventListener('click',()=>window.openServiceModal());
+  if($('saveServiceBtn'))$('saveServiceBtn').addEventListener('click',async()=>{
+    const name=$('serviceName').value.trim(),price=Number($('servicePrice').value),duration=Number($('serviceDuration').value);
+    if(!name){alert('Informe o nome do serviço.');return;}
+    if($('servicePrice').value===''||!Number.isFinite(price)||price<0){alert('Informe um preço válido.');return;}
+    if(!Number.isInteger(duration)||duration<5||duration>600){alert('A duração deve ser entre 5 e 600 minutos.');return;}
+    const btn=$('saveServiceBtn');btn.disabled=true;btn.textContent='Salvando...';
+    try{
+      const payload={barbershop_id:window.shopId,name,price,duration_minutes:duration,active:$('serviceActive').checked};
+      let result;
+      if(editingServiceId){result=await window.sb.from('services').update(payload).eq('id',editingServiceId).eq('barbershop_id',window.shopId);}
+      else{result=await window.sb.from('services').insert(payload);}
+      if(result.error)throw result.error;
+      closeServiceModal();await loadAll();alert(editingServiceId?'Serviço atualizado com sucesso.':'Serviço cadastrado com sucesso.');
+    }catch(e){alert('Não foi possível salvar o serviço: '+(e.message||e));}
+    finally{btn.disabled=false;btn.textContent='Salvar serviço';}
+  });
 
   function renderCustomers(){
     const list=document.querySelector('#clientes .list');
