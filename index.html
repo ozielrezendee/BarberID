@@ -68,6 +68,36 @@ main{padding:16px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9p
 
 
 .staff-avatar{width:30px;height:30px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:7px;border:1px solid #dbe2ea;background:#eef2f7}.staff-avatar.large{width:92px;height:92px;display:block;margin:0 auto 10px}.team-edit{border:0;border-radius:9px;background:#e8efff;color:#1d4ed8;padding:10px 12px;font-weight:700}.team-buttons{display:flex;gap:7px;align-items:center}.team-member-main{display:flex;align-items:center;gap:8px}.avatar-placeholder{width:30px;height:30px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:#e8efff;color:#1d4ed8;font-size:12px;font-weight:800;margin-right:7px}
+
+/* BarberID desktop layout preview: desktop navigation and expanded workspace */
+@media (min-width: 900px){
+ body{background:#f3f5f9;}
+ .app{max-width:none;width:100%;min-height:100vh;margin:0;padding:0 0 0 190px;position:relative;}
+ .bottom{position:fixed;left:0;top:0;bottom:0;transform:none;width:190px;display:flex;flex-direction:column;justify-content:flex-start;gap:6px;padding:22px 10px;background:#101828;border:0;border-right:1px solid #263247;z-index:100;}
+ .bottom button{display:flex;align-items:center;gap:9px;text-align:left;padding:11px 10px;border-radius:11px;color:#cbd5e1;font-size:13px;font-weight:600;}
+ .bottom button.active{background:#2453df;color:#fff;}
+ .bottom .ico{display:inline-block;font-size:17px;margin:0;width:23px;text-align:center;}
+ header{padding:24px 32px 12px;background:#fff;border-bottom:1px solid #e7eaf0;}
+ header .top{max-width:1500px;margin:0 auto;}
+ header .greet{max-width:1500px;margin:20px auto 0;}
+ main{max-width:1500px;margin:0 auto;padding:24px 32px;}
+ .dashboard-cards{grid-template-columns:repeat(3,minmax(180px,1fr));gap:18px;}
+ .dashboard-card{padding:22px;border-radius:16px;}
+ .dashboard-card span{font-size:13px;}
+ .dashboard-card b{font-size:28px;}
+ .dashboard-secondary{max-width:520px;padding:14px 18px;}
+ .primary{width:auto;min-width:220px;padding:14px 20px;cursor:pointer;}
+ .card{border-radius:16px;}
+ .appt{grid-template-columns:80px minmax(240px,1fr) auto;gap:18px;padding:18px 22px;}
+ .page .head{padding:24px 32px 0;}
+ .page .head h1{color:#101828;}
+ .back{color:#2453df;}
+ .sheet{max-width:620px;border-radius:22px;margin:auto;}
+ .modal{align-items:center;padding:24px;}
+}
+@media (min-width: 900px) and (max-width: 1150px){.app{padding-left:180px}.bottom{width:180px}main{padding:20px}.dashboard-cards{grid-template-columns:repeat(2,minmax(180px,1fr));}}
+@media (max-width: 899px){.app{max-width:520px;margin:auto;padding-bottom:80px}.bottom{left:50%;transform:translateX(-50%);width:min(520px,100%);flex-direction:row;justify-content:initial;padding:8px;}}
+
 </style>
 <style>
 .module-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}.module-card{background:#fff;border:1px solid #e7eaf0;border-radius:15px;padding:15px}.module-card span{display:block;font-size:11px;color:#667085}.module-card b{display:block;font-size:22px;margin-top:4px}.module-actions{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.module-actions button,.mini-btn{border:0;border-radius:11px;padding:11px 13px;font-weight:700;background:#eef3ff;color:#1d4ed8}.mini-btn.danger{background:#fff0f0;color:#b42318}.module-list .row{cursor:pointer}.tag{display:inline-block;padding:5px 8px;border-radius:999px;background:#eef3ff;color:#1d4ed8;font-size:11px;font-weight:700}.muted{color:#667085}.empty-state{text-align:center;padding:30px 15px;color:#667085}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.form-grid input,.form-grid select,.module-form input,.module-form select{width:100%;box-sizing:border-box;padding:12px;border:1px solid #dfe3ea;border-radius:10px;background:#fff}.module-form{display:grid;gap:9px;background:#fff;border:1px solid #e7eaf0;border-radius:15px;padding:14px;margin:12px 0}.module-form button{padding:12px;border:0;border-radius:11px;background:#1d4ed8;color:#fff;font-weight:800}.table-row{display:grid;grid-template-columns:1.3fr .8fr .8fr;gap:8px;align-items:center;padding:12px 0;border-bottom:1px solid #edf0f4}.table-row:last-child{border-bottom:0}.report-bar{height:10px;border-radius:99px;background:#e9edf3;overflow:hidden}.report-bar i{display:block;height:100%;background:#2563eb;border-radius:99px}.switch-row{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid #edf0f4}.switch{width:44px;height:24px;border-radius:20px;background:#d0d5dd;position:relative}.switch.on{background:#2563eb}.switch:after{content:'';position:absolute;width:20px;height:20px;background:#fff;border-radius:50%;top:2px;left:2px}.switch.on:after{left:22px}
@@ -86,8 +116,49 @@ main{padding:16px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9p
 .profile-choice{display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:12px;padding:18px;border:1px solid #e4e7ec;border-radius:16px;background:#fff}.profile-choice small{display:block;color:#667085;margin-top:5px;line-height:1.4}.profile-choice:focus{outline:2px solid #2453df;outline-offset:2px}
 .agenda-nav{display:flex;align-items:center;justify-content:space-between;gap:6px;margin:10px 0;padding:8px;background:#fff;border:1px solid #e4e7ec;border-radius:12px;position:sticky;top:0;z-index:5}.agenda-nav button{border:0;border-radius:9px;background:#eef3ff;color:#2453df;font-weight:700;padding:9px 10px;font-size:12px;white-space:nowrap}.agenda-nav b{font-size:11px;text-align:center;color:#344054}
 </style>
+
+<style>
+ .desktop-sidebar,.desktop-topbar{display:none;}
+@media (min-width:900px){
+  .app{padding-left:190px!important;padding-top:68px!important;max-width:none!important;margin:0!important;padding-bottom:24px!important;}
+  .desktop-sidebar{display:flex;position:fixed;z-index:100;left:0;top:0;bottom:0;width:190px;box-sizing:border-box;flex-direction:column;gap:5px;padding:18px 12px;background:#101828;color:#fff;overflow-y:auto;}
+  .sidebar-brand{font-size:21px;font-weight:900;padding:8px 9px 20px;border-bottom:1px solid #344054;margin-bottom:12px;}
+  .sidebar-brand small{display:block;color:#98a2b3;font-size:10px;letter-spacing:2px;margin-top:4px;}
+  .sidebar-label{font-size:10px;color:#98a2b3;font-weight:800;letter-spacing:1.5px;padding:5px 10px;}
+  .desktop-sidebar button{display:flex;align-items:center;gap:10px;text-align:left;width:100%;border:0;border-radius:9px;padding:11px 10px;background:transparent;color:#e4e7ec;font-size:13px;font-weight:700;cursor:pointer;}
+  .desktop-sidebar button:hover{background:#25324a;color:#fff;}
+  .desktop-topbar{position:fixed;z-index:99;left:190px;right:0;top:0;height:68px;display:flex;align-items:center;gap:10px;padding:0 26px;background:#fff;border-bottom:1px solid #e4e7ec;box-shadow:0 2px 8px #1018280a;}
+  .desktop-topbar button{height:42px;min-width:130px;border:0;border-radius:10px;padding:0 18px;background:#f2f4f7;color:#344054;font-weight:800;display:flex;align-items:center;justify-content:center;gap:9px;cursor:pointer;}
+  .desktop-topbar button.selected,.desktop-topbar button:hover{background:#2453df;color:#fff;}
+  .bottom{display:none!important;}
+  .app>section.page{min-height:calc(100vh - 90px);}
+}
+@media(max-width:899px){.app{padding-top:0!important}.desktop-sidebar,.desktop-topbar{display:none!important;}}
+</style>
+
 </head><body><div id="loginScreen" class="login-screen"><div class="login-box"><h1>BarberID</h1><p>Entre para acessar os dados reais da sua barbearia.</p><input id="loginEmail" type="email" placeholder="E-mail"><input id="loginPassword" type="password" placeholder="Senha"><button id="loginBtn" type="button">Entrar</button><div id="loginError" class="login-error"></div><div class="db-note">Dados sincronizados com Supabase</div></div></div>
 <div class="app">
+<aside class="desktop-sidebar" aria-label="Menu de módulos">
+  <div class="sidebar-brand">BarberID <small>PAINEL</small></div>
+  <div class="sidebar-label">MENU</div>
+  <button onclick="show('perfil')">👤 <span>Perfil</span></button>
+  <button onclick="show('equipe')">👨‍💼 <span>Equipe</span></button>
+  <button onclick="show('servicos')">✂️ <span>Serviços</span></button>
+  <button onclick="show('comanda')">🧾 <span>Comanda</span></button>
+  <button onclick="show('estoque')">📦 <span>Estoque</span></button>
+  <button onclick="show('fidelidade')">❤️ <span>Fidelidade</span></button>
+  <button onclick="show('financeiro')">💳 <span>Financeiro</span></button>
+  <button onclick="show('relatorios')">📊 <span>Relatórios</span></button>
+  <button onclick="showPublicBooking()">🌐 <span>Agendamento público</span></button>
+  <button onclick="show('comunicacao')">🔔 <span>Comunicação</span></button>
+  <button onclick="show('avaliacoes');loadReviews()">⭐ <span>Avaliações</span></button>
+  <button onclick="show('perfil-barbearia')">⚙️ <span>Configurações</span></button>
+</aside>
+<nav class="desktop-topbar" aria-label="Navegação principal">
+  <button onclick="show('caixa',this)">💰 <span>CAIXA</span></button>
+  <button class="selected" onclick="show('home',this)">📅 <span>AGENDA</span></button>
+  <button onclick="show('clientes',this)">👥 <span>CLIENTES</span></button>
+</nav>
 <section id="home" class="page active"><header><div class="top"><div class="brand">BarberID</div><div>🔔</div></div><div class="greet"><small id="dashboardDate"></small><h1>Agenda do dia 👋</h1></div></header><main>
 <div class="period-tabs" id="periodTabs"><button class="period-tab active" data-period="today" type="button">Hoje</button><button class="period-tab" data-period="week" type="button">Semana</button></div>
 <div class="barber-tabs" id="barberTabs"><button class="barber-tab active" data-barber="all" type="button">Todos</button><button class="barber-tab" data-barber="Barbeiro 1" type="button">Barbeiro 1</button><button class="barber-tab" data-barber="Barbeiro 2" type="button">Barbeiro 2</button><button class="barber-tab" data-barber="Barbeiro 3" type="button">Barbeiro 3</button></div>
@@ -199,7 +270,7 @@ main{padding:16px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9p
 </main></section>
 <section id="agendamento-publico" class="page"><div class="head"><button class="back" onclick="show('mais')">‹ Voltar</button><h1>Agendamento público</h1></div><main><div class="module-form"><p style="color:#667085;font-size:14px;line-height:1.5;margin-top:0">Compartilhe este link com seus clientes para que escolham o profissional, serviço, data e horário disponíveis.</p><label for="publicBookingLink">Link para clientes</label><input id="publicBookingLink" readonly><button type="button" onclick="copyPublicBookingLink()">Copiar link</button><button type="button" class="close" onclick="openPublicBookingLink()" style="margin-top:8px">Abrir prévia do agendamento</button><div id="publicBookingHelp" class="profile-help" role="status" style="margin-top:12px">O link usa o identificador público da barbearia. Se a página avisar que a barbearia não foi encontrada, precisaremos conferir o slug cadastrado no Supabase.</div><div style="margin-top:18px;text-align:center"><img id="publicBookingQr" alt="QR Code do agendamento" style="width:190px;height:190px;max-width:100%;border:1px solid #e4e9f2;border-radius:12px;padding:8px;background:#fff"><p class="profile-help">QR Code para compartilhar ou imprimir.</p></div></div></main></section>
 <section id="mais" class="page"><div class="head"><button class="back" onclick="show('home')">‹ Voltar</button><h1>Mais</h1></div><main><div class="list">
-<div class="row" onclick="show('perfil')" style="cursor:pointer"><b>👤 Perfil</b><small>Dados pessoais e dados da sua barbearia</small></div><div class="row" onclick="show('caixa')" style="cursor:pointer"><b>💰 Caixa</b><small>Abertura, entradas, saídas e fechamento</small></div><div class="row" onclick="show('equipe')" style="cursor:pointer"><b>👨‍💼 Equipe</b><small>Barbeiros, horários e permissões</small></div><div class="row" onclick="show('servicos')" style="cursor:pointer"><b>✂️ Serviços</b><small>Cadastro, preços e duração dos atendimentos</small></div><div class="row" onclick="show('comanda')" style="cursor:pointer"><b>🧾 Comanda</b><small>Serviços, produtos, descontos e pagamento</small></div><div class="row" onclick="show('estoque')" style="cursor:pointer"><b>📦 Estoque</b><small>Produtos, entradas, saídas e estoque mínimo</small></div><div class="row" onclick="show('fidelidade')" style="cursor:pointer"><b>❤️ Fidelidade</b><small>Pontos, cashback, cartões e pacotes</small></div><div class="row" onclick="show('financeiro')" style="cursor:pointer"><b>💳 Financeiro</b><small>Contas, recebimentos e fluxo de caixa</small></div><div class="row" onclick="show('relatorios')" style="cursor:pointer"><b>📊 Relatórios</b><small>Faturamento, ocupação, ticket e desempenho</small></div><div class="row" onclick="showPublicBooking()" role="button" tabindex="0" style="cursor:pointer" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showPublicBooking()}"><b>🌐 Agendamento público</b><small>Link, QR Code e página para seus clientes</small></div><div class="row" onclick="show('comunicacao')" role="button" tabindex="0" style="cursor:pointer" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();show('comunicacao')}"><b>🔔 Comunicação</b><small>WhatsApp, confirmações, lembretes e pós-atendimento</small></div><div class="row" onclick="show('avaliacoes');loadReviews()" role="button" tabindex="0" style="cursor:pointer" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();show('avaliacoes');loadReviews()}"><b>⭐ Avaliações</b><small>Notas e comentários dos clientes</small></div><div class="row"><b>⚙️ Configurações</b><small>Barbearia, horários, regras e permissões</small></div>
+<div class="row" onclick="show('perfil')" style="cursor:pointer"><b>👤 Perfil</b><small>Dados pessoais e dados da sua barbearia</small></div><div class="row" onclick="show('equipe')" style="cursor:pointer"><b>👨‍💼 Equipe</b><small>Barbeiros, horários e permissões</small></div><div class="row" onclick="show('servicos')" style="cursor:pointer"><b>✂️ Serviços</b><small>Cadastro, preços e duração dos atendimentos</small></div><div class="row" onclick="show('comanda')" style="cursor:pointer"><b>🧾 Comanda</b><small>Serviços, produtos, descontos e pagamento</small></div><div class="row" onclick="show('estoque')" style="cursor:pointer"><b>📦 Estoque</b><small>Produtos, entradas, saídas e estoque mínimo</small></div><div class="row" onclick="show('fidelidade')" style="cursor:pointer"><b>❤️ Fidelidade</b><small>Pontos, cashback, cartões e pacotes</small></div><div class="row" onclick="show('financeiro')" style="cursor:pointer"><b>💳 Financeiro</b><small>Contas, recebimentos e fluxo de caixa</small></div><div class="row" onclick="show('relatorios')" style="cursor:pointer"><b>📊 Relatórios</b><small>Faturamento, ocupação, ticket e desempenho</small></div><div class="row" onclick="showPublicBooking()" role="button" tabindex="0" style="cursor:pointer" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showPublicBooking()}"><b>🌐 Agendamento público</b><small>Link, QR Code e página para seus clientes</small></div><div class="row" onclick="show('comunicacao')" role="button" tabindex="0" style="cursor:pointer" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();show('comunicacao')}"><b>🔔 Comunicação</b><small>WhatsApp, confirmações, lembretes e pós-atendimento</small></div><div class="row" onclick="show('avaliacoes');loadReviews()" role="button" tabindex="0" style="cursor:pointer" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();show('avaliacoes');loadReviews()}"><b>⭐ Avaliações</b><small>Notas e comentários dos clientes</small></div><div class="row" onclick="show('perfil-barbearia')" role="button" tabindex="0" style="cursor:pointer" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();show('perfil-barbearia')}"><b>⚙️ Configurações</b><small>Barbearia, horários, regras e permissões</small></div>
 </div></main></section>
 <nav class="bottom"><button class="active" data-target="home" onclick="show('home',this)"><span class="ico">📅</span>Agenda</button><button data-target="caixa" onclick="show('caixa',this)"><span class="ico">💰</span>Caixa</button><button data-target="clientes" onclick="show('clientes',this)"><span class="ico">👥</span>Clientes</button><button data-target="mais" onclick="show('mais',this)"><span class="ico">☰</span>Mais</button></nav></div>
 <div id="m" class="modal"><div class="sheet">
