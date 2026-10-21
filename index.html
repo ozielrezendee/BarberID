@@ -305,7 +305,7 @@ main{padding:16px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9p
 <div class="finish-actions"><button class="no" type="button" id="finishNo">Voltar</button><button class="yes" type="button" id="finishYes">Confirmar pagamento</button></div>
 </div></div>
 
-<script>function show(id,b){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));const page=document.getElementById(id);if(page)page.classList.add('active');document.querySelectorAll('.bottom button').forEach(x=>x.classList.toggle('active',(b&&x===b)||(!b&&x.dataset.target===id)));scrollTo(0,0);if(id==='perfil-horarios'&&window.loadShopHoursForProfile)window.loadShopHoursForProfile();}
+<script>function show(id,b){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));const page=document.getElementById(id);if(page)page.classList.add('active');document.querySelectorAll('.bottom button').forEach(x=>x.classList.toggle('active',(b&&x===b)||(!b&&x.dataset.target===id)));const topTarget=(id==='home'||id==='caixa'||id==='clientes')?id:null;document.querySelectorAll('.desktop-topbar button').forEach(x=>{const action=x.getAttribute('onclick')||'';const match=topTarget&&action.includes("show('\"+topTarget+"'");x.classList.toggle('selected',!!match);});scrollTo(0,0);if(id==='perfil-horarios'&&window.loadShopHoursForProfile)window.loadShopHoursForProfile();}
 
 
 
