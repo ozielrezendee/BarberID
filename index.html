@@ -30,7 +30,7 @@ main{padding:16px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9p
 @media(max-height:700px){#staffHoursModal .cash-sheet,#staffCommissionModal .cash-sheet{max-height:calc(100dvh - 16px);padding:12px}#staffHoursModal .cash-sheet h2,#staffCommissionModal .cash-sheet h2{font-size:18px}}
 .cash-sheet input,.cash-sheet select{width:100%;padding:13px;margin:7px 0 12px;border:1px solid #ddd;border-radius:10px}.cash-sheet button{width:100%;padding:14px;border:0;border-radius:11px;background:#1d4ed8;color:#fff;font-weight:700}.cash-sheet .close{margin-top:8px;background:#eee!important;color:#111!important}.cash-open{background:#e8efff;color:#1d4ed8}.cash-status{font-size:11px;color:#15803d;background:#ecfdf3;padding:5px 8px;border-radius:8px}.cash-tabs{display:flex;gap:8px;margin:16px 0 10px}.cash-tabs button{flex:1;padding:11px;border:1px solid #e2e6ee;background:#fff;border-radius:10px;font-weight:700}.cash-tabs button.active{background:#0b1220;color:#fff}.history-item{background:#fff;border:1px solid #e7eaf0;border-radius:14px;padding:14px;margin-bottom:9px}.history-head{display:flex;justify-content:space-between;gap:8px;align-items:center}.history-item small{color:#667085}.history-item .mini-btn{margin-top:10px}.admin-note{font-size:12px;color:#667085;background:#f8fafc;border-radius:10px;padding:10px;margin:10px 0}
 
-.login-screen{position:fixed;inset:0;background:#f5f7fa;z-index:100;display:flex;align-items:center;justify-content:center;padding:20px}.login-box{width:min(420px,100%);background:#fff;border:1px solid #e7eaf0;border-radius:20px;padding:24px;box-shadow:0 15px 50px #0001}.login-box h1{margin:0 0 6px}.login-box p{color:#667085;font-size:13px}.login-box input{width:100%;padding:13px;margin:7px 0 10px;border:1px solid #ddd;border-radius:10px}.login-box button{width:100%;padding:14px;border:0;border-radius:11px;background:#1d4ed8;color:#fff;font-weight:700}.login-error{color:#b42318;font-size:12px;margin-top:8px;display:none}.loading{opacity:.7;pointer-events:none}.db-note{font-size:11px;color:#667085;margin-top:10px;text-align:center}
+.login-screen{position:fixed;inset:0;background:#f5f7fa;z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px}.login-box{width:min(420px,100%);background:#fff;border:1px solid #e7eaf0;border-radius:20px;padding:24px;box-shadow:0 15px 50px #0001}.login-box h1{margin:0 0 6px}.login-box p{color:#667085;font-size:13px}.login-box input{width:100%;padding:13px;margin:7px 0 10px;border:1px solid #ddd;border-radius:10px}.login-box button{width:100%;padding:14px;border:0;border-radius:11px;background:#1d4ed8;color:#fff;font-weight:700}.login-error{color:#b42318;font-size:12px;margin-top:8px;display:none}.loading{opacity:.7;pointer-events:none}.db-note{font-size:11px;color:#667085;margin-top:10px;text-align:center}
 .modal.open{display:flex!important;align-items:center!important;justify-content:center!important;z-index:9999}.modal.open .sheet{display:block!important;width:min(92vw,420px);max-height:85vh;overflow:auto}
 
 .week-calendar-scroll{width:100%;max-height:62vh;overflow:auto;overscroll-behavior:contain;border:1px solid #e2e6ee;border-radius:14px;background:#fff;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y}
@@ -138,9 +138,11 @@ main{padding:16px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9p
   .app>section.page{min-height:calc(100vh - 90px);}
 }
 @media(max-width:899px){.app{padding-top:0!important}.desktop-sidebar,.desktop-topbar{display:none!important;}}
+body.logged-out .app,body.logged-out .desktop-sidebar,body.logged-out .desktop-topbar{display:none!important;}
+body.logged-out #loginScreen{display:flex!important;z-index:999999!important;}
 </style>
 
-</head><body><div id="loginScreen" class="login-screen"><div class="login-box"><h1>BarberID</h1><p>Entre para acessar os dados reais da sua barbearia.</p><input id="loginEmail" type="email" placeholder="E-mail"><input id="loginPassword" type="password" placeholder="Senha"><button id="loginBtn" type="button">Entrar</button><div id="loginError" class="login-error"></div><div class="db-note">Dados sincronizados com Supabase</div></div></div>
+</head><body class="logged-out"><div id="loginScreen" class="login-screen"><div class="login-box"><h1>BarberID</h1><p>Entre para acessar os dados reais da sua barbearia.</p><input id="loginEmail" type="email" placeholder="E-mail"><input id="loginPassword" type="password" placeholder="Senha"><button id="loginBtn" type="button">Entrar</button><div id="loginError" class="login-error"></div><div class="db-note">Dados sincronizados com Supabase</div></div></div>
 <div class="app">
 <aside class="desktop-sidebar" aria-label="Menu de módulos">
   <div class="sidebar-brand">BarberID <small>PAINEL</small></div>
@@ -321,6 +323,7 @@ async function logoutBarberID(){
     if(btn){btn.disabled=false;btn.querySelector('span').textContent='Sair / Logout';}
     return;
   }
+  document.body.classList.add('logged-out');
   const loginScreen=document.getElementById('loginScreen');
   if(loginScreen)loginScreen.style.display='flex';
   const email=document.getElementById('loginEmail');if(email)email.value='';
@@ -432,6 +435,7 @@ function loadCommunicationLogs(){const m=document.getElementById('waLogsMessage'
     const {error}=await sb.auth.signInWithPassword({email,password});
     setLoading(false);
     if(error){ setLoginError('E-mail ou senha inválidos.'); return; }
+    document.body.classList.remove('logged-out');
     $('loginScreen').style.display='none';
     await loadAll();
   }
@@ -445,18 +449,22 @@ function loadCommunicationLogs(){const m=document.getElementById('waLogsMessage'
     const {data:{session}}=await sb.auth.getSession();
     if(session){
       currentUser=session.user;
+      document.body.classList.remove('logged-out');
       $('loginScreen').style.display='none';
       await loadAll();
     }else{
+      document.body.classList.add('logged-out');
       $('loginScreen').style.display='flex';
     }
 
     sb.auth.onAuthStateChange(async (_event,session)=>{
       currentUser=session?.user||null;
       if(session){
+        document.body.classList.remove('logged-out');
         $('loginScreen').style.display='none';
         await loadAll();
       }else{
+        document.body.classList.add('logged-out');
         $('loginScreen').style.display='flex';
       }
     });
