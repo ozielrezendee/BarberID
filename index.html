@@ -130,7 +130,7 @@ main{padding:16px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9p
   .desktop-sidebar button:hover{background:#25324a;color:#fff;}
   .desktop-topbar{position:fixed;z-index:99;left:190px;right:0;top:0;height:68px;display:flex;align-items:center;gap:10px;padding:0 26px;background:#fff;border-bottom:1px solid #e4e7ec;box-shadow:0 2px 8px #1018280a;}
   .desktop-topbar button{height:42px;min-width:130px;border:0;border-radius:10px;padding:0 18px;background:#f2f4f7;color:#344054;font-weight:800;display:flex;align-items:center;justify-content:center;gap:9px;cursor:pointer;}
-  .desktop-topbar button.selected,.desktop-topbar button:hover{background:#2453df;color:#fff;}
+  .desktop-topbar button.selected{background:#2453df;color:#fff;} .desktop-topbar button:hover:not(.selected){background:#e4e7ec;color:#344054;}
   .bottom{display:none!important;}
   .app>section.page{min-height:calc(100vh - 90px);}
 }
@@ -156,9 +156,9 @@ main{padding:16px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9p
   <button onclick="show('perfil-barbearia')">⚙️ <span>Configurações</span></button>
 </aside>
 <nav class="desktop-topbar" aria-label="Navegação principal">
-  <button onclick="show('caixa',this)">💰 <span>CAIXA</span></button>
-  <button class="selected" onclick="show('home',this)">📅 <span>AGENDA</span></button>
-  <button onclick="show('clientes',this)">👥 <span>CLIENTES</span></button>
+  <button data-top-target="caixa" onclick="show('caixa',this)">💰 <span>CAIXA</span></button>
+  <button data-top-target="home" class="selected" onclick="show('home',this)">📅 <span>AGENDA</span></button>
+  <button data-top-target="clientes" onclick="show('clientes',this)">👥 <span>CLIENTES</span></button>
 </nav>
 <section id="home" class="page active"><header><div class="top"><div class="brand">BarberID</div><div>🔔</div></div><div class="greet"><small id="dashboardDate"></small><h1>Agenda do dia 👋</h1></div></header><main>
 <div class="period-tabs" id="periodTabs"><button class="period-tab active" data-period="today" type="button">Hoje</button><button class="period-tab" data-period="week" type="button">Semana</button></div>
@@ -305,11 +305,15 @@ main{padding:16px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9p
 <div class="finish-actions"><button class="no" type="button" id="finishNo">Voltar</button><button class="yes" type="button" id="finishYes">Confirmar pagamento</button></div>
 </div></div>
 
-<script>function show(id,b){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));const page=document.getElementById(id);if(page)page.classList.add('active');document.querySelectorAll('.bottom button').forEach(x=>x.classList.toggle('active',(b&&x===b)||(!b&&x.dataset.target===id)));const topTarget=(id==='home'||id==='caixa'||id==='clientes')?id:null;document.querySelectorAll('.desktop-topbar button').forEach(x=>{const action=x.getAttribute('onclick')||'';const match=topTarget&&action.includes("show('\"+topTarget+"'");x.classList.toggle('selected',!!match);});scrollTo(0,0);if(id==='perfil-horarios'&&window.loadShopHoursForProfile)window.loadShopHoursForProfile();}
-
-
-
-</script>
+<script>function show(id,b){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  const page=document.getElementById(id);
+  if(page) page.classList.add('active');
+  document.querySelectorAll('.bottom button').forEach(x=>x.classList.toggle('active', (b && x===b) || (!b && x.dataset.target===id)));
+  document.querySelectorAll('.desktop-topbar button').forEach(x=>x.classList.toggle('selected', x.dataset.topTarget===id));
+  scrollTo(0,0);
+  if(id==='perfil-horarios' && window.loadShopHoursForProfile) window.loadShopHoursForProfile();
+}</script>
 
 <script>
 function publicBookingUrl(){const base=new URL('agendar.html',location.href);base.searchParams.set('barbearia','barbearia-division-street');return base.href;}
