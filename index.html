@@ -128,6 +128,9 @@ main{padding:16px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9p
   .sidebar-label{font-size:10px;color:#98a2b3;font-weight:800;letter-spacing:1.5px;padding:5px 10px;}
   .desktop-sidebar button{display:flex;align-items:center;gap:10px;text-align:left;width:100%;border:0;border-radius:9px;padding:11px 10px;background:transparent;color:#e4e7ec;font-size:13px;font-weight:700;cursor:pointer;}
   .desktop-sidebar button:hover{background:#25324a;color:#fff;}
+  .desktop-sidebar .sidebar-bottom-separator{margin-top:auto;border-top:1px solid #344054;margin-bottom:6px;padding-top:8px;flex-shrink:0;}
+  .desktop-sidebar button.sidebar-logout{color:#fda29b;background:rgba(217,45,32,.08);margin-bottom:4px;flex-shrink:0;}
+  .desktop-sidebar button.sidebar-logout:hover{background:#912018;color:#fff;}
   .desktop-topbar{position:fixed;z-index:99;left:190px;right:0;top:0;height:68px;display:flex;align-items:center;gap:10px;padding:0 26px;background:#fff;border-bottom:1px solid #e4e7ec;box-shadow:0 2px 8px #1018280a;}
   .desktop-topbar button{height:42px;min-width:130px;border:0;border-radius:10px;padding:0 18px;background:#f2f4f7;color:#344054;font-weight:800;display:flex;align-items:center;justify-content:center;gap:9px;cursor:pointer;}
   .desktop-topbar button.selected{background:#2453df;color:#fff;} .desktop-topbar button:hover:not(.selected){background:#e4e7ec;color:#344054;}
@@ -154,6 +157,8 @@ main{padding:16px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9p
   <button onclick="show('comunicacao')">🔔 <span>Comunicação</span></button>
   <button onclick="show('avaliacoes');loadReviews()">⭐ <span>Avaliações</span></button>
   <button onclick="show('perfil-barbearia')">⚙️ <span>Configurações</span></button>
+  <div class="sidebar-bottom-separator" aria-hidden="true"></div>
+  <button class="sidebar-logout" type="button" onclick="logoutBarberID()">🚪 <span>Sair / Logout</span></button>
 </aside>
 <nav class="desktop-topbar" aria-label="Navegação principal">
   <button data-top-target="caixa" onclick="show('caixa',this)">💰 <span>CAIXA</span></button>
@@ -305,6 +310,28 @@ main{padding:16px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9p
 <div class="finish-actions"><button class="no" type="button" id="finishNo">Voltar</button><button class="yes" type="button" id="finishYes">Confirmar pagamento</button></div>
 </div></div>
 
+<script>
+async function logoutBarberID(){
+  if(!window.sb?.auth){alert('O serviço de autenticação ainda não está pronto. Tente novamente.');return;}
+  const btn=document.querySelector('.sidebar-logout');
+  if(btn){btn.disabled=true;btn.querySelector('span').textContent='Saindo...';}
+  const {error}=await window.sb.auth.signOut();
+  if(error){
+    alert('Não foi possível sair da conta: '+error.message);
+    if(btn){btn.disabled=false;btn.querySelector('span').textContent='Sair / Logout';}
+    return;
+  }
+  const loginScreen=document.getElementById('loginScreen');
+  if(loginScreen)loginScreen.style.display='flex';
+  const email=document.getElementById('loginEmail');if(email)email.value='';
+  const password=document.getElementById('loginPassword');if(password)password.value='';
+  const errorBox=document.getElementById('loginError');if(errorBox){errorBox.textContent='';errorBox.style.display='none';}
+  document.querySelectorAll('.page').forEach(page=>page.classList.remove('active'));
+  const home=document.getElementById('home');if(home)home.classList.add('active');
+  document.querySelectorAll('.desktop-topbar button').forEach(button=>button.classList.toggle('selected',button.dataset.topTarget==='home'));
+  if(btn){btn.disabled=false;btn.querySelector('span').textContent='Sair / Logout';}
+}
+</script>
 <script>function show(id,b){
   document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
   const page=document.getElementById(id);
