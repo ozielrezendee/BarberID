@@ -174,7 +174,7 @@ body.logged-out #loginScreen{display:flex!important;z-index:999999!important;}
 </nav>
 <section id="home" class="page active"><header><div class="top"><div class="brand">BarberID</div><div>🔔</div></div><div class="greet"><small id="dashboardDate"></small><h1>Agenda do dia 👋</h1></div></header><main>
 <div class="period-tabs" id="periodTabs"><button class="period-tab active" data-period="today" type="button">Hoje</button><button class="period-tab" data-period="week" type="button">Semana</button></div>
-<div class="barber-tabs" id="barberTabs"><button class="barber-tab active" data-barber="all" type="button">Todos</button><button class="barber-tab" data-barber="Barbeiro 1" type="button">Barbeiro 1</button><button class="barber-tab" data-barber="Barbeiro 2" type="button">Barbeiro 2</button><button class="barber-tab" data-barber="Barbeiro 3" type="button">Barbeiro 3</button></div>
+<div class="barber-tabs" id="barberTabs"><button class="barber-tab active" data-barber="all" type="button">Todos</button></div>
 <div class="dashboard-cards"><div class="dashboard-card"><div class="dashboard-icon">💰</div><span id="revenueLabel">Faturamento de hoje</span><b id="fatValue">R$ 0,00</b></div><div class="dashboard-card"><div class="dashboard-icon">📅</div><span id="appointmentsLabel">Agendamentos de hoje</span><b id="apptCount">0</b></div></div>
 <div class="dashboard-secondary"><span>Aguardando</span><b id="waitingCount">0</b></div>
 <button class="primary" onclick="openAppointmentModal()">＋ Novo agendamento</button><div class="section"><b id="agendaListTitle">Agenda de hoje</b></div>
@@ -194,12 +194,12 @@ body.logged-out #loginScreen{display:flex!important;z-index:999999!important;}
 </main></section>
 <div id="cashCorrectionModal" class="cash-modal"><div class="cash-sheet"><h2>Corrigir caixa</h2><p class="muted" id="correctionSessionLabel">Sessão</p><label for="correctionField">O que será corrigido?</label><select id="correctionField"><option value="opening_amount">Saldo inicial</option><option value="closing_amount">Saldo final registrado (caixa fechado)</option></select><label for="correctionValue">Novo valor (R$)</label><input id="correctionValue" type="number" min="0" step="0.01" placeholder="Novo valor"><label for="correctionReason">Justificativa obrigatória</label><textarea id="correctionReason" rows="3" placeholder="Explique o motivo da correção" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:10px;margin:7px 0 12px"></textarea><button id="confirmCashCorrection" type="button">Salvar correção</button><button class="close" id="cancelCashCorrection" type="button">Cancelar</button></div></div>
 <div id="cashMovementCorrectionModal" class="cash-modal"><div class="cash-sheet"><h2>Corrigir lançamento</h2><p class="muted" id="movementCorrectionLabel">Lançamento financeiro</p><label for="movementCorrectionDescription">Descrição / comanda</label><input id="movementCorrectionDescription" type="text" maxlength="180" placeholder="Descrição do lançamento"><label for="movementCorrectionAmount">Novo valor (R$)</label><input id="movementCorrectionAmount" type="number" min="0" step="0.01" placeholder="Novo valor"><label for="movementCorrectionMethod">Forma de pagamento</label><select id="movementCorrectionMethod"><option value="pix">Pix</option><option value="cash">Dinheiro</option><option value="credit">Crédito</option><option value="debit">Débito</option></select><label for="movementCorrectionReason">Justificativa obrigatória</label><textarea id="movementCorrectionReason" rows="3" placeholder="Explique o motivo da correção (mínimo 8 caracteres)" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:10px;margin:7px 0 12px"></textarea><button id="confirmMovementCorrection" type="button">Salvar correção</button><button class="close" id="cancelMovementCorrection" type="button">Cancelar</button></div></div>
-<section id="clientes" class="page"><div class="head"><button class="back" onclick="show('home')">‹ Voltar</button><h1>Clientes</h1></div><main><button id="newCustomerBtn" class="primary" type="button">＋ Novo cliente</button><div class="list"><div class="row"><b>João Silva</b><small>Telefone · Histórico de atendimentos</small></div><div class="row"><b>Marcos Souza</b><small>Telefone · Histórico de atendimentos</small></div><div class="row"><b>Pedro Alves</b><small>12 atendimentos</small></div></div></main></section>
+<section id="clientes" class="page"><div class="head"><button class="back" onclick="show('home')">‹ Voltar</button><h1>Clientes</h1></div><main><button id="newCustomerBtn" class="primary" type="button">＋ Novo cliente</button><div class="list" id="customerList"><div class="row">Nenhum cliente cadastrado. Cadastre o primeiro cliente para começar.</div></div></main></section>
 <section id="servicos" class="page"><div class="head"><button class="back" onclick="show('mais')">‹ Voltar</button><h1>Serviços</h1></div><main><p class="muted">Cadastre os serviços, preços e duração. A duração será usada para calcular os horários disponíveis.</p><button id="newServiceBtn" class="primary" type="button">＋ Novo serviço</button><div id="serviceList" class="list"><div class="row">Carregando serviços...</div></div></main></section>
 <div id="serviceModal" class="modal"><div class="sheet"><h2 id="serviceModalTitle">Novo serviço</h2><label for="serviceName">Nome do serviço</label><input id="serviceName" maxlength="100" placeholder="Ex.: Corte degradê"><label for="servicePrice">Preço (R$)</label><input id="servicePrice" type="number" min="0" step="0.01" placeholder="40,00"><label for="serviceDuration">Duração (minutos)</label><input id="serviceDuration" type="number" min="5" step="5" value="30" placeholder="30"><label class="switch-row"><input id="serviceActive" type="checkbox" checked style="width:auto;margin-right:8px"> Serviço ativo e disponível para agendamento</label><button id="saveServiceBtn" type="button">Salvar serviço</button><button class="close" type="button" onclick="closeServiceModal()">Cancelar</button></div></div>
 
 <section id="equipe" class="page"><div class="head"><button class="back" onclick="show('mais')">‹ Voltar</button><h1>Equipe</h1></div><main>
-<div class="module-grid"><div class="module-card"><span>Barbeiros ativos</span><b id="teamCount">3</b></div><div class="module-card"><span>Atendimentos hoje</span><b id="teamAppointments">4</b></div></div>
+<div class="module-grid"><div class="module-card"><span>Barbeiros ativos</span><b id="teamCount">0</b></div><div class="module-card"><span>Atendimentos hoje</span><b id="teamAppointments">0</b></div></div>
 <div class="module-actions"><button onclick="openTeamForm()">＋ Novo barbeiro</button></div>
 <div id="teamList" class="list module-list"><div class="row">Carregando equipe...</div></div>
 <div id="teamForm" class="module-form" style="display:none"><input id="teamName" placeholder="Nome do barbeiro"><select id="teamRole"><option>Barbeiro</option><option>Gerente</option><option>Recepcionista</option></select><input id="teamSchedule" placeholder="Horário (ex.: 09:00–19:00)"><button onclick="addTeamMember()">Salvar barbeiro</button></div>
@@ -216,23 +216,23 @@ body.logged-out #loginScreen{display:flex!important;z-index:999999!important;}
 </main></section>
 
 <section id="estoque" class="page"><div class="head"><button class="back" onclick="show('mais')">‹ Voltar</button><h1>Estoque</h1></div><main>
-<div class="module-grid"><div class="module-card"><span>Produtos</span><b id="stockCount">4</b></div><div class="module-card"><span>Estoque baixo</span><b id="lowStock">1</b></div></div>
+<div class="module-grid"><div class="module-card"><span>Produtos</span><b id="stockCount">0</b></div><div class="module-card"><span>Estoque baixo</span><b id="lowStock">0</b></div></div>
 <div class="module-actions"><button onclick="toggleStockForm()">＋ Novo produto</button><button onclick="stockMovement()">↕ Movimentar estoque</button><button class="close" onclick="stockHistory()">Histórico</button></div><div id="stockMessage" class="profile-help" role="status" style="margin:10px 0"></div>
 <div id="stockForm" class="module-form" style="display:none"><input id="stockName" placeholder="Nome do produto"><input id="stockQty" type="number" min="0" placeholder="Quantidade"><input id="stockMin" type="number" min="0" placeholder="Estoque mínimo"><input id="stockPrice" type="number" min="0" step="0.01" placeholder="Preço de venda (R$)"><input id="stockCost" type="number" min="0" step="0.01" placeholder="Custo unitário (R$), opcional"><button onclick="addStock()">Salvar produto</button></div>
-<div id="stockList" class="list module-list"><div class="row"><b>Pomada modeladora</b><small>Estoque: 12 · Mínimo: 5 · R$ 35,00</small></div><div class="row"><b>Shampoo</b><small>Estoque: 3 · Mínimo: 5 · <span class="tag">Baixo</span></small></div><div class="row"><b>Óleo para barba</b><small>Estoque: 8 · Mínimo: 3 · R$ 28,00</small></div><div class="row"><b>Toalha</b><small>Estoque: 30 · Mínimo: 10</small></div></div>
+<div id="stockList" class="list module-list"><div class="row">Nenhum produto cadastrado. Clique em “Novo produto” para começar.</div></div>
 </main></section>
 
 <section id="fidelidade" class="page"><div class="head"><button class="back" onclick="show('mais')">‹ Voltar</button><h1>Fidelidade</h1></div><main>
-<div class="module-grid"><div class="module-card"><span>Clientes no programa</span><b id="loyalClients">18</b></div><div class="module-card"><span>Pontos distribuídos</span><b id="loyalPoints">420</b></div></div>
+<div class="module-grid"><div class="module-card"><span>Clientes no programa</span><b id="loyalClients">0</b></div><div class="module-card"><span>Pontos distribuídos</span><b id="loyalPoints">0</b></div></div>
 <div class="module-form"><b>Regra atual</b><div class="muted">A cada R$ 10 em serviços = 1 ponto.</div><div class="switch-row">Programa ativo <span class="switch on"></span></div><div class="switch-row">Avisar cliente ao ganhar pontos <span class="switch on"></span></div></div>
 <div class="module-actions"><button onclick="addLoyalty()">＋ Registrar pontos</button><button onclick="redeemLoyalty()">🎁 Resgatar recompensa</button></div>
-<div class="list module-list"><div class="row"><b>João Silva</b><small>120 pontos · Próxima recompensa em 30 pontos</small></div><div class="row"><b>Marcos Souza</b><small>80 pontos · 1 recompensa disponível</small></div><div class="row"><b>Pedro Alves</b><small>55 pontos · Próxima recompensa em 45 pontos</small></div></div>
+<div class="list module-list" id="loyaltyList"><div class="row">Ainda não há clientes com pontos de fidelidade.</div></div>
 </main></section>
 
 <section id="financeiro" class="page"><div class="head"><button class="back" onclick="show('mais')">‹ Voltar</button><h1>Financeiro</h1></div><main>
-<div class="module-grid"><div class="module-card"><span>Receitas do mês</span><b id="finRevenue">R$ 9.760,00</b></div><div class="module-card"><span>Despesas do mês</span><b id="finExpenses">R$ 1.850,00</b></div><div class="module-card"><span>Resultado</span><b id="finResult">R$ 7.910,00</b></div><div class="module-card"><span>Ticket médio</span><b>R$ 61,25</b></div></div>
+<div class="module-grid"><div class="module-card"><span>Receitas do mês</span><b id="finRevenue">R$ 0,00</b></div><div class="module-card"><span>Despesas do mês</span><b id="finExpenses">R$ 0,00</b></div><div class="module-card"><span>Resultado</span><b id="finResult">R$ 0,00</b></div><div class="module-card"><span>Ticket médio</span><b id="finTicket">R$ 0,00</b></div></div>
 <div class="module-actions"><button onclick="addFinanceEntry()">＋ Nova movimentação</button><button onclick="show('caixa')">Abrir Caixa</button></div>
-<div class="list module-list"><div class="row"><b>Recebimentos</b><small>Hoje · R$ 320,00</small></div><div class="row"><b>Aluguel</b><small>Despesa · R$ 1.200,00 · Pendente</small></div><div class="row"><b>Produtos</b><small>Despesa · R$ 650,00 · Pago</small></div></div>
+<div class="list module-list" id="financeEntriesList"><div class="row">Nenhuma movimentação financeira registrada.</div></div>
 <div class="section"><b>Comissões dos profissionais</b><button class="mini-btn" type="button" onclick="loadCommissionReport()">Atualizar</button></div>
 <div class="module-actions"><button type="button" onclick="showCommissionReport()">Ver comissões</button></div>
 <div id="commissionPanel" style="display:none">
@@ -501,11 +501,21 @@ function loadCommunicationLogs(){const m=document.getElementById('waLogsMessage'
   }
 
   async function getShop(){
+    if(!currentUser?.id) throw new Error('Não há usuário autenticado.');
     const {data,error}=await window.sb.from('barbershops')
       .select('id,name,owner_id,phone,email,address,owner_is_barber')
       .eq('owner_id',currentUser.id)
-      .single();
+      .maybeSingle();
     if(error) throw new Error('Barbearia: '+error.message);
+    if(!data){
+      shopId=null; isShopAdmin=false;
+      ['shopProfileName','shopProfilePhone','shopProfileEmail','shopProfileAddress'].forEach(id=>{if($(id))$(id).value='';});
+      if($('personalName')) $('personalName').value=currentUser.user_metadata?.full_name||currentUser.user_metadata?.name||'';
+      if($('personalEmail')) $('personalEmail').value=currentUser.email||'';
+      if($('personalPhone')) $('personalPhone').value=currentUser.user_metadata?.phone||'';
+      if($('ownerAlsoBarber')) {$('ownerAlsoBarber').checked=false;if($('ownerBarberConfig'))$('ownerBarberConfig').style.display='none';}
+      return null;
+    }
     shopId=data.id;
     isShopAdmin=!!currentUser && data.owner_id===currentUser.id;
     if($('shopProfileName')) $('shopProfileName').value=data.name||'';
@@ -590,9 +600,28 @@ function loadCommunicationLogs(){const m=document.getElementById('waLogsMessage'
     finally{btn.disabled=false;btn.textContent='Confirmar agendamento';}
   };
 
+  function showNoBarbershopState(){
+    dbStaff=[]; dbServices=[]; dbCustomers=[]; dbAppointments=[]; dbPayments=[];
+    window.dbStaff=dbStaff; window.dbServices=dbServices; window.dbCustomers=dbCustomers; window.dbAppointments=dbAppointments; window.dbPayments=dbPayments;
+    renderStaff(); renderServices(); renderCustomers(); renderAppointments(); updateDashboardFromDB(); updateRealReports();
+    const set=(id,value)=>{const el=$(id);if(el)el.textContent=value;};
+    set('stockCount','0');set('lowStock','0');set('teamCount','0');set('teamAppointments','0');set('loyalClients','0');set('loyalPoints','0');
+    set('finRevenue','R$ 0,00');set('finExpenses','R$ 0,00');set('finResult','R$ 0,00');set('finTicket','R$ 0,00');
+    const empty=(id,msg)=>{const el=$(id);if(el)el.innerHTML='<div class="row">'+msg+'</div>';};
+    empty('stockList','Cadastre sua barbearia primeiro para começar a montar o estoque.');
+    empty('financeEntriesList','Nenhuma movimentação financeira registrada.');
+    empty('loyaltyList','Ainda não há clientes com pontos de fidelidade.');
+    empty('cashHistoryList','Nenhum histórico de caixa.');
+    empty('cashList','Sem movimentações.');
+    if($('cashIn'))$('cashIn').textContent='R$ 0,00';if($('cashOut'))$('cashOut').textContent='R$ 0,00';if($('cashBalance'))$('cashBalance').textContent='R$ 0,00';if($('cashCount'))$('cashCount').textContent='0';if($('cashStatus'))$('cashStatus').textContent='Caixa fechado';
+    const msg=$('shopProfileMessage');if(msg)msg.textContent='Sua conta ainda não tem uma barbearia. Preencha os dados acima e salve para começar.';
+    if(typeof show==='function')show('perfil-barbearia');
+  }
+
   async function loadAll(){
     try{
-      await getShop();
+      const shop=await getShop();
+      if(!shop){showNoBarbershopState();return;}
 
       const [st,sv,cu,ap,pa]=await Promise.all([
         sb.from('staff').select('id,name,role,active,avatar_url').eq('barbershop_id',window.shopId).eq('active',true).order('name'),
@@ -729,9 +758,17 @@ function loadCommunicationLogs(){const m=document.getElementById('waLogsMessage'
     if($('shopLogo')?.files?.length){msg.textContent='Os dados podem ser salvos agora; o envio permanente do logotipo ainda precisa da configuração do Storage no Supabase.';}
     btn.disabled=true;btn.textContent='Salvando...';
     try{
-      const {error}=await window.sb.from('barbershops').update({name,phone:phone||null,email:email||null,address:address||null}).eq('id',shopId).eq('owner_id',currentUser.id);
-      if(error)throw error;
-      msg.textContent='Dados da barbearia salvos com sucesso.';
+      if(!currentUser?.id)throw new Error('Sua sessão expirou. Entre novamente.');
+      let result;
+      if(shopId){
+        result=await window.sb.from('barbershops').update({name,phone:phone||null,email:email||null,address:address||null}).eq('id',shopId).eq('owner_id',currentUser.id);
+      }else{
+        result=await window.sb.from('barbershops').insert({owner_id:currentUser.id,name,phone:phone||null,email:email||null,address:address||null,owner_is_barber:!!$('ownerAlsoBarber')?.checked}).select('id,name,owner_id,phone,email,address,owner_is_barber').single();
+      }
+      if(result.error)throw result.error;
+      if(!shopId&&result.data){shopId=result.data.id;isShopAdmin=true;}
+      msg.textContent='Dados da barbearia salvos com sucesso. Carregando seu painel...';
+      await loadAll();
     }catch(e){msg.textContent='Não foi possível salvar: '+(e.message||e);}
     finally{btn.disabled=false;btn.textContent='Salvar dados da barbearia';}
   });
@@ -859,11 +896,11 @@ function loadCommunicationLogs(){const m=document.getElementById('waLogsMessage'
   });
 
   function renderCustomers(){
-    const list=document.querySelector('#clientes .list');
+    const list=document.getElementById('customerList')||document.querySelector('#clientes .list');
     if(!list)return;
     list.innerHTML=dbCustomers.map(x=>
       `<div class="row"><b>${window.escapeHtml(x.name)}</b><small>${window.escapeHtml(x.phone||'Sem telefone')} · ${x.loyalty_points||0} pontos</small></div>`
-    ).join('');
+    ).join('')||'<div class="row">Nenhum cliente cadastrado. Cadastre o primeiro cliente para começar.</div>';
   }
 
   function appointmentForToday(a){ return dateKey(a.starts_at)===todayKey(); }
