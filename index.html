@@ -30,7 +30,7 @@ main{padding:16px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9p
 @media(max-height:700px){#staffHoursModal .cash-sheet,#staffCommissionModal .cash-sheet{max-height:calc(100dvh - 16px);padding:12px}#staffHoursModal .cash-sheet h2,#staffCommissionModal .cash-sheet h2{font-size:18px}}
 .cash-sheet input,.cash-sheet select{width:100%;padding:13px;margin:7px 0 12px;border:1px solid #ddd;border-radius:10px}.cash-sheet button{width:100%;padding:14px;border:0;border-radius:11px;background:#1d4ed8;color:#fff;font-weight:700}.cash-sheet .close{margin-top:8px;background:#eee!important;color:#111!important}.cash-open{background:#e8efff;color:#1d4ed8}.cash-status{font-size:11px;color:#15803d;background:#ecfdf3;padding:5px 8px;border-radius:8px}.cash-tabs{display:flex;gap:8px;margin:16px 0 10px}.cash-tabs button{flex:1;padding:11px;border:1px solid #e2e6ee;background:#fff;border-radius:10px;font-weight:700}.cash-tabs button.active{background:#0b1220;color:#fff}.history-item{background:#fff;border:1px solid #e7eaf0;border-radius:14px;padding:14px;margin-bottom:9px}.history-head{display:flex;justify-content:space-between;gap:8px;align-items:center}.history-item small{color:#667085}.history-item .mini-btn{margin-top:10px}.admin-note{font-size:12px;color:#667085;background:#f8fafc;border-radius:10px;padding:10px;margin:10px 0}
 
-.login-screen{position:fixed;inset:0;background:#f5f7fa;z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px}.login-box{width:min(420px,100%);background:#fff;border:1px solid #e7eaf0;border-radius:20px;padding:24px;box-shadow:0 15px 50px #0001}.login-box h1{margin:0 0 6px}.login-box p{color:#667085;font-size:13px}.login-box input{width:100%;padding:13px;margin:7px 0 10px;border:1px solid #ddd;border-radius:10px}.login-box button{width:100%;padding:14px;border:0;border-radius:11px;background:#1d4ed8;color:#fff;font-weight:700}.login-error{color:#b42318;font-size:12px;margin-top:8px;display:none}.loading{opacity:.7;pointer-events:none}.db-note{font-size:11px;color:#667085;margin-top:10px;text-align:center}
+.login-screen{position:fixed;inset:0;background:#f5f7fa;z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;overflow-y:auto}.login-box{width:min(420px,100%);background:#fff;border:1px solid #e7eaf0;border-radius:20px;padding:24px;box-shadow:0 15px 50px #0001;margin:auto}.login-box h1{margin:0 0 6px}.login-box p{color:#667085;font-size:13px}.login-box input[type=email],.login-box input[type=password],.login-box input[type=text]{width:100%;padding:13px;margin:7px 0 10px;border:1px solid #ddd;border-radius:10px}.login-box button{padding:13px;border:0;border-radius:11px;background:#1d4ed8;color:#fff;font-weight:700;cursor:pointer}.login-tabs{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:18px 0 12px}.login-tabs button{background:#f1f3f7;color:#475467;border:1px solid #e2e6ee}.login-tabs button.active{background:#1d4ed8;color:#fff;border-color:#1d4ed8}.login-submit{width:100%;margin-top:5px}.login-links{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:9px 0;font-size:12px}.login-link{border:0!important;background:transparent!important;color:#1d4ed8!important;padding:4px 0!important;font-weight:600;text-align:left}.show-password{display:flex;align-items:center;gap:8px;color:#475467;font-size:12px;margin:2px 0 10px}.show-password input{width:auto;margin:0}.login-error{color:#b42318;font-size:12px;margin-top:8px;display:none;line-height:1.4}.login-success{color:#067647;background:#ecfdf3;border-radius:9px;padding:10px;font-size:12px;margin-top:10px;display:none;line-height:1.4}.loading{opacity:.7;pointer-events:none}.db-note{font-size:11px;color:#667085;margin-top:10px;text-align:center}
 .modal.open{display:flex!important;align-items:center!important;justify-content:center!important;z-index:9999}.modal.open .sheet{display:block!important;width:min(92vw,420px);max-height:85vh;overflow:auto}
 
 .week-calendar-scroll{width:100%;max-height:62vh;overflow:auto;overscroll-behavior:contain;border:1px solid #e2e6ee;border-radius:14px;background:#fff;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y}
@@ -142,7 +142,12 @@ body.logged-out .app,body.logged-out .desktop-sidebar,body.logged-out .desktop-t
 body.logged-out #loginScreen{display:flex!important;z-index:999999!important;}
 </style>
 
-</head><body class="logged-out"><div id="loginScreen" class="login-screen"><div class="login-box"><h1>BarberID</h1><p>Entre para acessar os dados reais da sua barbearia.</p><input id="loginEmail" type="email" placeholder="E-mail"><input id="loginPassword" type="password" placeholder="Senha"><button id="loginBtn" type="button">Entrar</button><div id="loginError" class="login-error"></div><div class="db-note">Dados sincronizados com Supabase</div></div></div>
+</head><body class="logged-out"><div id="loginScreen" class="login-screen"><div class="login-box"><h1>BarberID</h1><p id="loginIntro">Entre para acessar os dados reais da sua barbearia.</p>
+<div class="login-tabs" role="tablist" aria-label="Acesso à conta"><button id="loginTab" class="active" type="button" role="tab" aria-selected="true">Fazer login</button><button id="signupTab" type="button" role="tab" aria-selected="false">Criar cadastro</button></div>
+<section id="loginPanel"><input id="loginEmail" type="email" placeholder="E-mail" autocomplete="username"><input id="loginPassword" type="password" placeholder="Senha" autocomplete="current-password"><label class="show-password"><input id="showLoginPassword" type="checkbox"> Mostrar senha</label><div class="login-links"><span></span><button id="forgotPasswordBtn" class="login-link" type="button">Esqueceu a senha?</button></div><button id="loginBtn" class="login-submit" type="button">Entrar</button><div id="loginError" class="login-error" role="alert"></div><div id="resetSuccess" class="login-success" role="status"></div></section>
+<section id="signupPanel" style="display:none"><input id="signupEmail" type="email" placeholder="Seu e-mail" autocomplete="email"><input id="signupPassword" type="password" placeholder="Crie uma senha (mínimo 6 caracteres)" autocomplete="new-password"><input id="signupConfirmPassword" type="password" placeholder="Confirme a senha" autocomplete="new-password"><label class="show-password"><input id="showSignupPassword" type="checkbox"> Mostrar senhas</label><button id="signupBtn" class="login-submit" type="button">Criar conta e enviar ativação</button><div id="signupError" class="login-error" role="alert"></div><div id="signupSuccess" class="login-success" role="status"></div></section>
+<section id="recoveryPanel" style="display:none"><p>Crie uma nova senha para sua conta.</p><input id="recoveryPassword" type="password" placeholder="Nova senha (mínimo 6 caracteres)" autocomplete="new-password"><input id="recoveryConfirmPassword" type="password" placeholder="Confirme a nova senha" autocomplete="new-password"><label class="show-password"><input id="showRecoveryPassword" type="checkbox"> Mostrar senhas</label><button id="saveRecoveryPasswordBtn" class="login-submit" type="button">Salvar nova senha</button><button id="backToLoginBtn" class="login-link" type="button">Voltar para o login</button><div id="recoveryError" class="login-error" role="alert"></div><div id="recoverySuccess" class="login-success" role="status"></div></section>
+<div class="db-note">Autenticação segura com Supabase</div></div></div>
 <div class="app">
 <aside class="desktop-sidebar" aria-label="Menu de módulos">
   <div class="sidebar-brand">BarberID <small>PAINEL</small></div>
@@ -422,51 +427,76 @@ function loadCommunicationLogs(){const m=document.getElementById('waLogsMessage'
     $('loginError').textContent=msg||'';
     $('loginError').style.display=msg?'block':'none';
   }
-  function setLoading(v){
-    $('loginBtn').disabled=v;
-    $('loginBtn').textContent=v?'Entrando...':'Entrar';
+  function showAuthMessage(id,msg){const el=$(id);if(el){el.textContent=msg||'';el.style.display=msg?'block':'none';}}
+  function clearAuthMessages(){['loginError','signupError','resetSuccess','signupSuccess','recoveryError','recoverySuccess'].forEach(id=>showAuthMessage(id,''));}
+  function switchAuthTab(tab){
+    clearAuthMessages();
+    const loginActive=tab==='login';
+    $('loginPanel').style.display=loginActive?'block':'none';
+    $('signupPanel').style.display=loginActive?'none':'block';$('recoveryPanel').style.display='none';
+    $('loginTab').classList.toggle('active',loginActive);$('signupTab').classList.toggle('active',!loginActive);
+    $('loginTab').setAttribute('aria-selected',String(loginActive));$('signupTab').setAttribute('aria-selected',String(!loginActive));
+    $('loginIntro').textContent=loginActive?'Entre para acessar os dados reais da sua barbearia.':'Crie sua conta e confirme seu e-mail para ativar o acesso.';
   }
+  function setLoading(v){$('loginBtn').disabled=v;$('loginBtn').textContent=v?'Entrando...':'Entrar';}
 
   async function login(){
-    setLoginError('');
-    setLoading(true);
-    const email=$('loginEmail').value.trim();
-    const password=$('loginPassword').value;
+    clearAuthMessages();setLoading(true);
+    const email=$('loginEmail').value.trim();const password=$('loginPassword').value;
+    if(!email||!password){setLoginError('Informe seu e-mail e sua senha.');setLoading(false);return;}
     const {error}=await sb.auth.signInWithPassword({email,password});
     setLoading(false);
-    if(error){ setLoginError('E-mail ou senha inválidos.'); return; }
-    document.body.classList.remove('logged-out');
-    $('loginScreen').style.display='none';
-    await loadAll();
+    if(error){setLoginError(error.message?.toLowerCase().includes('not confirmed')?'Confirme seu e-mail antes de entrar.':'Não foi possível entrar. Confira seu e-mail e senha.');return;}
+    document.body.classList.remove('logged-out');$('loginScreen').style.display='none';await loadAll();
   }
-
-  $('loginBtn').addEventListener('click',login);
+  async function signup(){
+    clearAuthMessages();const email=$('signupEmail').value.trim();const password=$('signupPassword').value;const confirm=$('signupConfirmPassword').value;
+    if(!email||!password||!confirm){showAuthMessage('signupError','Preencha todos os campos.');return;}
+    if(password.length<6){showAuthMessage('signupError','A senha deve ter pelo menos 6 caracteres.');return;}
+    if(password!==confirm){showAuthMessage('signupError','As senhas não são iguais.');return;}
+    const btn=$('signupBtn');btn.disabled=true;btn.textContent='Criando cadastro...';
+    try{
+      const {data,error}=await sb.auth.signUp({email,password,options:{emailRedirectTo:window.location.href.split('#')[0]}});
+      if(error)throw error;
+      if(data?.session){showAuthMessage('signupSuccess','Cadastro criado. Sua sessão já está ativa; agora você pode entrar no painel.');}
+      else{showAuthMessage('signupSuccess','Cadastro iniciado! Enviamos um e-mail de confirmação para '+email+'. Abra a mensagem e clique no link para ativar sua conta. Confira também a pasta de spam.');}
+    }catch(err){showAuthMessage('signupError',err?.message||'Não foi possível criar a conta. Tente novamente.');}
+    finally{btn.disabled=false;btn.textContent='Criar conta e enviar ativação';}
+  }
+  async function resetPassword(){
+    clearAuthMessages();const email=$('loginEmail').value.trim();
+    if(!email){setLoginError('Digite seu e-mail acima e clique em “Esqueceu a senha?”.');$('loginEmail').focus();return;}
+    const btn=$('forgotPasswordBtn');btn.disabled=true;btn.textContent='Enviando...';
+    try{const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:window.location.href.split('#')[0]});if(error)throw error;showAuthMessage('resetSuccess','Se houver uma conta cadastrada com esse e-mail, você receberá uma mensagem com as instruções para redefinir a senha. Confira também o spam.');}
+    catch(err){setLoginError(err?.message||'Não foi possível enviar o e-mail de recuperação.');}
+    finally{btn.disabled=false;btn.textContent='Esqueceu a senha?';}
+  }
+  $('loginTab').addEventListener('click',()=>switchAuthTab('login'));
+  $('signupTab').addEventListener('click',()=>switchAuthTab('signup'));
+  $('loginBtn').addEventListener('click',login);$('signupBtn').addEventListener('click',signup);$('forgotPasswordBtn').addEventListener('click',resetPassword);
+  $('showLoginPassword').addEventListener('change',e=>{$('loginPassword').type=e.target.checked?'text':'password';});
+  $('showSignupPassword').addEventListener('change',e=>{const type=e.target.checked?'text':'password';$('signupPassword').type=type;$('signupConfirmPassword').type=type;});
+  $('showRecoveryPassword').addEventListener('change',e=>{const type=e.target.checked?'text':'password';$('recoveryPassword').type=type;$('recoveryConfirmPassword').type=type;});
+  function showRecoveryPanel(){clearAuthMessages();$('loginPanel').style.display='none';$('signupPanel').style.display='none';$('recoveryPanel').style.display='block';$('loginTab').style.display='none';$('signupTab').style.display='none';$('loginIntro').textContent='Redefinição de senha';document.body.classList.add('logged-out');$('loginScreen').style.display='flex';}
+  $('saveRecoveryPasswordBtn').addEventListener('click',async()=>{clearAuthMessages();const password=$('recoveryPassword').value;const confirm=$('recoveryConfirmPassword').value;if(password.length<6){showAuthMessage('recoveryError','A senha deve ter pelo menos 6 caracteres.');return;}if(password!==confirm){showAuthMessage('recoveryError','As senhas não são iguais.');return;}const btn=$('saveRecoveryPasswordBtn');btn.disabled=true;btn.textContent='Salvando...';try{const {error}=await sb.auth.updateUser({password});if(error)throw error;await sb.auth.signOut();$('recoveryPanel').style.display='none';$('loginTab').style.display='';$('signupTab').style.display='';switchAuthTab('login');showAuthMessage('resetSuccess','Senha alterada com sucesso. Agora você pode entrar com a nova senha.');}catch(err){showAuthMessage('recoveryError',err?.message||'Não foi possível alterar a senha. Solicite um novo link.');}finally{btn.disabled=false;btn.textContent='Salvar nova senha';}});
+  $('backToLoginBtn').addEventListener('click',()=>{window.location.hash='';$('loginTab').style.display='';$('signupTab').style.display='';switchAuthTab('login');});
   bindPeriodTabs();
   const dateEl=$('dashboardDate');if(dateEl)dateEl.textContent=new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long',timeZone:tz});
   $('loginPassword').addEventListener('keydown',e=>{if(e.key==='Enter')login()});
+  ['signupEmail','signupPassword','signupConfirmPassword'].forEach(id=>$(id).addEventListener('keydown',e=>{if(e.key==='Enter')signup()}));
 
   async function init(){
+    const isRecovery=()=>new URLSearchParams(window.location.hash.replace(/^#/, '')).get('type')==='recovery';
     const {data:{session}}=await sb.auth.getSession();
-    if(session){
-      currentUser=session.user;
-      document.body.classList.remove('logged-out');
-      $('loginScreen').style.display='none';
-      await loadAll();
-    }else{
-      document.body.classList.add('logged-out');
-      $('loginScreen').style.display='flex';
-    }
+    if(isRecovery()){showRecoveryPanel();}
+    else if(session){currentUser=session.user;document.body.classList.remove('logged-out');$('loginScreen').style.display='none';await loadAll();}
+    else{document.body.classList.add('logged-out');$('loginScreen').style.display='flex';}
 
-    sb.auth.onAuthStateChange(async (_event,session)=>{
+    sb.auth.onAuthStateChange(async (event,session)=>{
+      if(event==='PASSWORD_RECOVERY'||isRecovery()){showRecoveryPanel();return;}
       currentUser=session?.user||null;
-      if(session){
-        document.body.classList.remove('logged-out');
-        $('loginScreen').style.display='none';
-        await loadAll();
-      }else{
-        document.body.classList.add('logged-out');
-        $('loginScreen').style.display='flex';
-      }
+      if(session){document.body.classList.remove('logged-out');$('loginScreen').style.display='none';await loadAll();}
+      else{document.body.classList.add('logged-out');$('loginScreen').style.display='flex';}
     });
   }
 
