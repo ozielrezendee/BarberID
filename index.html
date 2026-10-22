@@ -1480,7 +1480,44 @@ window.closeStaffHoursConfig=function(){document.getElementById('staffHoursModal
 document.getElementById('saveStaffHours')?.addEventListener('click',async()=>{const btn=document.getElementById('saveStaffHours');const records=[];for(const card of document.querySelectorAll('#staffHoursList .schedule-day')){const day=Number(card.dataset.day),working=card.querySelector('.staff-day-open').checked,start=card.querySelector('.staff-starts').value,end=card.querySelector('.staff-ends').value,lunch=working&&card.querySelector('.staff-lunch-enabled').checked,ls=card.querySelector('.staff-lunch-start').value,le=card.querySelector('.staff-lunch-end').value;if(working&&(!start||!end||start>=end)){alert('Confira o horário de '+window.weekDays[day].label+'.');return;}if(lunch&&(!ls||!le||ls>=le||ls<start||le>end)){alert('Confira o intervalo de almoço de '+window.weekDays[day].label+'.');return;}records.push({staff_id:commissionEditingStaffId,day_of_week:day,is_working:working,starts_at:working?start:null,ends_at:working?end:null,has_lunch_break:lunch,lunch_starts_at:lunch?ls:null,lunch_ends_at:lunch?le:null});}btn.disabled=true;btn.textContent='Salvando...';try{const {error}=await window.sb.from('staff_hours').upsert(records,{onConflict:'staff_id,day_of_week'});if(error)throw error;staffHourRows=records;alert('Horários do profissional salvos.');closeStaffHoursConfig();}catch(e){alert('Não foi possível salvar os horários: '+e.message);}finally{btn.disabled=false;btn.textContent='Salvar horários';}});
 
 // Registra uma comissão uma única vez ao finalizar um atendimento pago.
-async function createCommissionForAppointment(a,amount,paymentId){try{const {data:existing,error:ee}=await window.sb.from('staff_commissions').select('id').eq('appointment_id',a.id).limit(1);if(ee)throw ee;if(existing?.length)return;const {data:cfg,error:ce}=await window.sb.from('staff_service_commissions').select('commission_percent,active').eq('barbershop_id',window.shopId).eq('staff_id',a.barber_id).eq('service_id',a.service_id).eq('active',true).maybeSingle();if(ce)throw ce;if(!cfg)return;const pct=Number(cfg.commission_percent||0),value=Math.round(Number(amount)*pct)/100;const {error}=await window.sb.from('staff_commissions').insert({barbershop_id:window.shopId,staff_id:a.barber_id,service_id:a.service_id,appointment_id:a.id,payment_id:paymentId,service_amount:Number(amount),commission_percent:pct,commission_amount:value,status:'pending'});if(error&&error.code!=='23505')throw error;}catch(e){console.error('Falha ao gerar comissão:',e);alert('Pagamento foi registrado, mas a comissão não foi gerada: '+(e.message||e));}}
+async function createCommissionForAppointment(a,amount,paymentId){
+  try{
+    if(!window.sb||!window.shopId)throw new Error('Sessão da barbearia não identificada.');
+    if(!a?.id||!a?.barber_id||!a?.service_id)throw new Error('O atendimento não contém profissional, serviço ou identificador.');
+    const {data:existing,error:ee}=await window.sb.from('staff_commissions')
+      .select('id').eq('barbershop_id',window.shopId).eq('appointment_id',a.id).limit(1);
+    if(ee)throw new Error('Consulta de comissão existente: '+ee.message);
+    if(existing?.length)return;
+    const {data:cfg,error:ce}=await window.sb.from('staff_service_commissions')
+      .select('commission_percent,active').eq('barbershop_id',window.shopId)
+      .eq('staff_id',a.barber_id).eq('service_id',a.service_id).eq('active',true).maybeSingle();
+    if(ce)throw new Error('Consulta da configuração: '+ce.message);
+    if(!cfg)throw new Error('Não há comissão ativa configurada para este profissional e serviço nesta barbearia.');
+    const pct=Number(cfg.commission_percent);
+    const base=Number(amount);
+    if(!Number.isFinite(pct)||pct<0||pct>100)throw new Error('Percentual de comissão inválido.');
+    if(!Number.isFinite(base)||base<0)throw new Error('Valor do atendimento inválido.');
+    const service=(window.dbServices||[]).find(x=>String(x.id)===String(a.service_id));
+    const payload={
+      id:crypto.randomUUID(),
+      barbershop_id:window.shopId,
+      staff_id:a.barber_id,
+      appointment_id:a.id,
+      service_id:a.service_id,
+      service_name:service?.name||null,
+      payment_id:paymentId||null,
+      service_amount:base,
+      commission_percent:pct,
+      commission_amount:Math.round((base*pct/100)*100)/100,
+      status:'pending'
+    };
+    const {error}=await window.sb.from('staff_commissions').insert(payload);
+    if(error&&error.code!=='23505')throw new Error('Gravação da comissão: '+error.message);
+  }catch(e){
+    console.error('Falha ao gerar comissão:',e);
+    alert('Pagamento foi registrado, mas a comissão não foi gerada: '+(e.message||e));
+  }
+}
 </script>
 
 <script>
