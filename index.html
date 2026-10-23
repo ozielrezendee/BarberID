@@ -73,6 +73,8 @@ main{padding:16px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9p
 @media (min-width: 900px){
  body{background:#f3f5f9;}
  .app{max-width:none;width:100%;min-height:100vh;margin:0;padding:0 0 0 190px;position:relative;}
+ #globalDashboardHeader{display:block;width:100%;box-sizing:border-box;}
+ .desktop-topbar{position:relative;}
  .bottom{position:fixed;left:0;top:0;bottom:0;transform:none;width:190px;display:flex;flex-direction:column;justify-content:flex-start;gap:6px;padding:22px 10px;background:#101828;border:0;border-right:1px solid #263247;z-index:100;}
  .bottom button{display:flex;align-items:center;gap:9px;text-align:left;padding:11px 10px;border-radius:11px;color:#cbd5e1;font-size:13px;font-weight:600;}
  .bottom button.active{background:#2453df;color:#fff;}
@@ -167,12 +169,13 @@ body.logged-out #loginScreen{display:flex!important;z-index:999999!important;}
   <div class="sidebar-bottom-separator" aria-hidden="true"></div>
   <button class="sidebar-logout" type="button" onclick="logoutBarberID()">🚪 <span>Sair / Logout</span></button>
 </aside>
+<header id="globalDashboardHeader"><div class="top"><div class="brand">BarberID</div><div>🔔</div></div><div class="greet"><small id="dashboardDate"></small><h1>Agenda do dia 👋</h1></div></header>
 <nav class="desktop-topbar" aria-label="Navegação principal">
   <button data-top-target="caixa" onclick="show('caixa',this)">💰 <span>CAIXA</span></button>
   <button data-top-target="home" class="selected" onclick="show('home',this)">📅 <span>AGENDA</span></button>
   <button data-top-target="clientes" onclick="show('clientes',this)">👥 <span>CLIENTES</span></button>
 </nav>
-<section id="home" class="page active"><header><div class="top"><div class="brand">BarberID</div><div>🔔</div></div><div class="greet"><small id="dashboardDate"></small><h1>Agenda do dia 👋</h1></div></header><main>
+<section id="home" class="page active"><main>
 <div class="period-tabs" id="periodTabs"><button class="period-tab active" data-period="today" type="button">Hoje</button><button class="period-tab" data-period="week" type="button">Semana</button></div>
 <div class="barber-tabs" id="barberTabs"><button class="barber-tab active" data-barber="all" type="button">Todos</button></div>
 <div class="dashboard-cards"><div class="dashboard-card"><div class="dashboard-icon">💰</div><span id="revenueLabel">Faturamento de hoje</span><b id="fatValue">R$ 0,00</b></div><div class="dashboard-card"><div class="dashboard-icon">📅</div><span id="appointmentsLabel">Agendamentos de hoje</span><b id="apptCount">0</b></div></div>
@@ -1419,8 +1422,8 @@ function loadCommunicationLogs(){const m=document.getElementById('waLogsMessage'
     const day=new Intl.DateTimeFormat('pt-BR',{weekday:'long',day:'numeric',month:'long',timeZone:tz}).format(now);
     const hour=Number(new Intl.DateTimeFormat('pt-BR',{hour:'2-digit',hour12:false,timeZone:tz}).format(now));
     const greeting=hour<12?'Bom dia':hour<18?'Boa tarde':'Boa noite';
-    const small=document.querySelector('#home header .greet small');
-    const h=document.querySelector('#home header .greet h1');
+    const small=document.querySelector('#globalDashboardHeader .greet small');
+    const h=document.querySelector('#globalDashboardHeader .greet h1');
     if(small)small.textContent=day.charAt(0).toUpperCase()+day.slice(1);
     const meta=currentUser?.user_metadata||{};
     const rawName=meta.full_name||meta.name||meta.display_name||meta.first_name||'';
