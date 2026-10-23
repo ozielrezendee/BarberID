@@ -73,8 +73,6 @@ main{padding:16px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9p
 @media (min-width: 900px){
  body{background:#f3f5f9;}
  .app{max-width:none;width:100%;min-height:100vh;margin:0;padding:0 0 0 190px;position:relative;}
- #globalDashboardHeader{display:block;width:100%;box-sizing:border-box;}
- .desktop-topbar{position:relative;}
  .bottom{position:fixed;left:0;top:0;bottom:0;transform:none;width:190px;display:flex;flex-direction:column;justify-content:flex-start;gap:6px;padding:22px 10px;background:#101828;border:0;border-right:1px solid #263247;z-index:100;}
  .bottom button{display:flex;align-items:center;gap:9px;text-align:left;padding:11px 10px;border-radius:11px;color:#cbd5e1;font-size:13px;font-weight:600;}
  .bottom button.active{background:#2453df;color:#fff;}
@@ -123,7 +121,7 @@ main{padding:16px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9p
 <style>
  .desktop-sidebar,.desktop-topbar{display:none;}
 @media (min-width:900px){
-  .app{padding-left:190px!important;padding-top:68px!important;max-width:none!important;margin:0!important;padding-bottom:24px!important;}
+  .app{padding-left:190px!important;padding-top:0!important;max-width:none!important;margin:0!important;padding-bottom:24px!important;}
   .desktop-sidebar{display:flex;position:fixed;z-index:100;left:0;top:0;bottom:0;width:190px;box-sizing:border-box;flex-direction:column;gap:5px;padding:18px 12px;background:#101828;color:#fff;overflow-y:auto;}
   .sidebar-brand{font-size:21px;font-weight:900;padding:8px 9px 20px;border-bottom:1px solid #344054;margin-bottom:12px;}
   .sidebar-brand small{display:block;color:#98a2b3;font-size:10px;letter-spacing:2px;margin-top:4px;}
@@ -133,13 +131,16 @@ main{padding:16px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9p
   .desktop-sidebar .sidebar-bottom-separator{margin-top:auto;border-top:1px solid #344054;margin-bottom:6px;padding-top:8px;flex-shrink:0;}
   .desktop-sidebar button.sidebar-logout{color:#fda29b;background:rgba(217,45,32,.08);margin-bottom:4px;flex-shrink:0;}
   .desktop-sidebar button.sidebar-logout:hover{background:#912018;color:#fff;}
-  .desktop-topbar{position:fixed;z-index:99;left:190px;right:0;top:0;height:68px;display:flex;align-items:center;gap:10px;padding:0 26px;background:#fff;border-bottom:1px solid #e4e7ec;box-shadow:0 2px 8px #1018280a;}
+  .desktop-topbar{position:relative;z-index:99;margin-left:0;left:auto;right:auto;top:auto;height:68px;display:flex;align-items:center;gap:10px;padding:0 26px;background:#fff;border-bottom:1px solid #e4e7ec;box-shadow:0 2px 8px #1018280a;}
   .desktop-topbar button{height:42px;min-width:130px;border:0;border-radius:10px;padding:0 18px;background:#f2f4f7;color:#344054;font-weight:800;display:flex;align-items:center;justify-content:center;gap:9px;cursor:pointer;}
   .desktop-topbar button.selected{background:#2453df;color:#fff;} .desktop-topbar button:hover:not(.selected){background:#e4e7ec;color:#344054;}
   .bottom{display:none!important;}
   .app>section.page{min-height:calc(100vh - 90px);}
 }
 @media(max-width:899px){.app{padding-top:0!important}.desktop-sidebar,.desktop-topbar{display:none!important;}}
+@media (min-width:900px){#dashboardHeader{margin-left:190px;border-radius:0;padding:20px 32px 18px;min-height:142px;}#dashboardHeader .greet{margin-top:14px}#dashboardHeader .greet h1{font-size:25px}.desktop-topbar{width:calc(100% - 190px)} }
+@media(max-width:899px){#dashboardHeader{display:none!important}}
+
 body.logged-out .app,body.logged-out .desktop-sidebar,body.logged-out .desktop-topbar{display:none!important;}
 body.logged-out #loginScreen{display:flex!important;z-index:999999!important;}
 </style>
@@ -169,12 +170,13 @@ body.logged-out #loginScreen{display:flex!important;z-index:999999!important;}
   <div class="sidebar-bottom-separator" aria-hidden="true"></div>
   <button class="sidebar-logout" type="button" onclick="logoutBarberID()">🚪 <span>Sair / Logout</span></button>
 </aside>
-<header id="globalDashboardHeader"><div class="top"><div class="brand">BarberID</div><div>🔔</div></div><div class="greet"><small id="dashboardDate"></small><h1>Agenda do dia 👋</h1></div></header>
+<header id="dashboardHeader"><div class="top"><div class="brand">BarberID</div><div>🔔</div></div><div class="greet"><small id="dashboardDate"></small><h1>Agenda do dia 👋</h1></div></header>
 <nav class="desktop-topbar" aria-label="Navegação principal">
   <button data-top-target="caixa" onclick="show('caixa',this)">💰 <span>CAIXA</span></button>
   <button data-top-target="home" class="selected" onclick="show('home',this)">📅 <span>AGENDA</span></button>
   <button data-top-target="clientes" onclick="show('clientes',this)">👥 <span>CLIENTES</span></button>
 </nav>
+
 <section id="home" class="page active"><main>
 <div class="period-tabs" id="periodTabs"><button class="period-tab active" data-period="today" type="button">Hoje</button><button class="period-tab" data-period="week" type="button">Semana</button></div>
 <div class="barber-tabs" id="barberTabs"><button class="barber-tab active" data-barber="all" type="button">Todos</button></div>
@@ -1422,8 +1424,8 @@ function loadCommunicationLogs(){const m=document.getElementById('waLogsMessage'
     const day=new Intl.DateTimeFormat('pt-BR',{weekday:'long',day:'numeric',month:'long',timeZone:tz}).format(now);
     const hour=Number(new Intl.DateTimeFormat('pt-BR',{hour:'2-digit',hour12:false,timeZone:tz}).format(now));
     const greeting=hour<12?'Bom dia':hour<18?'Boa tarde':'Boa noite';
-    const small=document.querySelector('#globalDashboardHeader .greet small');
-    const h=document.querySelector('#globalDashboardHeader .greet h1');
+    const small=document.querySelector('#dashboardHeader .greet small');
+    const h=document.querySelector('#dashboardHeader .greet h1');
     if(small)small.textContent=day.charAt(0).toUpperCase()+day.slice(1);
     const meta=currentUser?.user_metadata||{};
     const rawName=meta.full_name||meta.name||meta.display_name||meta.first_name||'';
