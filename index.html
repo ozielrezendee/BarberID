@@ -346,7 +346,7 @@ html[data-apptheme="dark"] body{background:#111827;color:#f3f4f6}html[data-appth
 <button id="saveAppointment" type="button">Confirmar agendamento</button><button class="close" type="button" onclick="closeM()">Cancelar</button>
 </div></div>
 <div id="customerModal" class="modal"><div class="sheet">
-<h2>Novo cliente</h2><input id="customerName" placeholder="Nome completo"><input id="customerPhone" type="tel" placeholder="Telefone">
+<h2>Novo cliente</h2><label for="customerName">Nome completo *</label><input id="customerName" autocomplete="name" placeholder="Nome completo" required><label for="customerPhone">Telefone *</label><input id="customerPhone" type="tel" autocomplete="tel" placeholder="Telefone" required><label for="customerBirthday">Aniversário</label><input id="customerBirthday" type="date" aria-label="Aniversário do cliente"><label for="customerEmail">E-mail</label><input id="customerEmail" type="email" autocomplete="email" placeholder="cliente@email.com"><p class="profile-help">A foto poderá ser adicionada pelo próprio cliente no perfil dele, quando o acesso ao perfil do cliente estiver disponível.</p>
 <button id="saveCustomer" type="button">Cadastrar cliente</button><button class="close" type="button" onclick="closeCustomerModal()">Cancelar</button>
 </div></div>
 <div id="finishModal" class="finish-modal"><div class="finish-box">
@@ -618,7 +618,7 @@ function loadCommunicationLogs(){const m=document.getElementById('waLogsMessage'
 
 
   window.openCustomerModal=function(){
-    $('customerName').value=''; $('customerPhone').value='';
+    $('customerName').value=''; $('customerPhone').value=''; if($('customerBirthday'))$('customerBirthday').value=''; if($('customerEmail'))$('customerEmail').value='';
     $('customerModal').style.display='flex';
     $('customerModal').classList.add('open');
     setTimeout(()=>$('customerName').focus(),50);
@@ -631,14 +631,16 @@ function loadCommunicationLogs(){const m=document.getElementById('waLogsMessage'
 
 
   $('saveCustomer').onclick=async()=>{
-    const name=$('customerName').value.trim(), phone=$('customerPhone').value.trim();
+    const name=$('customerName').value.trim(), phone=$('customerPhone').value.trim(), birthDate=$('customerBirthday')?.value||null, email=$('customerEmail')?.value.trim()||null;
     if(!name){alert('Informe o nome do cliente.');return;}
+    if(!phone){alert('Informe o telefone do cliente.');return;}
+    if(email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){alert('Informe um e-mail válido.');return;}
     const btn=$('saveCustomer'); btn.disabled=true; btn.textContent='Cadastrando...';
     try{
       const {data:existing,error:fe}=await sb.from('customers').select('id').eq('barbershop_id',window.shopId).ilike('name',name).limit(1);
       if(fe) throw new Error(fe.message);
       if(existing?.length){alert('Já existe um cliente com esse nome.');return;}
-      const {error}=await window.sb.from('customers').insert({barbershop_id:shopId,name,phone:phone||null,loyalty_points:0});
+      const {error}=await window.sb.from('customers').insert({barbershop_id:shopId,name,phone,email,birth_date:birthDate,loyalty_points:0});
       if(error) throw new Error(error.message);
       closeCustomerModal(); await loadAll(); alert('Cliente cadastrado com sucesso.');
     }catch(e){alert('Não foi possível cadastrar o cliente: '+e.message);}
