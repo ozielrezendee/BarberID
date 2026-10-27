@@ -645,7 +645,7 @@ function loadCommunicationLogs(){const m=document.getElementById('waLogsMessage'
   const normalizedPhone = value => String(value||'').replace(/\D/g,'');
   function closeImportContacts(){ $('importContactsModal').style.display='none'; $('importContactsModal').classList.remove('open'); }
   function openImportContacts(){
-    contactsToImport=[]; $('contactsImportMessage').textContent='Selecione os contatos do celular ou escolha um arquivo .vcf.';
+    contactsToImport=[]; $('contactsImportMessage').textContent='Selecione contatos se o navegador permitir, ou escolha um arquivo .vcf. No iPhone, use um arquivo salvo em Arquivos.';
     $('contactsVcfFile').value=''; $('selectAllImportContacts').checked=false; renderImportContacts();
     $('importContactsModal').style.display='flex'; $('importContactsModal').classList.add('open');
   }
@@ -676,8 +676,11 @@ function loadCommunicationLogs(){const m=document.getElementById('waLogsMessage'
   $('pickPhoneContacts').addEventListener('click',async()=>{
     try{
       if(!('contacts' in navigator) || typeof navigator.contacts.select!=='function'){
-        $('contactsImportMessage').textContent='Este navegador não oferece seleção direta de contatos. Use a opção de arquivo .vcf exportado dos contatos do celular.';
-        $('contactsVcfFile').focus(); return;
+        const isIOS=/iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
+        $('contactsImportMessage').textContent=isIOS
+          ? 'No iPhone, o Safari e o app instalado não liberam a agenda diretamente para sites. Selecione um arquivo de contatos .vcf salvo no app Arquivos. No Android, a seleção direta também depende do navegador; se não abrir, use .vcf.'
+          : 'Este navegador não libera a agenda diretamente. Vou abrir os arquivos para você selecionar um .vcf exportado dos contatos do celular.';
+        $('contactsVcfFile').click(); return;
       }
       const chosen=await navigator.contacts.select(['name','tel','email'],{multiple:true});
       cleanImportedContacts(chosen.map(c=>({name:Array.isArray(c.name)?c.name[0]:c.name,phone:Array.isArray(c.tel)?c.tel[0]:c.tel,email:Array.isArray(c.email)?c.email[0]:c.email})));
