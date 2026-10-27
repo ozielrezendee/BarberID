@@ -214,7 +214,7 @@ html[data-apptheme="dark"] body{background:#111827;color:#f3f4f6}html[data-appth
 </main></section>
 <div id="cashCorrectionModal" class="cash-modal"><div class="cash-sheet"><h2>Corrigir caixa</h2><p class="muted" id="correctionSessionLabel">Sessão</p><label for="correctionField">O que será corrigido?</label><select id="correctionField"><option value="opening_amount">Saldo inicial</option><option value="closing_amount">Saldo final registrado (caixa fechado)</option></select><label for="correctionValue">Novo valor (R$)</label><input id="correctionValue" type="number" min="0" step="0.01" placeholder="Novo valor"><label for="correctionReason">Justificativa obrigatória</label><textarea id="correctionReason" rows="3" placeholder="Explique o motivo da correção" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:10px;margin:7px 0 12px"></textarea><button id="confirmCashCorrection" type="button">Salvar correção</button><button class="close" id="cancelCashCorrection" type="button">Cancelar</button></div></div>
 <div id="cashMovementCorrectionModal" class="cash-modal"><div class="cash-sheet"><h2>Corrigir lançamento</h2><p class="muted" id="movementCorrectionLabel">Lançamento financeiro</p><label for="movementCorrectionDescription">Descrição / comanda</label><input id="movementCorrectionDescription" type="text" maxlength="180" placeholder="Descrição do lançamento"><label for="movementCorrectionAmount">Novo valor (R$)</label><input id="movementCorrectionAmount" type="number" min="0" step="0.01" placeholder="Novo valor"><label for="movementCorrectionMethod">Forma de pagamento</label><select id="movementCorrectionMethod"><option value="pix">Pix</option><option value="cash">Dinheiro</option><option value="credit">Crédito</option><option value="debit">Débito</option></select><label for="movementCorrectionReason">Justificativa obrigatória</label><textarea id="movementCorrectionReason" rows="3" placeholder="Explique o motivo da correção (mínimo 8 caracteres)" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:10px;margin:7px 0 12px"></textarea><button id="confirmMovementCorrection" type="button">Salvar correção</button><button class="close" id="cancelMovementCorrection" type="button">Cancelar</button></div></div>
-<section id="clientes" class="page"><div class="head"><button class="back" onclick="show('home')">‹ Voltar</button><h1>Clientes</h1></div><main><button id="newCustomerBtn" class="primary" type="button">＋ Novo cliente</button><div class="list" id="customerList"><div class="row">Nenhum cliente cadastrado. Cadastre o primeiro cliente para começar.</div></div></main></section>
+<section id="clientes" class="page"><div class="head"><button class="back" onclick="show('home')">‹ Voltar</button><h1>Clientes</h1></div><main><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px"><button id="newCustomerBtn" class="primary" type="button" style="margin:0">＋ Novo cliente</button><button id="importContactsBtn" class="close" type="button" style="margin:0;border:1px solid #cbd5e1">♙ Importar contatos</button></div><div class="list" id="customerList"><div class="row">Nenhum cliente cadastrado. Cadastre o primeiro cliente para começar.</div></div></main></section>
 <section id="servicos" class="page"><div class="head"><button class="back" onclick="show('mais')">‹ Voltar</button><h1>Serviços</h1></div><main><p class="muted">Cadastre os serviços, preços e duração. A duração será usada para calcular os horários disponíveis.</p><button id="newServiceBtn" class="primary" type="button">＋ Novo serviço</button><div id="serviceList" class="list"><div class="row">Carregando serviços...</div></div></main></section>
 <div id="serviceModal" class="modal"><div class="sheet"><h2 id="serviceModalTitle">Novo serviço</h2><label for="serviceName">Nome do serviço</label><input id="serviceName" maxlength="100" placeholder="Ex.: Corte degradê"><label for="servicePrice">Preço (R$)</label><input id="servicePrice" type="number" min="0" step="0.01" placeholder="40,00"><label for="serviceDuration">Duração (minutos)</label><input id="serviceDuration" type="number" min="5" step="5" value="30" placeholder="30"><label class="switch-row"><input id="serviceActive" type="checkbox" checked style="width:auto;margin-right:8px"> Serviço ativo e disponível para agendamento</label><button id="saveServiceBtn" type="button">Salvar serviço</button><button class="close" type="button" onclick="closeServiceModal()">Cancelar</button></div></div>
 
@@ -348,6 +348,15 @@ html[data-apptheme="dark"] body{background:#111827;color:#f3f4f6}html[data-appth
 <div id="customerModal" class="modal"><div class="sheet">
 <h2>Novo cliente</h2><label for="customerName">Nome completo *</label><input id="customerName" autocomplete="name" placeholder="Nome completo" required><label for="customerPhone">Telefone *</label><input id="customerPhone" type="tel" autocomplete="tel" placeholder="Telefone" required><label for="customerBirthday">Aniversário</label><input id="customerBirthday" type="date" aria-label="Aniversário do cliente"><label for="customerEmail">E-mail</label><input id="customerEmail" type="email" autocomplete="email" placeholder="cliente@email.com"><p class="profile-help">A foto poderá ser adicionada pelo próprio cliente no perfil dele, quando o acesso ao perfil do cliente estiver disponível.</p>
 <button id="saveCustomer" type="button">Cadastrar cliente</button><button class="close" type="button" onclick="closeCustomerModal()">Cancelar</button>
+</div></div>
+<div id="importContactsModal" class="modal"><div class="sheet" style="max-width:620px;width:min(620px,94vw);max-height:85vh;overflow:auto">
+<h2>Importar contatos</h2><p class="profile-help">Selecione vários contatos do celular ou importe um arquivo de contatos (.vcf). Confira a lista antes de cadastrar.</p>
+<button id="pickPhoneContacts" type="button" style="width:100%;margin:6px 0 10px">📱 Selecionar contatos do celular</button>
+<label for="contactsVcfFile">Ou importar arquivo de contatos (.vcf)</label><input id="contactsVcfFile" type="file" accept=".vcf,text/vcard,text/x-vcard" style="margin:6px 0 12px">
+<div id="contactsImportMessage" class="profile-help" role="status">Nenhum contato selecionado.</div>
+<div style="display:flex;justify-content:space-between;gap:10px;align-items:center;margin:8px 0"><label style="display:flex;align-items:center;gap:8px;margin:0"><input type="checkbox" id="selectAllImportContacts" style="width:auto"> Selecionar todos</label><b id="importContactsCount">0 selecionados</b></div>
+<div id="importContactsList" class="list" style="max-height:260px;overflow:auto"><div class="row">Escolha contatos para visualizar aqui.</div></div>
+<button id="confirmImportContacts" type="button" disabled>Importar selecionados</button><button class="close" id="cancelImportContacts" type="button">Cancelar</button>
 </div></div>
 <div id="finishModal" class="finish-modal"><div class="finish-box">
 <h2>Finalizar atendimento</h2>
@@ -629,6 +638,87 @@ function loadCommunicationLogs(){const m=document.getElementById('waLogsMessage'
     window.openCustomerModal();
   });
 
+
+  let contactsToImport=[];
+  const normalizedPhone = value => String(value||'').replace(/\D/g,'');
+  function closeImportContacts(){ $('importContactsModal').style.display='none'; $('importContactsModal').classList.remove('open'); }
+  function openImportContacts(){
+    contactsToImport=[]; $('contactsImportMessage').textContent='Selecione os contatos do celular ou escolha um arquivo .vcf.';
+    $('contactsVcfFile').value=''; $('selectAllImportContacts').checked=false; renderImportContacts();
+    $('importContactsModal').style.display='flex'; $('importContactsModal').classList.add('open');
+  }
+  function renderImportContacts(){
+    const list=$('importContactsList');
+    if(!contactsToImport.length){list.innerHTML='<div class="row">Nenhum contato selecionado ainda.</div>'; $('importContactsCount').textContent='0 selecionados'; $('confirmImportContacts').disabled=true; return;}
+    list.innerHTML=contactsToImport.map((c,i)=>`<label class="row" style="display:flex;align-items:center;gap:10px;cursor:pointer"><input type="checkbox" data-import-contact="${i}" ${c.selected?'checked':''} style="width:auto;flex-shrink:0"><span style="flex:1"><b>${window.escapeHtml(c.name||'Contato sem nome')}</b><small>${window.escapeHtml(c.phone||'Sem telefone')}${c.email?' · '+window.escapeHtml(c.email):''}</small></span></label>`).join('');
+    list.querySelectorAll('[data-import-contact]').forEach(el=>el.addEventListener('change',()=>{contactsToImport[Number(el.dataset.importContact)].selected=el.checked;updateImportCount();}));
+    updateImportCount();
+  }
+  function updateImportCount(){
+    const count=contactsToImport.filter(c=>c.selected && c.name.trim() && normalizedPhone(c.phone).length>=8).length;
+    $('importContactsCount').textContent=count+' selecionado(s)'; $('confirmImportContacts').disabled=count===0;
+    $('selectAllImportContacts').checked=contactsToImport.length>0 && contactsToImport.every(c=>c.selected);
+  }
+  function cleanImportedContacts(items){
+    const seen=new Set();
+    contactsToImport=(items||[]).map(c=>({name:String(c.name||'').trim(),phone:String(c.phone||'').trim(),email:String(c.email||'').trim(),birth_date:c.birth_date||null,selected:true}))
+      .filter(c=>c.name && normalizedPhone(c.phone).length>=8)
+      .filter(c=>{const k=normalizedPhone(c.phone);if(seen.has(k))return false;seen.add(k);return true;});
+    $('contactsImportMessage').textContent=contactsToImport.length?'Confira os contatos. Contatos sem nome ou telefone válido foram ignorados.':'Nenhum contato com nome e telefone válido foi encontrado.';
+    renderImportContacts();
+  }
+  const importContactsBtn=$('importContactsBtn'); if(importContactsBtn) importContactsBtn.addEventListener('click',openImportContacts);
+  $('cancelImportContacts').addEventListener('click',closeImportContacts);
+  $('selectAllImportContacts').addEventListener('change',()=>{contactsToImport.forEach(c=>c.selected=$('selectAllImportContacts').checked);renderImportContacts();});
+  $('pickPhoneContacts').addEventListener('click',async()=>{
+    try{
+      if(!('contacts' in navigator) || typeof navigator.contacts.select!=='function'){
+        $('contactsImportMessage').textContent='Este navegador não oferece seleção direta de contatos. Use a opção de arquivo .vcf exportado dos contatos do celular.';
+        $('contactsVcfFile').focus(); return;
+      }
+      const chosen=await navigator.contacts.select(['name','tel','email'],{multiple:true});
+      cleanImportedContacts(chosen.map(c=>({name:Array.isArray(c.name)?c.name[0]:c.name,phone:Array.isArray(c.tel)?c.tel[0]:c.tel,email:Array.isArray(c.email)?c.email[0]:c.email})));
+    }catch(e){ if(e.name!=='AbortError') $('contactsImportMessage').textContent='Não foi possível abrir os contatos: '+(e.message||e)+'. Você também pode importar um arquivo .vcf.'; }
+  });
+  $('contactsVcfFile').addEventListener('change',async e=>{
+    const file=e.target.files?.[0]; if(!file)return;
+    try{
+      const raw=(await file.text()).replace(/\r?\n[ \t]/g,'');
+      const cards=raw.split(/BEGIN:VCARD/i).slice(1).map(block=>block.split(/END:VCARD/i)[0]);
+      const parsed=cards.map(card=>{
+        const lines=card.split(/\r?\n/); let name='',phone='',email='',bday=null;
+        for(const line of lines){
+          const idx=line.indexOf(':'); if(idx<0)continue; const key=line.slice(0,idx).toUpperCase(), val=line.slice(idx+1).trim();
+          if(key.startsWith('FN'))name=val.replace(/\\[,;]/g,m=>m[1]).replace(/\\n/gi,' ');
+          else if(!name && key.startsWith('N')){const parts=val.split(';').reverse();name=parts.filter(Boolean).join(' ').replace(/\\[,;]/g,m=>m[1]);}
+          else if(!phone && key.startsWith('TEL'))phone=val;
+          else if(!email && key.startsWith('EMAIL'))email=val;
+          else if(!bday && key.startsWith('BDAY')){const m=val.match(/^(\d{4})-?(\d{2})-?(\d{2})$/);if(m)bday=`${m[1]}-${m[2]}-${m[3]}`;}
+        }
+        return {name,phone,email,birth_date:bday};
+      });
+      cleanImportedContacts(parsed);
+    }catch(err){$('contactsImportMessage').textContent='Não foi possível ler o arquivo .vcf: '+(err.message||err);}
+  });
+  $('confirmImportContacts').addEventListener('click',async()=>{
+    const selected=contactsToImport.filter(c=>c.selected && c.name.trim() && normalizedPhone(c.phone).length>=8);
+    if(!selected.length){alert('Selecione ao menos um contato com nome e telefone válido.');return;}
+    const btn=$('confirmImportContacts');btn.disabled=true;btn.textContent='Importando...';
+    try{
+      const {data:existing,error}=await window.sb.from('customers').select('name,phone').eq('barbershop_id',window.shopId);
+      if(error)throw error;
+      const existingPhones=new Set((existing||[]).map(c=>normalizedPhone(c.phone)).filter(Boolean));
+      const existingNames=new Set((existing||[]).map(c=>String(c.name||'').trim().toLocaleLowerCase('pt-BR')));
+      const fresh=selected.filter(c=>!existingPhones.has(normalizedPhone(c.phone)) && !existingNames.has(c.name.trim().toLocaleLowerCase('pt-BR')));
+      const duplicates=selected.length-fresh.length;
+      if(!fresh.length){alert(`Nenhum contato novo para importar. ${duplicates} já existe(m) na lista.`);return;}
+      const payload=fresh.map(c=>({barbershop_id:window.shopId,name:c.name,phone:c.phone,email:c.email||null,birth_date:c.birth_date||null,loyalty_points:0}));
+      const {error:insertError}=await window.sb.from('customers').insert(payload);
+      if(insertError)throw insertError;
+      closeImportContacts();await loadAll();alert(`Importação concluída: ${fresh.length} cliente(s) cadastrado(s). ${duplicates?duplicates+' contato(s) ignorado(s) por já existirem.':''}`);
+    }catch(err){alert('Não foi possível importar os contatos: '+(err.message||err));}
+    finally{btn.disabled=false;btn.textContent='Importar selecionados';}
+  });
 
   $('saveCustomer').onclick=async()=>{
     const name=$('customerName').value.trim(), phone=$('customerPhone').value.trim(), birthDate=$('customerBirthday')?.value||null, email=$('customerEmail')?.value.trim()||null;
