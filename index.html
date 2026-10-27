@@ -351,8 +351,10 @@ html[data-apptheme="dark"] body{background:#111827;color:#f3f4f6}html[data-appth
 </div></div>
 <div id="importContactsModal" class="modal"><div class="sheet" style="max-width:620px;width:min(620px,94vw);max-height:85vh;overflow:auto">
 <h2>Importar contatos</h2><p class="profile-help">Selecione vários contatos do celular ou importe um arquivo de contatos (.vcf). Confira a lista antes de cadastrar.</p>
-<button id="pickPhoneContacts" type="button" style="width:100%;margin:6px 0 10px">📱 Selecionar contatos do celular</button>
-<label for="contactsVcfFile">Ou importar arquivo de contatos (.vcf)</label><input id="contactsVcfFile" type="file" accept=".vcf,text/vcard,text/x-vcard" style="margin:6px 0 12px">
+<button id="pickPhoneContacts" type="button" style="width:100%;margin:6px 0 8px">📱 Importar da agenda do celular</button>
+<button id="whatsappContactsHelp" class="close" type="button" style="width:100%;margin:0 0 10px">🟢 Importar contatos do WhatsApp</button>
+<label for="contactsVcfFile">📂 Importar arquivo de contatos (.vcf)</label><input id="contactsVcfFile" type="file" accept=".vcf,text/vcard,text/x-vcard" style="margin:6px 0 12px">
+<p class="profile-help" style="margin-top:0">O WhatsApp não permite que um site leia diretamente toda a lista de contatos. Para importar contatos usados no WhatsApp, salve-os primeiro na agenda do celular e use “Importar da agenda”, ou selecione um arquivo .vcf.</p>
 <div id="contactsImportMessage" class="profile-help" role="status">Nenhum contato selecionado.</div>
 <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;margin:8px 0"><label style="display:flex;align-items:center;gap:8px;margin:0"><input type="checkbox" id="selectAllImportContacts" style="width:auto"> Selecionar todos</label><b id="importContactsCount">0 selecionados</b></div>
 <div id="importContactsList" class="list" style="max-height:260px;overflow:auto"><div class="row">Escolha contatos para visualizar aqui.</div></div>
@@ -669,6 +671,7 @@ function loadCommunicationLogs(){const m=document.getElementById('waLogsMessage'
   }
   const importContactsBtn=$('importContactsBtn'); if(importContactsBtn) importContactsBtn.addEventListener('click',openImportContacts);
   $('cancelImportContacts').addEventListener('click',closeImportContacts);
+  $('whatsappContactsHelp').addEventListener('click',()=>{ $('contactsImportMessage').textContent='Para importar contatos do WhatsApp: salve os números desejados na agenda do celular e toque em “Importar da agenda do celular”. Se tiver um arquivo .vcf, escolha “Importar arquivo de contatos”. Por segurança, o BarberID não acessa conversas nem lê sua conta do WhatsApp.'; });
   $('selectAllImportContacts').addEventListener('change',()=>{contactsToImport.forEach(c=>c.selected=$('selectAllImportContacts').checked);renderImportContacts();});
   $('pickPhoneContacts').addEventListener('click',async()=>{
     try{
