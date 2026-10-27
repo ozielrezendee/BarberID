@@ -154,7 +154,8 @@ body.logged-out .app,body.logged-out .desktop-sidebar,body.logged-out .desktop-t
 body:not(.home-view) #dashboardHeader,body:not(.home-view) .desktop-topbar{display:none!important;}
 body.home-view #dashboardHeader,body.home-view .desktop-topbar{display:block;}
 body.home-view .desktop-topbar{display:flex;}
-.desktop-sidebar button.sidebar-home{background:rgba(29,78,216,.16);color:#fff;}
+.desktop-sidebar button.sidebar-home{background:transparent;color:#e4e7ec;}
+.desktop-sidebar button.active-sidebar{background:var(--app-primary,#1d4ed8)!important;color:#fff!important;box-shadow:inset 3px 0 0 #fff;}
 .desktop-sidebar button.sidebar-home:hover{background:var(--app-primary,#1d4ed8);}
 body.logged-out #loginScreen{display:flex!important;z-index:999999!important;}
 html[data-apptheme="dark"] body{background:#111827;color:#f3f4f6}html[data-apptheme="dark"] .page main{background:#111827}html[data-apptheme="dark"] .stat,html[data-apptheme="dark"] .card,html[data-apptheme="dark"] .row,html[data-apptheme="dark"] .module-form,html[data-apptheme="dark"] .dashboard-card{background:#1f2937;color:#f3f4f6;border-color:#374151}html[data-apptheme="dark"] input,html[data-apptheme="dark"] select{background:#111827;color:#f3f4f6;border-color:#4b5563}html[data-apptheme="dark"] .desktop-topbar{background:#1f2937}
@@ -410,6 +411,23 @@ document.addEventListener('DOMContentLoaded',loadAppSettings);
   if(page) page.classList.add('active');
   document.querySelectorAll('.bottom button').forEach(x=>x.classList.toggle('active', (b && x===b) || (!b && x.dataset.target===id)));
   document.querySelectorAll('.desktop-topbar button').forEach(x=>x.classList.toggle('selected', x.dataset.topTarget===id));
+  const sidebarMap={
+    'home':'home','perfil':'perfil','perfil-pessoal':'perfil','perfil-dados-pessoais':'perfil','perfil-barbearia':'perfil','perfil-dados-barbearia':'perfil',
+    'cadastros':'cadastros','clientes':'cadastros','profissionais':'cadastros','servicos':'cadastros','serviços':'cadastros','produtos':'cadastros','estoque':'cadastros','pacotes':'cadastros','comanda':'cadastros','venda-pacotes':'cadastros',
+    'financeiro':'financeiro','caixa':'financeiro','comissoes':'financeiro','comissões':'financeiro','dashboard-profissional':'financeiro',
+    'aniversariantes':'aniversariantes','redes-sociais':'redes-sociais','comunicacao':'comunicacao','cupons':'cupons','configuracoes':'configuracoes','meu-plano':'meu-plano','ajuda':'ajuda'
+  };
+  let key=sidebarMap[id];
+  if(!key){
+    if(/^(perfil|dados-pessoais|dados-barbearia)/.test(id))key='perfil';
+    else if(/^(cliente|profissional|servico|serviço|produto|estoque|pacote|comanda|venda)/.test(id))key='cadastros';
+    else if(/^(caixa|financeiro|comissao|comissão|dashboard-profissional)/.test(id))key='financeiro';
+    else if(/^(parametro|configurac)/.test(id))key='configuracoes';
+  }
+  document.querySelectorAll('.desktop-sidebar button[onclick*="show("]').forEach(btn=>{
+    const match=btn.getAttribute('onclick').match(/show\('([^']+)'/);
+    btn.classList.toggle('active-sidebar',!!key&&match&&match[1]===key);
+  });
   scrollTo(0,0);
   if(id==='perfil-horarios' && window.loadShopHoursForProfile) window.loadShopHoursForProfile();
 }</script>
