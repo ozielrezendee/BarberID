@@ -151,11 +151,16 @@ main{padding:16px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9p
 @media(max-width:899px){#dashboardHeader{background:var(--app-header);display:none!important}}
 
 body.logged-out .app,body.logged-out .desktop-sidebar,body.logged-out .desktop-topbar{display:none!important;}
+body:not(.home-view) #dashboardHeader,body:not(.home-view) .desktop-topbar{display:none!important;}
+body.home-view #dashboardHeader,body.home-view .desktop-topbar{display:block;}
+body.home-view .desktop-topbar{display:flex;}
+.desktop-sidebar button.sidebar-home{background:rgba(29,78,216,.16);color:#fff;}
+.desktop-sidebar button.sidebar-home:hover{background:var(--app-primary,#1d4ed8);}
 body.logged-out #loginScreen{display:flex!important;z-index:999999!important;}
 html[data-apptheme="dark"] body{background:#111827;color:#f3f4f6}html[data-apptheme="dark"] .page main{background:#111827}html[data-apptheme="dark"] .stat,html[data-apptheme="dark"] .card,html[data-apptheme="dark"] .row,html[data-apptheme="dark"] .module-form,html[data-apptheme="dark"] .dashboard-card{background:#1f2937;color:#f3f4f6;border-color:#374151}html[data-apptheme="dark"] input,html[data-apptheme="dark"] select{background:#111827;color:#f3f4f6;border-color:#4b5563}html[data-apptheme="dark"] .desktop-topbar{background:#1f2937}
 </style>
 
-<style>.settings-group-title{padding:14px 18px;margin:14px 0 0;background:#e9eef7;color:#172033;border-bottom:1px solid #d9e0eb;font-size:16px}.settings-switch-list{background:#fff;border:1px solid #e2e5ea;border-radius:12px;overflow:hidden}.settings-switch-row{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:18px 16px;min-height:76px;border-bottom:1px solid #e6e6e6;background:#fff}.settings-switch-row>div{min-width:0;flex:1}.settings-switch-row b{display:block;font-size:16px;line-height:1.35;color:#30343b}.settings-switch-row small{display:block;margin-top:5px;color:#687385;line-height:1.4;font-size:12px}.settings-switch-row select{max-width:220px;min-width:145px;width:auto}.settings-switch-row input[type=color]{width:54px;height:40px;padding:3px;border:1px solid #d6d9df;border-radius:8px}.switch{position:relative;display:inline-block;width:58px;height:32px;flex:0 0 58px}.switch input{opacity:0;width:0;height:0}.slider{position:absolute;cursor:pointer;inset:0;background:#c6c8cc;border-radius:30px;transition:.2s}.slider:before{content:"";position:absolute;height:26px;width:26px;left:3px;top:3px;background:#fff;border-radius:50%;box-shadow:0 1px 3px #0002;transition:.2s}.switch input:checked+.slider{background:#28bd61}.switch input:checked+.slider:before{transform:translateX(26px)}.settings-switch-row[hidden]{display:none}@media(max-width:600px){.settings-switch-row{padding:15px 12px;gap:10px}.settings-switch-row b{font-size:15px}.settings-switch-row select{min-width:110px;max-width:145px;font-size:13px}}</style></head><body class="logged-out"><div id="loginScreen" class="login-screen"><div class="login-box"><h1>BarberID</h1><p id="loginIntro">Entre para acessar os dados reais da sua barbearia.</p>
+<style>.settings-group-title{padding:14px 18px;margin:14px 0 0;background:#e9eef7;color:#172033;border-bottom:1px solid #d9e0eb;font-size:16px}.settings-switch-list{background:#fff;border:1px solid #e2e5ea;border-radius:12px;overflow:hidden}.settings-switch-row{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:18px 16px;min-height:76px;border-bottom:1px solid #e6e6e6;background:#fff}.settings-switch-row>div{min-width:0;flex:1}.settings-switch-row b{display:block;font-size:16px;line-height:1.35;color:#30343b}.settings-switch-row small{display:block;margin-top:5px;color:#687385;line-height:1.4;font-size:12px}.settings-switch-row select{max-width:220px;min-width:145px;width:auto}.settings-switch-row input[type=color]{width:54px;height:40px;padding:3px;border:1px solid #d6d9df;border-radius:8px}.switch{position:relative;display:inline-block;width:58px;height:32px;flex:0 0 58px}.switch input{opacity:0;width:0;height:0}.slider{position:absolute;cursor:pointer;inset:0;background:#c6c8cc;border-radius:30px;transition:.2s}.slider:before{content:"";position:absolute;height:26px;width:26px;left:3px;top:3px;background:#fff;border-radius:50%;box-shadow:0 1px 3px #0002;transition:.2s}.switch input:checked+.slider{background:#28bd61}.switch input:checked+.slider:before{transform:translateX(26px)}.settings-switch-row[hidden]{display:none}@media(max-width:600px){.settings-switch-row{padding:15px 12px;gap:10px}.settings-switch-row b{font-size:15px}.settings-switch-row select{min-width:110px;max-width:145px;font-size:13px}}</style></head><body class="logged-out home-view"><div id="loginScreen" class="login-screen"><div class="login-box"><h1>BarberID</h1><p id="loginIntro">Entre para acessar os dados reais da sua barbearia.</p>
 <div class="login-tabs" role="tablist" aria-label="Acesso à conta"><button id="loginTab" class="active" type="button" role="tab" aria-selected="true">Fazer login</button><button id="signupTab" type="button" role="tab" aria-selected="false">Criar cadastro</button></div>
 <section id="loginPanel"><input id="loginEmail" type="email" placeholder="E-mail" autocomplete="username"><input id="loginPassword" type="password" placeholder="Senha" autocomplete="current-password"><label class="show-password"><input id="showLoginPassword" type="checkbox"> Mostrar senha</label><div class="login-links"><span></span><button id="forgotPasswordBtn" class="login-link" type="button">Esqueceu a senha?</button></div><button id="loginBtn" class="login-submit" type="button">Entrar</button><div id="loginError" class="login-error" role="alert"></div><div id="resetSuccess" class="login-success" role="status"></div></section>
 <section id="signupPanel" style="display:none"><input id="signupEmail" type="email" placeholder="Seu e-mail" autocomplete="email"><input id="signupPassword" type="password" placeholder="Crie uma senha (mínimo 6 caracteres)" autocomplete="new-password"><input id="signupConfirmPassword" type="password" placeholder="Confirme a senha" autocomplete="new-password"><label class="show-password"><input id="showSignupPassword" type="checkbox"> Mostrar senhas</label><button id="signupBtn" class="login-submit" type="button">Criar conta e enviar ativação</button><div id="signupError" class="login-error" role="alert"></div><div id="signupSuccess" class="login-success" role="status"></div></section>
@@ -165,6 +170,7 @@ html[data-apptheme="dark"] body{background:#111827;color:#f3f4f6}html[data-appth
 <aside class="desktop-sidebar" aria-label="Menu de módulos">
   <div class="sidebar-brand">BarberID <small>PAINEL</small></div>
   <div class="sidebar-label">MENU</div>
+  <button class="sidebar-home" onclick="show('home')">🏠 <span>HOME</span></button>
   <button onclick="show('perfil')">👤 <span>Perfil</span></button>
   <button onclick="show('cadastros')">🗂️ <span>Cadastros</span></button>
   <button onclick="show('financeiro')">💳 <span>Financeiro</span></button>
@@ -380,6 +386,7 @@ async function logoutBarberID(){
   const errorBox=document.getElementById('loginError');if(errorBox){errorBox.textContent='';errorBox.style.display='none';}
   document.querySelectorAll('.page').forEach(page=>page.classList.remove('active'));
   const home=document.getElementById('home');if(home)home.classList.add('active');
+  document.body.classList.add('home-view');
   document.querySelectorAll('.desktop-topbar button').forEach(button=>button.classList.toggle('selected',button.dataset.topTarget==='home'));
   if(btn){btn.disabled=false;btn.querySelector('span').textContent='Sair / Logout';}
 }
@@ -397,6 +404,7 @@ function resetAppSettings(){localStorage.removeItem(appSettingsKey());loadAppSet
 document.addEventListener('DOMContentLoaded',loadAppSettings);
 </script>
 <script>function show(id,b){
+  document.body.classList.toggle('home-view',id==='home');
   document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
   const page=document.getElementById(id);
   if(page) page.classList.add('active');
