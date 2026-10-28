@@ -222,8 +222,16 @@ html[data-apptheme="dark"] body{background:#111827;color:#f3f4f6}html[data-appth
 <div id="serviceModal" class="modal"><div class="sheet"><h2 id="serviceModalTitle">Novo serviço</h2><label for="serviceName">Nome do serviço</label><input id="serviceName" maxlength="100" placeholder="Ex.: Corte degradê"><label for="servicePrice">Preço (R$)</label><input id="servicePrice" type="number" min="0" step="0.01" placeholder="40,00"><label for="serviceDuration">Duração (minutos)</label><input id="serviceDuration" type="number" min="5" step="5" value="30" placeholder="30">
 <div class="service-photo-editor" style="margin:12px 0;padding:12px;border:1px solid #dbe2ee;border-radius:12px">
 <label for="servicePhotoFile">Foto do serviço</label>
-<img id="servicePhotoPreview" alt="Prévia da foto do serviço" style="display:block;width:100%;max-width:260px;height:150px;object-fit:cover;border-radius:10px;margin:8px 0;background:#eef2f7">
+<div id="serviceCropFrame" style="width:100%;max-width:320px;height:180px;overflow:hidden;border-radius:10px;margin:8px 0;background:#eef2f7;display:flex;align-items:center;justify-content:center">
+<img id="servicePhotoPreview" alt="Prévia do enquadramento da foto do serviço" style="display:block;width:100%;height:100%;object-fit:cover;object-position:50% 50%;background:#eef2f7">
+</div>
 <input id="servicePhotoFile" type="file" accept="image/*" style="width:100%">
+<div id="serviceCropControls" style="display:none;margin-top:10px;padding:10px;background:#f8fafc;border-radius:10px">
+<label for="serviceCropX">Enquadramento horizontal</label><input id="serviceCropX" type="range" min="0" max="100" value="50" style="width:100%">
+<label for="serviceCropY">Enquadramento vertical</label><input id="serviceCropY" type="range" min="0" max="100" value="50" style="width:100%">
+<label for="serviceCropZoom">Zoom</label><input id="serviceCropZoom" type="range" min="100" max="250" value="100" style="width:100%">
+<small>Arraste os controles para escolher a parte da foto que aparecerá no serviço.</small>
+</div>
 <button id="removeServicePhotoBtn" type="button" class="mini-btn" style="margin-top:8px">Remover foto atual</button>
 <small style="display:block;margin-top:6px">Sem foto personalizada, será usada uma imagem padrão. Você pode escolher uma imagem do computador ou do celular.</small>
 </div>
@@ -1085,7 +1093,29 @@ function loadCommunicationLogs(){const m=document.getElementById('waLogsMessage'
   };
 
   const SERVICE_DEFAULT_IMAGE = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360"><rect width="640" height="360" fill="#101827"/><circle cx="320" cy="130" r="58" fill="#2347a8"/><path d="M282 126h76M290 145h60M300 164h40" stroke="#fff" stroke-width="10" stroke-linecap="round"/><text x="320" y="260" text-anchor="middle" font-family="Arial,sans-serif" font-size="30" font-weight="700" fill="#fff">BARBERID</text><text x="320" y="295" text-anchor="middle" font-family="Arial,sans-serif" font-size="17" fill="#cbd5e1">SERVIÇO</text></svg>');
-  let servicePhotoRemoved=false, servicePhotoCurrentUrl=null;
+  let servicePhotoRemoved=false, servicePhotoCurrentUrl=null, serviceCropImage=null;
+  function updateServiceCropPreview(){
+    const img=$('servicePhotoPreview');if(!img)return;
+    const x=Number($('serviceCropX')?.value||50),y=Number($('serviceCropY')?.value||50),zoom=Number($('serviceCropZoom')?.value||100)/100;
+    img.style.objectPosition=x+'% '+y+'%';img.style.transform='scale('+zoom+')';
+    const frame=$('serviceCropFrame');if(frame)frame.style.overflow='hidden';
+  }
+  function resetServiceCrop(){serviceCropImage=null;['serviceCropX','serviceCropY'].forEach(id=>{if($(id))$(id).value=50});if($('serviceCropZoom'))$('serviceCropZoom').value=100;if($('serviceCropControls'))$('serviceCropControls').style.display='none';if($('servicePhotoPreview'))$('servicePhotoPreview').style.transform='scale(1)';}
+  async function makeCroppedServiceFile(file){
+    if(!file)return null;
+    const img=serviceCropImage;
+    if(!img)return file;
+    const aspect=320/180,zoom=Number($('serviceCropZoom').value||100)/100;
+    let cw=Math.min(img.naturalWidth,img.naturalHeight*aspect)/zoom, ch=cw/aspect;
+    if(ch>img.naturalHeight){ch=img.naturalHeight/zoom;cw=ch*aspect;}
+    const maxX=Math.max(0,img.naturalWidth-cw),maxY=Math.max(0,img.naturalHeight-ch);
+    const sx=maxX*Number($('serviceCropX').value||50)/100, sy=maxY*Number($('serviceCropY').value||50)/100;
+    const canvas=document.createElement('canvas');canvas.width=960;canvas.height=540;
+    const ctx=canvas.getContext('2d');ctx.drawImage(img,sx,sy,cw,ch,0,0,canvas.width,canvas.height);
+    const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',0.88));
+    if(!blob)throw new Error('Não foi possível preparar a imagem recortada.');
+    return new File([blob],(file.name||'servico').replace(/\.[^.]+$/,'')+'_recortada.jpg',{type:'image/jpeg'});
+  }
   function renderServices(){
     const list=$('serviceList'); if(!list)return;
     if(!dbServices.length){list.innerHTML='<div class="row"><b>Nenhum serviço ativo</b><small>Toque em “Novo serviço” para cadastrar o primeiro.</small></div>';return;}
@@ -1098,7 +1128,7 @@ function loadCommunicationLogs(){const m=document.getElementById('waLogsMessage'
     $('serviceModalTitle').textContent=item?'Editar serviço':'Novo serviço';
     $('serviceName').value=item?.name||''; $('servicePrice').value=item?Number(item.price||0):'';
     $('serviceDuration').value=item?.duration_minutes||30; $('serviceActive').checked=item?.active!==false;
-    servicePhotoCurrentUrl=item?.image_url||null;servicePhotoRemoved=false;$('servicePhotoFile').value='';
+    servicePhotoCurrentUrl=item?.image_url||null;servicePhotoRemoved=false;$('servicePhotoFile').value='';resetServiceCrop();
     $('servicePhotoPreview').src=servicePhotoCurrentUrl||SERVICE_DEFAULT_IMAGE;
     $('removeServicePhotoBtn').textContent=servicePhotoCurrentUrl?'Remover foto atual':'Usar imagem padrão';
     $('serviceModal').style.display='flex'; $('serviceModal').classList.add('open');
@@ -1109,10 +1139,11 @@ function loadCommunicationLogs(){const m=document.getElementById('waLogsMessage'
     const file=$('servicePhotoFile').files?.[0];if(!file)return;
     if(!file.type.startsWith('image/')){alert('Escolha um arquivo de imagem.');$('servicePhotoFile').value='';return;}
     if(file.size>5*1024*1024){alert('A imagem deve ter no máximo 5 MB.');$('servicePhotoFile').value='';return;}
-    servicePhotoRemoved=false;const reader=new FileReader();reader.onload=()=>{$('servicePhotoPreview').src=reader.result;};reader.readAsDataURL(file);
+    servicePhotoRemoved=false;const reader=new FileReader();reader.onload=()=>{const img=new Image();img.onload=()=>{serviceCropImage=img;$('servicePhotoPreview').src=reader.result;$('serviceCropControls').style.display='block';updateServiceCropPreview();};img.src=reader.result;};reader.readAsDataURL(file);
   });
+  ['serviceCropX','serviceCropY','serviceCropZoom'].forEach(id=>{if($(id))$(id).addEventListener('input',updateServiceCropPreview);});
   if($('removeServicePhotoBtn'))$('removeServicePhotoBtn').addEventListener('click',()=>{
-    servicePhotoRemoved=true;servicePhotoCurrentUrl=null;$('servicePhotoFile').value='';$('servicePhotoPreview').src=SERVICE_DEFAULT_IMAGE;$('removeServicePhotoBtn').textContent='Imagem padrão selecionada';
+    servicePhotoRemoved=true;servicePhotoCurrentUrl=null;$('servicePhotoFile').value='';resetServiceCrop();$('servicePhotoPreview').src=SERVICE_DEFAULT_IMAGE;$('removeServicePhotoBtn').textContent='Imagem padrão selecionada';
   });
   if($('newServiceBtn'))$('newServiceBtn').addEventListener('click',()=>window.openServiceModal());
   if($('saveServiceBtn'))$('saveServiceBtn').addEventListener('click',async()=>{
@@ -1123,8 +1154,9 @@ function loadCommunicationLogs(){const m=document.getElementById('waLogsMessage'
     const btn=$('saveServiceBtn');btn.disabled=true;btn.textContent='Salvando...';
     try{
       let imageUrl=servicePhotoRemoved?null:servicePhotoCurrentUrl;
-      const file=$('servicePhotoFile').files?.[0];
+      let file=$('servicePhotoFile').files?.[0];
       if(file){
+        file=await makeCroppedServiceFile(file);
         const auth=await window.sb.auth.getUser();if(auth.error)throw auth.error;
         const userId=auth.data?.user?.id;if(!userId)throw new Error('Sessão expirada. Entre novamente.');
         const ext=(file.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg';
