@@ -177,6 +177,7 @@ html[data-apptheme="dark"] body{background:#111827;color:#f3f4f6}html[data-appth
   <button class="sidebar-home" onclick="show('home')">🏠 <span>HOME</span></button>
   <button onclick="show('perfil')">👤 <span>Perfil</span></button>
   <button onclick="show('cadastros')">🗂️ <span>Cadastros</span></button>
+  <button onclick="show('fidelidade')">🎁 <span>Pacotes</span></button>
   <button onclick="show('financeiro')">💳 <span>Financeiro</span></button>
   <button onclick="show('aniversariantes');loadBirthdays()">🎂 <span>Aniversariantes</span></button>
   <button onclick="show('redes-sociais');loadSocialLinks()">🌐 <span>Redes sociais</span></button>
@@ -304,7 +305,6 @@ html[data-apptheme="dark"] body{background:#111827;color:#f3f4f6}html[data-appth
 <div class="row" onclick="show('equipe')"><b>👨‍💼 Profissionais</b><small>Equipe, permissões, horários e comissões.</small></div>
 <div class="row" onclick="show('servicos')"><b>✂️ Serviços</b><small>Nome, valor, duração e comissão.</small></div>
 <div class="row" onclick="show('estoque')"><b>📦 Produtos</b><small>Estoque e produtos cadastrados.</small></div>
-<div class="row" onclick="show('fidelidade')"><b>🎁 Pacotes</b><small>Pacotes e fidelidade.</small></div>
 <div class="row" onclick="show('comanda')"><b>🧾 Comanda / venda</b><small>Registrar atendimentos e vendas.</small></div>
 </div></main></section>
 <section id="aniversariantes" class="page"><div class="head"><button class="back" onclick="show('home')">‹ Voltar</button><h1>🎂 Aniversariantes</h1></div><main><p class="profile-help">A lista depende de os clientes terem a data de aniversário cadastrada.</p><div id="birthdaysList" class="list"><div class="row">Carregando clientes...</div></div></main></section>
@@ -437,14 +437,15 @@ document.addEventListener('DOMContentLoaded',loadAppSettings);
   document.querySelectorAll('.desktop-topbar button').forEach(x=>x.classList.toggle('selected', x.dataset.topTarget===id));
   const sidebarMap={
     'home':'home','perfil':'perfil','perfil-pessoal':'perfil','perfil-dados-pessoais':'perfil','perfil-barbearia':'perfil','perfil-dados-barbearia':'perfil',
-    'cadastros':'cadastros','clientes':'cadastros','profissionais':'cadastros','servicos':'cadastros','serviços':'cadastros','produtos':'cadastros','estoque':'cadastros','pacotes':'cadastros','comanda':'cadastros','venda-pacotes':'cadastros',
+    'cadastros':'cadastros','clientes':'cadastros','profissionais':'cadastros','servicos':'cadastros','serviços':'cadastros','produtos':'cadastros','estoque':'cadastros','comanda':'cadastros','venda-pacotes':'fidelidade','fidelidade':'fidelidade','pacotes':'fidelidade',
     'financeiro':'financeiro','caixa':'financeiro','comissoes':'financeiro','comissões':'financeiro','dashboard-profissional':'financeiro',
     'aniversariantes':'aniversariantes','redes-sociais':'redes-sociais','comunicacao':'comunicacao','cupons':'cupons','configuracoes':'configuracoes','meu-plano':'meu-plano','ajuda':'ajuda'
   };
   let key=sidebarMap[id];
   if(!key){
     if(/^(perfil|dados-pessoais|dados-barbearia)/.test(id))key='perfil';
-    else if(/^(cliente|profissional|servico|serviço|produto|estoque|pacote|comanda|venda)/.test(id))key='cadastros';
+    else if(/^(cliente|profissional|servico|serviço|produto|estoque|comanda)/.test(id))key='cadastros';
+    else if(/^(pacote|fidelidade|venda-pacotes)/.test(id))key='fidelidade';
     else if(/^(caixa|financeiro|comissao|comissão|dashboard-profissional)/.test(id))key='financeiro';
     else if(/^(parametro|configurac)/.test(id))key='configuracoes';
   }
