@@ -169,7 +169,7 @@ html[data-apptheme="dark"] body{background:#111827;color:#f3f4f6}html[data-appth
 <div class="db-note">Autenticação segura com Supabase</div></div></div>
 <div class="app">
 <aside class="desktop-sidebar" aria-label="Menu de módulos">
-  <div class="sidebar-brand">BarberID <small>PAINEL</small></div>
+  <div class="sidebar-brand"><div style="display:flex;align-items:center;gap:9px"><img id="sidebarShopLogo" alt="Logo da barbearia" style="display:none;width:42px;height:42px;object-fit:contain;border-radius:9px;background:#fff;padding:2px"><span id="sidebarBrandName">BarberID</span></div><small id="sidebarBrandSubtitle">PAINEL</small></div>
   <div class="sidebar-label">MENU</div>
   <button class="sidebar-home" onclick="show('home')">🏠 <span>HOME</span></button>
   <button onclick="show('perfil')">👤 <span>Perfil</span></button>
@@ -313,7 +313,7 @@ html[data-apptheme="dark"] body{background:#111827;color:#f3f4f6}html[data-appth
 <div class="module-form" id="personalProfileForm"><label for="personalName">Nome completo</label><input id="personalName" autocomplete="name" placeholder="Seu nome"><label for="personalEmail">E-mail</label><input id="personalEmail" type="email" autocomplete="email" placeholder="seu@email.com"><label for="personalPhone">Telefone</label><input id="personalPhone" type="tel" autocomplete="tel" placeholder="(00) 00000-0000"><label for="personalPhoto">Foto de perfil</label><input id="personalPhoto" type="file" accept="image/*"><div id="personalPhotoNote" class="profile-help">O envio permanente da foto depende da configuração do armazenamento no Supabase.</div><div class="row" style="margin:14px 0;background:#f8fafc"><label for="ownerAlsoBarber" style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0"><span><b style="display:block">✂️ DONO TAMBÉM É BARBEIRO</b><small>Quando ativado, seu perfil poderá aparecer como profissional.</small></span><input id="ownerAlsoBarber" type="checkbox" style="width:24px;height:24px;flex-shrink:0"></label><div id="ownerBarberConfig" style="display:none;margin-top:12px"><button type="button" id="ownerBarberHours" class="close">1. Horários</button><button type="button" id="ownerBarberCommissions" class="close">2. Serviços e comissões</button><small>Ative a opção e salve os dados pessoais para liberar as configurações.</small></div></div><button id="savePersonalProfile" type="button">Salvar dados pessoais</button><div id="personalProfileMessage" class="profile-help" role="status"></div></div>
 </main></section>
 <section id="perfil-barbearia" class="page"><div class="head"><button class="back" onclick="show('perfil')">‹ Voltar</button><h1>Dados da barbearia</h1></div><main>
-<div class="module-form" id="shopProfileForm"><label for="shopProfileName">Nome da barbearia</label><input id="shopProfileName" placeholder="Nome do estabelecimento"><label for="shopProfilePhone">Telefone</label><input id="shopProfilePhone" type="tel" placeholder="Telefone da barbearia"><label for="shopProfileEmail">E-mail</label><input id="shopProfileEmail" type="email" placeholder="contato@barbearia.com"><label for="shopProfileAddress">Endereço</label><input id="shopProfileAddress" placeholder="Rua, número, bairro e cidade"><label for="shopLogo">Foto ou logotipo</label><input id="shopLogo" type="file" accept="image/*"><div id="shopLogoNote" class="profile-help">O envio permanente da imagem depende de configurar o armazenamento no Supabase.</div><button id="saveShopProfile" type="button">Salvar dados da barbearia</button><div id="shopProfileMessage" class="profile-help" role="status"></div></div>
+<div class="module-form" id="shopProfileForm"><label for="shopProfileName">Nome da barbearia</label><input id="shopProfileName" placeholder="Nome do estabelecimento"><label for="shopProfilePhone">Telefone</label><input id="shopProfilePhone" type="tel" placeholder="Telefone da barbearia"><label for="shopProfileEmail">E-mail</label><input id="shopProfileEmail" type="email" placeholder="contato@barbearia.com"><label for="shopProfileAddress">Endereço</label><input id="shopProfileAddress" placeholder="Rua, número, bairro e cidade"><label for="shopLogo">Foto ou logotipo da barbearia</label><input id="shopLogo" type="file" accept="image/*"><img id="shopLogoPreview" alt="Prévia do logotipo" style="display:none;max-width:150px;max-height:150px;object-fit:contain;border:1px solid #e2e6ee;border-radius:12px;padding:6px;margin:8px 0"><button type="button" id="removeShopLogo" class="mini-btn" style="display:none">Remover foto atual</button><div id="shopLogoNote" class="profile-help">A imagem será salva na nuvem da sua barbearia e poderá ser usada no menu lateral e na página pública de agendamento.</div><button id="saveShopProfile" type="button">Salvar dados da barbearia</button><div id="shopProfileMessage" class="profile-help" role="status"></div></div>
 <div class="profile-choice row" onclick="show('perfil-horarios')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();show('perfil-horarios')}"><div style="font-size:26px;margin-right:12px">🕒</div><div><b>Horários de funcionamento</b><small>Escolha os dias, horários e intervalo para almoço.</small></div><span style="margin-left:auto;font-size:22px">›</span></div>
 </main></section>
 <section id="perfil-horarios" class="page"><div class="head"><button class="back" onclick="show('perfil-barbearia')">‹ Voltar</button><h1>Horários de funcionamento</h1></div><main>
@@ -607,13 +607,14 @@ function loadCommunicationLogs(){const m=document.getElementById('waLogsMessage'
   async function getShop(){
     if(!currentUser?.id) throw new Error('Não há usuário autenticado.');
     const {data,error}=await window.sb.from('barbershops')
-      .select('id,name,owner_id,phone,email,address,owner_is_barber')
+      .select('id,name,owner_id,phone,email,address,owner_is_barber,logo_url')
       .eq('owner_id',currentUser.id)
       .maybeSingle();
     if(error) throw new Error('Barbearia: '+error.message);
     if(!data){
       shopId=null; isShopAdmin=false;
       ['shopProfileName','shopProfilePhone','shopProfileEmail','shopProfileAddress'].forEach(id=>{if($(id))$(id).value='';});
+      setShopLogoPreview(null);
       if($('personalName')) $('personalName').value=currentUser.user_metadata?.full_name||currentUser.user_metadata?.name||'';
       if($('personalEmail')) $('personalEmail').value=currentUser.email||'';
       if($('personalPhone')) $('personalPhone').value=currentUser.user_metadata?.phone||'';
@@ -626,6 +627,8 @@ function loadCommunicationLogs(){const m=document.getElementById('waLogsMessage'
     if($('shopProfilePhone')) $('shopProfilePhone').value=data.phone||'';
     if($('shopProfileEmail')) $('shopProfileEmail').value=data.email||'';
     if($('shopProfileAddress')) $('shopProfileAddress').value=data.address||'';
+    setShopLogoPreview(data.logo_url||null);
+    updateSidebarBrand(data.name||'BarberID',data.logo_url||null);
     if($('personalName')) $('personalName').value=currentUser.user_metadata?.full_name||currentUser.user_metadata?.name||'';
     if($('personalEmail')) $('personalEmail').value=currentUser.email||'';
     if($('personalPhone')) $('personalPhone').value=currentUser.user_metadata?.phone||'';
@@ -942,23 +945,41 @@ function loadCommunicationLogs(){const m=document.getElementById('waLogsMessage'
   $('ownerBarberHours')?.addEventListener('click',()=>openOwnerAsStaffConfig('hours'));
   $('ownerBarberCommissions')?.addEventListener('click',()=>openOwnerAsStaffConfig('commissions'));
 
+  let shopLogoPendingUrl=null,shopLogoRemoveRequested=false;
+  function setShopLogoPreview(url){const img=$('shopLogoPreview'),remove=$('removeShopLogo');if(img){if(url){img.src=url;img.style.display='block';}else{img.removeAttribute('src');img.style.display='none';}}if(remove)remove.style.display=url?'inline-block':'none';shopLogoPendingUrl=url||null;}
+  function updateSidebarBrand(name,url){const title=$('sidebarBrandName'),img=$('sidebarShopLogo'),sub=$('sidebarBrandSubtitle');if(title)title.textContent=name||'BarberID';if(img){if(url){img.src=url;img.style.display='block';}else{img.removeAttribute('src');img.style.display='none';}}if(sub)sub.textContent=url?'BARBEARIA':'PAINEL';}
+  $('shopLogo')?.addEventListener('change',()=>{const file=$('shopLogo').files?.[0];if(!file)return;if(!file.type.startsWith('image/')){alert('Escolha um arquivo de imagem.');$('shopLogo').value='';return;}if(file.size>5*1024*1024){alert('A imagem deve ter no máximo 5 MB.');$('shopLogo').value='';return;}const reader=new FileReader();reader.onload=()=>{setShopLogoPreview(reader.result);shopLogoRemoveRequested=false;};reader.readAsDataURL(file);});
+  $('removeShopLogo')?.addEventListener('click',()=>{setShopLogoPreview(null);shopLogoRemoveRequested=true;if($('shopLogo'))$('shopLogo').value='';});
   $('saveShopProfile')?.addEventListener('click',async()=>{
     const btn=$('saveShopProfile'),msg=$('shopProfileMessage');
     const name=$('shopProfileName').value.trim(),phone=$('shopProfilePhone').value.trim(),email=$('shopProfileEmail').value.trim(),address=$('shopProfileAddress').value.trim();
     if(!name){alert('Informe o nome da barbearia.');return;}
-    if($('shopLogo')?.files?.length){msg.textContent='Os dados podem ser salvos agora; o envio permanente do logotipo ainda precisa da configuração do Storage no Supabase.';}
     btn.disabled=true;btn.textContent='Salvando...';
     try{
       if(!currentUser?.id)throw new Error('Sua sessão expirou. Entre novamente.');
       let result;
       if(shopId){
-        result=await window.sb.from('barbershops').update({name,phone:phone||null,email:email||null,address:address||null}).eq('id',shopId).eq('owner_id',currentUser.id);
+        result=await window.sb.from('barbershops').update({name,phone:phone||null,email:email||null,address:address||null}).eq('id',shopId).eq('owner_id',currentUser.id).select('id').maybeSingle();
       }else{
-        result=await window.sb.from('barbershops').insert({owner_id:currentUser.id,name,phone:phone||null,email:email||null,address:address||null,owner_is_barber:!!$('ownerAlsoBarber')?.checked}).select('id,name,owner_id,phone,email,address,owner_is_barber').single();
+        result=await window.sb.from('barbershops').insert({owner_id:currentUser.id,name,phone:phone||null,email:email||null,address:address||null,owner_is_barber:!!$('ownerAlsoBarber')?.checked}).select('id').single();
       }
       if(result.error)throw result.error;
       if(!shopId&&result.data){shopId=result.data.id;isShopAdmin=true;}
-      msg.textContent='Dados da barbearia salvos com sucesso. Carregando seu painel...';
+      if(!shopId)throw new Error('Não foi possível identificar a barbearia para salvar a imagem.');
+      let logoUrl=shopLogoPendingUrl;
+      const file=$('shopLogo')?.files?.[0];
+      if(file){
+        const ext=(file.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg';
+        const path=`${currentUser.id}/${shopId}/logo.${ext}`;
+        const upload=await window.sb.storage.from('barbershop-logos').upload(path,file,{upsert:true,contentType:file.type||'image/jpeg',cacheControl:'3600'});
+        if(upload.error)throw new Error('Dados salvos, mas não foi possível enviar a logo. Confira o bucket barbershop-logos e as políticas do Storage: '+upload.error.message);
+        const pub=window.sb.storage.from('barbershop-logos').getPublicUrl(path);
+        logoUrl=pub?.data?.publicUrl||null;
+      }
+      if(shopLogoRemoveRequested)logoUrl=null;
+      if(file||shopLogoRemoveRequested){const upd=await window.sb.from('barbershops').update({logo_url:logoUrl}).eq('id',shopId).eq('owner_id',currentUser.id);if(upd.error)throw new Error('Dados salvos, mas não foi possível salvar logo_url: '+upd.error.message);}
+      msg.textContent='Dados da barbearia e logotipo salvos com sucesso.';
+      if($('shopLogo'))$('shopLogo').value='';shopLogoRemoveRequested=false;
       await loadAll();
     }catch(e){msg.textContent='Não foi possível salvar: '+(e.message||e);}
     finally{btn.disabled=false;btn.textContent='Salvar dados da barbearia';}
