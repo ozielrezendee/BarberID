@@ -225,13 +225,6 @@ html[data-apptheme="dark"] body{background:#111827;color:#f3f4f6}html[data-appth
 <div id="serviceCropFrame" style="width:100%;max-width:320px;aspect-ratio:76/64;overflow:hidden;border-radius:10px;margin:8px 0;background:#eef2f7;display:flex;align-items:center;justify-content:center">
 <img id="servicePhotoPreview" alt="Prévia do enquadramento da foto do serviço" style="display:block;width:100%;height:100%;object-fit:cover;object-position:50% 50%;background:#eef2f7">
 </div>
-<div id="serviceCropControls" style="display:none;margin:8px 0;padding:10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px">
-  <small style="display:block;margin-bottom:8px">Ajuste o enquadramento da foto antes de salvar.</small>
-  <label for="serviceCropX">Mover para esquerda / direita</label><input id="serviceCropX" type="range" min="0" max="100" value="50" step="1" style="width:100%">
-  <label for="serviceCropY">Mover para cima / baixo</label><input id="serviceCropY" type="range" min="0" max="100" value="50" step="1" style="width:100%">
-  <label for="serviceCropZoom">Zoom</label><input id="serviceCropZoom" type="range" min="100" max="250" value="100" step="5" style="width:100%">
-  <button id="resetServiceCropBtn" type="button" class="mini-btn">Centralizar foto</button>
-</div>
 <input id="servicePhotoFile" type="file" accept="image/*" style="width:100%">
 <button id="removeServicePhotoBtn" type="button" class="mini-btn" style="margin-top:8px">Remover foto atual</button>
 <small style="display:block;margin-top:6px">Sem foto personalizada, será usada uma imagem padrão. Você pode escolher uma imagem do computador ou do celular.</small>
@@ -1097,31 +1090,25 @@ function loadCommunicationLogs(){const m=document.getElementById('waLogsMessage'
   let servicePhotoRemoved=false, servicePhotoCurrentUrl=null, serviceCropImage=null;
   function updateServiceCropPreview(){
     const img=$('servicePhotoPreview');if(!img)return;
-    const x=Number($('serviceCropX')?.value||50),y=Number($('serviceCropY')?.value||50),zoom=Number($('serviceCropZoom')?.value||100)/100;
-    img.style.objectFit='cover';img.style.objectPosition=`${x}% ${y}%`;img.style.transform=`scale(${zoom})`;
+    img.style.objectFit='cover';img.style.objectPosition='50% 50%';img.style.transform='none';
     const frame=$('serviceCropFrame');if(frame)frame.style.overflow='hidden';
-    const controls=$('serviceCropControls');if(controls)controls.style.display=serviceCropImage?'block':'none';
   }
-  function resetServiceCrop(){serviceCropImage=null;['serviceCropX','serviceCropY'].forEach(id=>{if($(id))$(id).value=50});if($('serviceCropZoom'))$('serviceCropZoom').value=100;updateServiceCropPreview();}
+  function resetServiceCrop(){serviceCropImage=null;updateServiceCropPreview();}
   async function makeCroppedServiceFile(file){
     if(!file)return null;
     const img=serviceCropImage;
     if(!img)return file;
-    const aspect=76/64,zoom=Number($('serviceCropZoom')?.value||100)/100;
-    let cw,ch;
-    if(img.naturalWidth/img.naturalHeight>aspect){ch=img.naturalHeight;cw=ch*aspect;}else{cw=img.naturalWidth;ch=cw/aspect;}
-    cw=Math.min(img.naturalWidth,cw/zoom);ch=Math.min(img.naturalHeight,ch/zoom);
-    const maxX=Math.max(0,img.naturalWidth-cw),maxY=Math.max(0,img.naturalHeight-ch);
-    const px=Number($('serviceCropX')?.value||50)/100,py=Number($('serviceCropY')?.value||50)/100;
-    const sx=maxX*px,sy=maxY*py;
+    // Recorte automático central no mesmo formato usado na miniatura do serviço.
+    const aspect=76/64;
+    let cw=Math.min(img.naturalWidth,img.naturalHeight*aspect),ch=cw/aspect;
+    if(ch>img.naturalHeight){ch=img.naturalHeight;cw=ch*aspect;}
+    const sx=(img.naturalWidth-cw)/2,sy=(img.naturalHeight-ch)/2;
     const canvas=document.createElement('canvas');canvas.width=912;canvas.height=768;
     const ctx=canvas.getContext('2d');ctx.drawImage(img,sx,sy,cw,ch,0,0,canvas.width,canvas.height);
     const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',0.88));
     if(!blob)throw new Error('Não foi possível preparar a imagem.');
-    return new File([blob],(file.name||'servico').replace(/\.[^.]+$/,'')+'_recortada.jpg',{type:'image/jpeg'});
+    return new File([blob],(file.name||'servico').replace(/\.[^.]+$/,'')+'_auto.jpg',{type:'image/jpeg'});
   }
-  ['serviceCropX','serviceCropY','serviceCropZoom'].forEach(id=>$(id)?.addEventListener('input',updateServiceCropPreview));
-  $('resetServiceCropBtn')?.addEventListener('click',()=>{if($('serviceCropX'))$('serviceCropX').value=50;if($('serviceCropY'))$('serviceCropY').value=50;if($('serviceCropZoom'))$('serviceCropZoom').value=100;updateServiceCropPreview();});
   function renderServices(){
     const list=$('serviceList'); if(!list)return;
     if(!dbServices.length){list.innerHTML='<div class="row"><b>Nenhum serviço ativo</b><small>Toque em “Novo serviço” para cadastrar o primeiro.</small></div>';return;}
