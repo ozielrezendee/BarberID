@@ -219,7 +219,15 @@ html[data-apptheme="dark"] body{background:#111827;color:#f3f4f6}html[data-appth
 <div id="cashMovementCorrectionModal" class="cash-modal"><div class="cash-sheet"><h2>Corrigir lançamento</h2><p class="muted" id="movementCorrectionLabel">Lançamento financeiro</p><label for="movementCorrectionDescription">Descrição / comanda</label><input id="movementCorrectionDescription" type="text" maxlength="180" placeholder="Descrição do lançamento"><label for="movementCorrectionAmount">Novo valor (R$)</label><input id="movementCorrectionAmount" type="number" min="0" step="0.01" placeholder="Novo valor"><label for="movementCorrectionMethod">Forma de pagamento</label><select id="movementCorrectionMethod"><option value="pix">Pix</option><option value="cash">Dinheiro</option><option value="credit">Crédito</option><option value="debit">Débito</option></select><label for="movementCorrectionReason">Justificativa obrigatória</label><textarea id="movementCorrectionReason" rows="3" placeholder="Explique o motivo da correção (mínimo 8 caracteres)" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:10px;margin:7px 0 12px"></textarea><button id="confirmMovementCorrection" type="button">Salvar correção</button><button class="close" id="cancelMovementCorrection" type="button">Cancelar</button></div></div>
 <section id="clientes" class="page"><div class="head"><button class="back" onclick="show('home')">‹ Voltar</button><h1>Clientes</h1></div><main><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px"><button id="newCustomerBtn" class="primary" type="button" style="margin:0">＋ Novo cliente</button><button id="importContactsBtn" class="close" type="button" style="margin:0;border:1px solid #cbd5e1">♙ Importar contatos</button></div><div class="list" id="customerList"><div class="row">Nenhum cliente cadastrado. Cadastre o primeiro cliente para começar.</div></div></main></section>
 <section id="servicos" class="page"><div class="head"><button class="back" onclick="show('mais')">‹ Voltar</button><h1>Serviços</h1></div><main><p class="muted">Cadastre os serviços, preços e duração. A duração será usada para calcular os horários disponíveis.</p><button id="newServiceBtn" class="primary" type="button">＋ Novo serviço</button><div id="serviceList" class="list"><div class="row">Carregando serviços...</div></div></main></section>
-<div id="serviceModal" class="modal"><div class="sheet"><h2 id="serviceModalTitle">Novo serviço</h2><label for="serviceName">Nome do serviço</label><input id="serviceName" maxlength="100" placeholder="Ex.: Corte degradê"><label for="servicePrice">Preço (R$)</label><input id="servicePrice" type="number" min="0" step="0.01" placeholder="40,00"><label for="serviceDuration">Duração (minutos)</label><input id="serviceDuration" type="number" min="5" step="5" value="30" placeholder="30"><label class="switch-row"><input id="serviceActive" type="checkbox" checked style="width:auto;margin-right:8px"> Serviço ativo e disponível para agendamento</label><button id="saveServiceBtn" type="button">Salvar serviço</button><button class="close" type="button" onclick="closeServiceModal()">Cancelar</button></div></div>
+<div id="serviceModal" class="modal"><div class="sheet"><h2 id="serviceModalTitle">Novo serviço</h2><label for="serviceName">Nome do serviço</label><input id="serviceName" maxlength="100" placeholder="Ex.: Corte degradê"><label for="servicePrice">Preço (R$)</label><input id="servicePrice" type="number" min="0" step="0.01" placeholder="40,00"><label for="serviceDuration">Duração (minutos)</label><input id="serviceDuration" type="number" min="5" step="5" value="30" placeholder="30">
+<div class="service-photo-editor" style="margin:12px 0;padding:12px;border:1px solid #dbe2ee;border-radius:12px">
+<label for="servicePhotoFile">Foto do serviço</label>
+<img id="servicePhotoPreview" alt="Prévia da foto do serviço" style="display:block;width:100%;max-width:260px;height:150px;object-fit:cover;border-radius:10px;margin:8px 0;background:#eef2f7">
+<input id="servicePhotoFile" type="file" accept="image/*" style="width:100%">
+<button id="removeServicePhotoBtn" type="button" class="mini-btn" style="margin-top:8px">Remover foto atual</button>
+<small style="display:block;margin-top:6px">Sem foto personalizada, será usada uma imagem padrão. Você pode escolher uma imagem do computador ou do celular.</small>
+</div>
+<label class="switch-row"><input id="serviceActive" type="checkbox" checked style="width:auto;margin-right:8px"> Serviço ativo e disponível para agendamento</label><button id="saveServiceBtn" type="button">Salvar serviço</button><button class="close" type="button" onclick="closeServiceModal()">Cancelar</button></div></div>
 
 <section id="equipe" class="page"><div class="head"><button class="back" onclick="show('mais')">‹ Voltar</button><h1>Equipe</h1></div><main>
 <div class="module-grid"><div class="module-card"><span>Barbeiros ativos</span><b id="teamCount">0</b></div><div class="module-card"><span>Atendimentos hoje</span><b id="teamAppointments">0</b></div></div>
@@ -822,7 +830,7 @@ function loadCommunicationLogs(){const m=document.getElementById('waLogsMessage'
 
       const [st,sv,cu,ap,pa]=await Promise.all([
         sb.from('staff').select('id,name,role,active,avatar_url').eq('barbershop_id',window.shopId).eq('active',true).order('name'),
-        sb.from('services').select('id,name,price,duration_minutes').eq('barbershop_id',window.shopId).eq('active',true).order('name'),
+        sb.from('services').select('id,name,price,duration_minutes,active,image_url').eq('barbershop_id',window.shopId).eq('active',true).order('name'),
         sb.from('customers').select('id,name,phone,loyalty_points').eq('barbershop_id',window.shopId).order('name'),
         sb.from('appointments').select('id,customer_id,barber_id,service_id,starts_at,ends_at,status,price').eq('barbershop_id',window.shopId).order('starts_at'),
         sb.from('payments').select('id,appointment_id,amount,method,status,paid_at,created_at').eq('barbershop_id',window.shopId).eq('status','paid').order('paid_at',{ascending:false})
@@ -1076,10 +1084,12 @@ function loadCommunicationLogs(){const m=document.getElementById('waLogsMessage'
     }catch(e){alert('Não foi possível remover o barbeiro: '+(e.message||e));}
   };
 
+  const SERVICE_DEFAULT_IMAGE = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360"><rect width="640" height="360" fill="#101827"/><circle cx="320" cy="130" r="58" fill="#2347a8"/><path d="M282 126h76M290 145h60M300 164h40" stroke="#fff" stroke-width="10" stroke-linecap="round"/><text x="320" y="260" text-anchor="middle" font-family="Arial,sans-serif" font-size="30" font-weight="700" fill="#fff">BARBERID</text><text x="320" y="295" text-anchor="middle" font-family="Arial,sans-serif" font-size="17" fill="#cbd5e1">SERVIÇO</text></svg>');
+  let servicePhotoRemoved=false, servicePhotoCurrentUrl=null;
   function renderServices(){
     const list=$('serviceList'); if(!list)return;
     if(!dbServices.length){list.innerHTML='<div class="row"><b>Nenhum serviço ativo</b><small>Toque em “Novo serviço” para cadastrar o primeiro.</small></div>';return;}
-    list.innerHTML=dbServices.map(x=>`<div class="row" style="display:flex;justify-content:space-between;align-items:center;gap:12px"><div><b>${window.escapeHtml(x.name)}</b><small>${Number(x.duration_minutes||30)} min · ${window.money(x.price)} · Ativo</small></div><button type="button" class="mini-btn" onclick="editService('${x.id}')">Editar</button></div>`).join('');
+    list.innerHTML=dbServices.map(x=>`<div class="row" style="display:flex;justify-content:space-between;align-items:center;gap:12px"><div style="display:flex;align-items:center;gap:12px;min-width:0"><img src="${window.escapeHtml(x.image_url||SERVICE_DEFAULT_IMAGE)}" onerror="this.onerror=null;this.src=SERVICE_DEFAULT_IMAGE" alt="" style="width:76px;height:64px;object-fit:cover;border-radius:10px;background:#eef2f7;flex-shrink:0"><div><b>${window.escapeHtml(x.name)}</b><small>${Number(x.duration_minutes||30)} min · ${window.money(x.price)} · ${x.active===false?'Inativo':'Ativo'}</small></div></div><button type="button" class="mini-btn" onclick="editService('${x.id}')">Editar</button></div>`).join('');
   }
 
   let editingServiceId=null;
@@ -1087,11 +1097,23 @@ function loadCommunicationLogs(){const m=document.getElementById('waLogsMessage'
     editingServiceId=id; const item=id?dbServices.find(x=>x.id===id):null;
     $('serviceModalTitle').textContent=item?'Editar serviço':'Novo serviço';
     $('serviceName').value=item?.name||''; $('servicePrice').value=item?Number(item.price||0):'';
-    $('serviceDuration').value=item?.duration_minutes||30; $('serviceActive').checked=true;
+    $('serviceDuration').value=item?.duration_minutes||30; $('serviceActive').checked=item?.active!==false;
+    servicePhotoCurrentUrl=item?.image_url||null;servicePhotoRemoved=false;$('servicePhotoFile').value='';
+    $('servicePhotoPreview').src=servicePhotoCurrentUrl||SERVICE_DEFAULT_IMAGE;
+    $('removeServicePhotoBtn').textContent=servicePhotoCurrentUrl?'Remover foto atual':'Usar imagem padrão';
     $('serviceModal').style.display='flex'; $('serviceModal').classList.add('open');
   };
   window.editService=function(id){window.openServiceModal(id);};
   window.closeServiceModal=function(){$('serviceModal').style.display='none';$('serviceModal').classList.remove('open');};
+  if($('servicePhotoFile'))$('servicePhotoFile').addEventListener('change',()=>{
+    const file=$('servicePhotoFile').files?.[0];if(!file)return;
+    if(!file.type.startsWith('image/')){alert('Escolha um arquivo de imagem.');$('servicePhotoFile').value='';return;}
+    if(file.size>5*1024*1024){alert('A imagem deve ter no máximo 5 MB.');$('servicePhotoFile').value='';return;}
+    servicePhotoRemoved=false;const reader=new FileReader();reader.onload=()=>{$('servicePhotoPreview').src=reader.result;};reader.readAsDataURL(file);
+  });
+  if($('removeServicePhotoBtn'))$('removeServicePhotoBtn').addEventListener('click',()=>{
+    servicePhotoRemoved=true;servicePhotoCurrentUrl=null;$('servicePhotoFile').value='';$('servicePhotoPreview').src=SERVICE_DEFAULT_IMAGE;$('removeServicePhotoBtn').textContent='Imagem padrão selecionada';
+  });
   if($('newServiceBtn'))$('newServiceBtn').addEventListener('click',()=>window.openServiceModal());
   if($('saveServiceBtn'))$('saveServiceBtn').addEventListener('click',async()=>{
     const name=$('serviceName').value.trim(),price=Number($('servicePrice').value),duration=Number($('serviceDuration').value);
@@ -1100,7 +1122,19 @@ function loadCommunicationLogs(){const m=document.getElementById('waLogsMessage'
     if(!Number.isInteger(duration)||duration<5||duration>600){alert('A duração deve ser entre 5 e 600 minutos.');return;}
     const btn=$('saveServiceBtn');btn.disabled=true;btn.textContent='Salvando...';
     try{
-      const payload={barbershop_id:window.shopId,name,price,duration_minutes:duration,active:$('serviceActive').checked};
+      let imageUrl=servicePhotoRemoved?null:servicePhotoCurrentUrl;
+      const file=$('servicePhotoFile').files?.[0];
+      if(file){
+        const auth=await window.sb.auth.getUser();if(auth.error)throw auth.error;
+        const userId=auth.data?.user?.id;if(!userId)throw new Error('Sessão expirada. Entre novamente.');
+        const ext=(file.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg';
+        const path=`${userId}/${window.shopId}/${editingServiceId||'novo'}-${Date.now()}.${ext}`;
+        const upload=await window.sb.storage.from('service-images').upload(path,file,{upsert:true,contentType:file.type||'image/jpeg'});
+        if(upload.error)throw new Error('Falha ao enviar a foto. Confira o bucket service-images e as permissões no Supabase: '+upload.error.message);
+        const pub=window.sb.storage.from('service-images').getPublicUrl(path);imageUrl=pub.data?.publicUrl||null;
+        if(!imageUrl)throw new Error('A imagem foi enviada, mas não foi possível obter a URL pública.');
+      }
+      const payload={barbershop_id:window.shopId,name,price,duration_minutes:duration,active:$('serviceActive').checked,image_url:imageUrl};
       let result;
       if(editingServiceId){result=await window.sb.from('services').update(payload).eq('id',editingServiceId).eq('barbershop_id',window.shopId);}
       else{result=await window.sb.from('services').insert(payload);}
