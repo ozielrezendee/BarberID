@@ -15,6 +15,7 @@ main{padding:16px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9p
 
 .pay-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.pay-option{min-height:52px;border:1px solid #dfe3ea;background:#fff;border-radius:11px;display:flex;align-items:center;gap:8px;padding:10px;font-weight:700}.pay-option.active{border:2px solid #1d4ed8;background:#eef4ff;color:#1d4ed8}.pay-option span{font-size:13px}
 
+.cash-closed-welcome{min-height:calc(100dvh - 230px);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px 8px 50px}.cash-machine{font-size:78px;line-height:1;margin-bottom:48px;filter:saturate(.85)}.cash-closed-welcome p{font-size:clamp(16px,4.3vw,21px);color:#999;margin:0 0 58px}.cash-closed-welcome button{width:100%;max-width:440px;padding:24px 16px;border:0;border-radius:8px;background:#31c273;color:#fff;font-size:20px;font-weight:800;box-shadow:0 2px 0 #20a75f;cursor:pointer}.cash-closed-welcome button:active{transform:scale(.99)}
 .caixa-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px}.cash-card{background:#fff;border:1px solid #e7eaf0;border-radius:15px;padding:15px}.cash-card b{display:block;font-size:22px}.cash-card span{font-size:11px;color:#667085}.cash-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:12px 0}.cash-actions button{padding:13px;border:0;border-radius:11px;font-weight:700}.cash-in{background:#dcfce7;color:#166534}.cash-out{background:#fee2e2;color:#991b1b}.cash-close{background:#0b1220;color:#fff;width:100%;padding:14px;border:0;border-radius:11px;font-weight:700;margin-top:10px}.cash-filter{display:flex;gap:7px;margin:12px 0;overflow:auto}.cash-filter button{white-space:nowrap;border:1px solid #e2e6ee;background:#fff;border-radius:9px;padding:8px 11px;font-size:11px;font-weight:700}.cash-filter button.active{background:#0b1220;color:#fff}.cash-tx{display:flex;justify-content:space-between;gap:10px;align-items:center}.cash-tx small{color:#667085}.cash-plus{color:#15803d;font-weight:800}.cash-minus{color:#b42318;font-weight:800}.cash-modal{display:none;position:fixed;inset:0;background:#0008;align-items:end;justify-content:center;z-index:30}.cash-sheet{background:#fff;width:min(520px,100%);padding:22px;border-radius:22px 22px 0 0}
 /* Modais de horários e comissões: compactos e com rolagem vertical própria */
 #staffHoursModal,#staffCommissionModal{align-items:center!important;justify-content:center!important;padding:12px;overflow-y:auto;-webkit-overflow-scrolling:touch}
@@ -223,15 +224,17 @@ html[data-apptheme="dark"] body{background:#111827;color:#f3f4f6}html[data-appth
 </main></section>
 <section id="agenda" class="page"><div class="head"><button class="back" onclick="show('home')">‹ Voltar</button><h1>Agenda</h1></div><main><p>A agenda do dia e da semana está disponível na tela principal.</p><button class="primary" onclick="show('home')">Voltar para Agenda</button></main></section>
 <section id="caixa" class="page"><div class="head"><button class="back" onclick="show('mais')">‹ Voltar</button><h1>Caixa</h1></div><main>
-<div class="cash-card" style="margin-bottom:10px"><span>Saldo do caixa</span><b id="cashBalance">R$ 0,00</b><div style="margin-top:7px"><span id="cashStatus" class="cash-status">Caixa fechado</span></div></div>
+<div id="cashClosedWelcome" class="cash-closed-welcome" style="display:none"><div class="cash-machine" aria-hidden="true">🧾</div><p>Nenhum caixa aberto com este usuário</p><button id="openCashBtn" type="button">ABRIR CAIXA</button></div>
+<div id="cashActiveContent" style="display:none">
+<div class="cash-card" style="margin-bottom:10px"><span>Saldo do caixa</span><b id="cashBalance">R$ 0,00</b><div style="margin-top:7px"><span id="cashStatus" class="cash-status">Caixa aberto</span></div></div>
 <div class="caixa-grid"><div class="cash-card"><span>Entradas</span><b id="cashIn">R$ 0,00</b></div><div class="cash-card"><span>Saídas</span><b id="cashOut">R$ 0,00</b></div></div>
-<div class="cash-actions"><button class="cash-open" id="openCashBtn" type="button">Abrir caixa</button><button class="cash-out" id="cashExpenseBtn" type="button">− Registrar saída</button></div>
+<div class="cash-actions"><button class="cash-open" id="cashExpenseBtn" type="button">− Registrar saída</button><button class="cash-close" id="closeCashBtn" type="button" style="margin:0">Fechar caixa</button></div>
 <div class="section"><b>Movimentações de hoje</b><span id="cashCount" style="font-size:12px;color:#667085">0</span></div>
 <div class="cash-filter"><button class="active" data-cash-filter="all" type="button">Todas</button><button data-cash-filter="Pix" type="button">Pix</button><button data-cash-filter="Dinheiro" type="button">Dinheiro</button><button data-cash-filter="Crédito" type="button">Crédito</button><button data-cash-filter="Débito" type="button">Débito</button></div>
 <div class="list" id="cashList"><div class="row"><div class="cash-tx"><div><b>Sem movimentações</b><small>Os pagamentos dos atendimentos concluídos aparecerão aqui.</small></div></div></div></div>
-<button class="cash-close" id="closeCashBtn" type="button">Fechar caixa</button>
 <div class="cash-tabs"><button id="cashCurrentTab" class="active" type="button">Caixa atual</button><button id="cashHistoryTab" type="button">Histórico de caixas</button></div>
 <div id="cashHistoryPanel" style="display:none"><div class="section"><b>Histórico e sessões abertas</b><button class="mini-btn" id="refreshCashHistory" type="button">Atualizar</button></div><div class="admin-note">As sessões abertas aparecem separadas dos caixas fechados. Correções exigem perfil administrador e justificativa.</div><div id="cashHistoryList" class="list"><div class="row">Carregando histórico...</div></div></div>
+</div>
 </main></section>
 <div id="cashCorrectionModal" class="cash-modal"><div class="cash-sheet"><h2>Corrigir caixa</h2><p class="muted" id="correctionSessionLabel">Sessão</p><label for="correctionField">O que será corrigido?</label><select id="correctionField"><option value="opening_amount">Saldo inicial</option><option value="closing_amount">Saldo final registrado (caixa fechado)</option></select><label for="correctionValue">Novo valor (R$)</label><input id="correctionValue" type="number" min="0" step="0.01" placeholder="Novo valor"><label for="correctionReason">Justificativa obrigatória</label><textarea id="correctionReason" rows="3" placeholder="Explique o motivo da correção" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:10px;margin:7px 0 12px"></textarea><button id="confirmCashCorrection" type="button">Salvar correção</button><button class="close" id="cancelCashCorrection" type="button">Cancelar</button></div></div>
 <div id="cashMovementCorrectionModal" class="cash-modal"><div class="cash-sheet"><h2>Corrigir lançamento</h2><p class="muted" id="movementCorrectionLabel">Lançamento financeiro</p><label for="movementCorrectionDescription">Descrição / comanda</label><input id="movementCorrectionDescription" type="text" maxlength="180" placeholder="Descrição do lançamento"><label for="movementCorrectionAmount">Novo valor (R$)</label><input id="movementCorrectionAmount" type="number" min="0" step="0.01" placeholder="Novo valor"><label for="movementCorrectionMethod">Forma de pagamento</label><select id="movementCorrectionMethod"><option value="pix">Pix</option><option value="cash">Dinheiro</option><option value="credit">Crédito</option><option value="debit">Débito</option></select><label for="movementCorrectionReason">Justificativa obrigatória</label><textarea id="movementCorrectionReason" rows="3" placeholder="Explique o motivo da correção (mínimo 8 caracteres)" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:10px;margin:7px 0 12px"></textarea><button id="confirmMovementCorrection" type="button">Salvar correção</button><button class="close" id="cancelMovementCorrection" type="button">Cancelar</button></div></div>
@@ -533,7 +536,7 @@ async function loadBirthdays(){const box=document.getElementById('birthdaysList'
 <div id="staffProfileModal" class="modal"><div class="sheet"><h2 id="staffProfileTitle">Perfil do barbeiro</h2><div id="staffPhotoPreview"></div><label for="staffPhotoInput">Foto do profissional</label><p style="font-size:12px;color:#667085;margin:4px 0 8px">Toque no campo abaixo para escolher uma foto da galeria do celular.</p><input id="staffPhotoInput" type="file" accept="image/*"><input id="staffProfileName" placeholder="Nome do barbeiro"><button id="saveStaffProfile" type="button">Salvar alterações do perfil</button><button id="deleteStaffProfile" type="button" style="background:#fee2e2;color:#b91c1c;border:0;border-radius:10px;padding:12px;font-weight:700;width:100%;margin-top:8px">Excluir profissional</button><div class="section"><b>Configurações do profissional</b></div><button type="button" class="close" onclick="openStaffHoursConfig()">Horários do profissional</button><button type="button" class="close" onclick="openStaffCommissionConfig()">Serviços e comissões</button><button class="close" type="button" onclick="closeStaffProfile()">Cancelar</button><p style="font-size:11px;color:#667085">A foto será enviada ao armazenamento do Supabase.</p></div></div>
 <div id="staffHoursModal" class="cash-modal"><div class="cash-sheet"><h2 id="staffHoursTitle">Horários do profissional</h2><p class="muted">Defina os dias de trabalho, horários e intervalo para almoço deste profissional.</p><div id="staffHoursList" class="list"></div><button type="button" id="saveStaffHours">Salvar horários</button><button type="button" class="close" onclick="closeStaffHoursConfig()">Voltar</button></div></div>
 <div id="staffCommissionModal" class="cash-modal"><div class="cash-sheet"><h2 id="staffCommissionTitle">Serviços e comissões</h2><p class="muted">Marque os serviços realizados e defina a comissão de cada um.</p><div id="staffCommissionServices" class="list"><div class="row">Carregando serviços...</div></div><button type="button" id="saveStaffCommissions">Salvar serviços e comissões</button><button type="button" class="close" onclick="closeStaffCommissionConfig()">Voltar</button></div></div>
-<div id="cashOpenModal" class="cash-modal"><div class="cash-sheet"><h2>Abrir caixa</h2><div style="color:#667085;font-size:13px;margin-bottom:8px">Informe o valor inicial disponível no caixa.</div><input id="openingAmount" type="number" min="0" step="0.01" placeholder="Valor inicial (R$)"><button id="confirmOpenCash" type="button">Abrir caixa</button><button class="close" id="cancelOpenCash" type="button">Cancelar</button></div></div>
+<div id="cashOpenModal" class="cash-modal"><div class="cash-sheet"><h2>Abrir caixa</h2><div style="color:#667085;font-size:13px;margin-bottom:12px">Confirme a data e informe o valor inicial disponível no caixa.</div><label for="openingDate" style="display:block;font-size:13px;font-weight:700;margin:0 0 6px">Data e hora de abertura</label><input id="openingDate" type="datetime-local" required style="width:100%;box-sizing:border-box;margin-bottom:12px"><label for="openingAmount" style="display:block;font-size:13px;font-weight:700;margin:0 0 6px">Valor inicial (R$)</label><input id="openingAmount" type="number" min="0" step="0.01" placeholder="0,00" required style="width:100%;box-sizing:border-box;margin-bottom:12px"><button id="confirmOpenCash" type="button">Confirmar e abrir caixa</button><button class="close" id="cancelOpenCash" type="button">Cancelar</button></div></div>
 <div id="cashExpenseModal" class="cash-modal"><div class="cash-sheet"><h2>Registrar saída</h2><input id="expenseDesc" placeholder="Descrição (ex.: Compra de material)"><input id="expenseAmount" type="number" min="0.01" step="0.01" placeholder="Valor (R$)"><select id="expenseMethod"><option>Dinheiro</option><option>Pix</option><option>Crédito</option><option>Débito</option></select><button id="confirmExpense" type="button">Registrar saída</button><button class="close" id="cancelExpense" type="button">Cancelar</button></div></div>
 <div id="cashCloseModal" class="cash-modal"><div class="cash-sheet"><h2>Fechar caixa</h2><div style="color:#667085;font-size:13px;margin-bottom:12px">Confira o saldo antes de fechar.</div><div class="cash-card"><span>Saldo calculado</span><b id="closeBalance">R$ 0,00</b></div><button id="confirmCloseCash" type="button" style="margin-top:12px">Confirmar fechamento</button><button class="close" id="cancelCloseCash" type="button">Cancelar</button></div></div>
 <script>
@@ -1536,7 +1539,9 @@ function loadCommunicationLogs(){const m=document.getElementById('waLogsMessage'
     cashSession=data||null;
 
     if($('cashStatus'))$('cashStatus').textContent=cashSession?'Caixa aberto':'Caixa fechado';
-    if($('openCashBtn'))$('openCashBtn').textContent=cashSession?'Caixa aberto':'Abrir caixa';
+    if($('openCashBtn'))$('openCashBtn').textContent='ABRIR CAIXA';
+    if($('cashClosedWelcome'))$('cashClosedWelcome').style.display=cashSession?'none':'flex';
+    if($('cashActiveContent'))$('cashActiveContent').style.display=cashSession?'block':'none';
 
     let movements=[];
     if(cashSession){
@@ -1665,35 +1670,42 @@ function loadCommunicationLogs(){const m=document.getElementById('waLogsMessage'
     }catch(e){alert('Não foi possível corrigir o lançamento. Execute o SQL complementar de correções de movimentações no Supabase. Detalhe: '+e.message);}
     finally{btn.disabled=false;btn.textContent='Salvar correção';}
   };
-  $('cashCurrentTab').onclick=()=>{ $('cashCurrentTab').classList.add('active');$('cashHistoryTab').classList.remove('active');$('cashHistoryPanel').style.display='none';document.querySelectorAll('#caixa main > :not(#cashHistoryPanel):not(.cash-tabs)').forEach(el=>el.style.display='');};
-  $('cashHistoryTab').onclick=async()=>{ $('cashHistoryTab').classList.add('active');$('cashCurrentTab').classList.remove('active');document.querySelectorAll('#caixa main > :not(#cashHistoryPanel):not(.cash-tabs)').forEach(el=>el.style.display='none');$('cashHistoryPanel').style.display='block';await loadCashHistory();};
+  $('cashCurrentTab').onclick=()=>{ $('cashCurrentTab').classList.add('active');$('cashHistoryTab').classList.remove('active');$('cashHistoryPanel').style.display='none';document.querySelectorAll('#cashActiveContent > :not(#cashHistoryPanel):not(.cash-tabs)').forEach(el=>el.style.display='');};
+  $('cashHistoryTab').onclick=async()=>{ $('cashHistoryTab').classList.add('active');$('cashCurrentTab').classList.remove('active');document.querySelectorAll('#cashActiveContent > :not(#cashHistoryPanel):not(.cash-tabs)').forEach(el=>el.style.display='none');$('cashHistoryPanel').style.display='block';await loadCashHistory();};
   $('refreshCashHistory').onclick=loadCashHistory;
 
   $('openCashBtn').onclick=()=>{
     if(cashSession){alert('O caixa já está aberto.');return;}
+    const now=new Date();
+    const localDateTime=new Date(now.getTime()-now.getTimezoneOffset()*60000).toISOString().slice(0,16);
+    $('openingDate').value=localDateTime;
     $('openingAmount').value='';
     $('cashOpenModal').style.display='flex';
-    setTimeout(()=>$('openingAmount').focus(),50);
+    setTimeout(()=>$('openingDate').focus(),50);
   };
   $('cancelOpenCash').onclick=()=>$('cashOpenModal').style.display='none';
 
   $('confirmOpenCash').onclick=async()=>{
     const amount=Number($('openingAmount').value||0);
-    if(amount<0){alert('Informe um valor inicial válido.');return;}
+    const openingDateValue=$('openingDate').value;
+    if(!openingDateValue){alert('Confirme a data e hora de abertura.');$('openingDate').focus();return;}
+    if(!Number.isFinite(amount)||amount<0||$('openingAmount').value.trim()===''){alert('Informe um valor inicial válido.');$('openingAmount').focus();return;}
+    const openedAt=new Date(openingDateValue);
+    if(Number.isNaN(openedAt.getTime())){alert('Informe uma data e hora válidas.');return;}
     const btn=$('confirmOpenCash');
     btn.disabled=true;btn.textContent='Abrindo...';
     try{
       const {data:existing}=await sb.from('cash_sessions').select('id').eq('barbershop_id',window.shopId).eq('status','open').limit(1);
       if(existing?.length){cashSession=existing[0];throw new Error('Já existe um caixa aberto.');}
       const {error}=await window.sb.from('cash_sessions').insert({
-        barbershop_id:shopId,opened_by:currentUser.id,opening_amount:amount,status:'open'
+        barbershop_id:shopId,opened_by:currentUser.id,opening_amount:amount,opened_at:openedAt.toISOString(),status:'open'
       });
       if(error)throw new Error(error.message);
       $('cashOpenModal').style.display='none';
       await loadCash();
       alert('Caixa aberto com sucesso.');
     }catch(e){alert('Não foi possível abrir o caixa: '+e.message)}
-    finally{btn.disabled=false;btn.textContent='Abrir caixa';}
+    finally{btn.disabled=false;btn.textContent='Confirmar e abrir caixa';}
   };
 
   $('cashExpenseBtn').onclick=()=>{
