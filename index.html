@@ -443,7 +443,7 @@ html[data-apptheme="dark"] body{background:#111827;color:#f3f4f6}html[data-appth
 <button id="saveAppointment" type="button">Confirmar agendamento</button><button class="close" type="button" onclick="closeM()">Cancelar</button>
 </div></div>
 <div id="customerModal" class="modal"><div class="sheet">
-<h2>Novo cliente</h2><label for="customerName">Nome completo *</label><input id="customerName" autocomplete="name" placeholder="Nome completo" required><label for="customerPhone">Telefone *</label><input id="customerPhone" type="tel" autocomplete="tel" placeholder="Telefone" required><label for="customerBirthday">Aniversário</label><input id="customerBirthday" type="date" aria-label="Aniversário do cliente"><label for="customerEmail">E-mail</label><input id="customerEmail" type="email" autocomplete="email" placeholder="cliente@email.com"><p class="profile-help">A foto poderá ser adicionada pelo próprio cliente no perfil dele, quando o acesso ao perfil do cliente estiver disponível.</p>
+<h2 id="customerModalHeading">Novo cliente</h2><label for="customerName">Nome completo *</label><input id="customerName" autocomplete="name" placeholder="Nome completo" required><label for="customerPhone">Telefone *</label><input id="customerPhone" type="tel" autocomplete="tel" placeholder="Telefone" required><label for="customerBirthday">Aniversário</label><input id="customerBirthday" type="date" aria-label="Aniversário do cliente"><label for="customerEmail">E-mail</label><input id="customerEmail" type="email" autocomplete="email" placeholder="cliente@email.com"><p class="profile-help">A foto poderá ser adicionada pelo próprio cliente no perfil dele, quando o acesso ao perfil do cliente estiver disponível.</p>
 <button id="saveCustomer" type="button">Cadastrar cliente</button><button class="close" type="button" onclick="closeCustomerModal()">Cancelar</button>
 </div></div>
 <div id="importContactsModal" class="modal"><div class="sheet" style="max-width:620px;width:min(620px,94vw);max-height:85vh;overflow:auto">
@@ -765,7 +765,9 @@ function loadCommunicationLogs(){const m=document.getElementById('waLogsMessage'
   }
 
 
+  let editingCustomerId=null;
   window.openCustomerModal=function(){
+    editingCustomerId=null; $('customerModalHeading').textContent='Novo cliente'; $('saveCustomer').textContent='Cadastrar cliente';
     $('customerName').value=''; $('customerPhone').value=''; if($('customerBirthday'))$('customerBirthday').value=''; if($('customerEmail'))$('customerEmail').value='';
     $('customerModal').style.display='flex';
     $('customerModal').classList.add('open');
@@ -863,21 +865,38 @@ function loadCommunicationLogs(){const m=document.getElementById('waLogsMessage'
     finally{btn.disabled=false;btn.textContent='Importar selecionados';}
   });
 
+  window.editCustomer=function(customerId){
+    const c=dbCustomers.find(x=>String(x.id)===String(customerId));
+    if(!c){alert('Não foi possível localizar esse cliente. Atualize a lista e tente novamente.');return;}
+    editingCustomerId=c.id;
+    $('customerModalHeading').textContent='Editar cliente'; $('saveCustomer').textContent='Salvar alterações';
+    $('customerName').value=c.name||c.full_name||''; $('customerPhone').value=c.phone||'';
+    if($('customerBirthday'))$('customerBirthday').value=String(c.birth_date||c.birthday||c.date_of_birth||'').slice(0,10);
+    if($('customerEmail'))$('customerEmail').value=c.email||'';
+    $('customerModal').style.display='flex'; $('customerModal').classList.add('open');
+    setTimeout(()=>$('customerName').focus(),50);
+  };
   $('saveCustomer').onclick=async()=>{
     const name=$('customerName').value.trim(), phone=$('customerPhone').value.trim(), birthDate=$('customerBirthday')?.value||null, email=$('customerEmail')?.value.trim()||null;
     if(!name){alert('Informe o nome do cliente.');return;}
     if(!phone){alert('Informe o telefone do cliente.');return;}
     if(email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){alert('Informe um e-mail válido.');return;}
-    const btn=$('saveCustomer'); btn.disabled=true; btn.textContent='Cadastrando...';
+    const btn=$('saveCustomer'); const wasEditing=!!editingCustomerId; btn.disabled=true; btn.textContent=wasEditing?'Salvando...':'Cadastrando...';
     try{
-      const {data:existing,error:fe}=await sb.from('customers').select('id').eq('barbershop_id',window.shopId).ilike('name',name).limit(1);
+      const {data:existing,error:fe}=await window.sb.from('customers').select('id').eq('barbershop_id',window.shopId).ilike('name',name);
       if(fe) throw new Error(fe.message);
-      if(existing?.length){alert('Já existe um cliente com esse nome.');return;}
-      const {error}=await window.sb.from('customers').insert({barbershop_id:shopId,name,phone,email,birth_date:birthDate,loyalty_points:0});
-      if(error) throw new Error(error.message);
-      closeCustomerModal(); await loadAll(); alert('Cliente cadastrado com sucesso.');
-    }catch(e){alert('Não foi possível cadastrar o cliente: '+e.message);}
-    finally{btn.disabled=false;btn.textContent='Cadastrar cliente';}
+      if((existing||[]).some(c=>String(c.id)!==String(editingCustomerId||''))){alert('Já existe outro cliente com esse nome.');return;}
+      const payload={name,phone,email,birth_date:birthDate};
+      let result;
+      if(editingCustomerId){
+        result=await window.sb.from('customers').update(payload).eq('id',editingCustomerId).eq('barbershop_id',window.shopId);
+      }else{
+        result=await window.sb.from('customers').insert({...payload,barbershop_id:window.shopId,loyalty_points:0});
+      }
+      if(result.error) throw new Error(result.error.message);
+      closeCustomerModal(); editingCustomerId=null; await loadAll(); alert(wasEditing?'Cliente atualizado com sucesso.':'Cliente cadastrado com sucesso.');
+    }catch(e){alert('Não foi possível '+(wasEditing?'atualizar':'cadastrar')+' o cliente: '+e.message);}
+    finally{btn.disabled=false;btn.textContent=editingCustomerId?'Salvar alterações':'Cadastrar cliente';}
   };
 
   window.openAppointmentModal=function(){
@@ -1284,8 +1303,9 @@ function loadCommunicationLogs(){const m=document.getElementById('waLogsMessage'
     const list=document.getElementById('customerList')||document.querySelector('#clientes .list');
     if(!list)return;
     list.innerHTML=dbCustomers.map(x=>
-      `<div class="row"><b>${window.escapeHtml(x.name)}</b><small>${window.escapeHtml(x.phone||'Sem telefone')} · ${x.loyalty_points||0} pontos</small></div>`
+      `<div class="row" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><div style="min-width:0;flex:1"><b>${window.escapeHtml(x.name||x.full_name||'Cliente')}</b><small>${window.escapeHtml(x.phone||'Sem telefone')} · ${x.loyalty_points||0} pontos${x.email?' · '+window.escapeHtml(x.email):''}${(x.birth_date||x.birthday||x.date_of_birth)?' · Aniversário: '+window.escapeHtml(String(x.birth_date||x.birthday||x.date_of_birth).slice(0,10).split('-').reverse().join('/')):''}</small></div><button type="button" class="mini-btn" data-edit-customer="${window.escapeHtml(String(x.id))}">✎ Editar</button></div>`
     ).join('')||'<div class="row">Nenhum cliente cadastrado. Cadastre o primeiro cliente para começar.</div>';
+    list.querySelectorAll('[data-edit-customer]').forEach(btn=>btn.addEventListener('click',()=>window.editCustomer(btn.dataset.editCustomer)));
   }
 
   function appointmentForToday(a){ return dateKey(a.starts_at)===todayKey(); }
